@@ -26,6 +26,7 @@
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie
 #' @importFrom mapplots add.pie
+#' @importFrom downscaleR array3Dto2Dmat
 #' 
 #' @export
 #' 

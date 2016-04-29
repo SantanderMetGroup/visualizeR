@@ -17,7 +17,7 @@
 #'  the diagram. Otherwise ignored.
 #' 
 #' @importFrom abind asub
-#' @import vioplot vioplot
+#' @importFrom vioplot vioplot
 #'   
 #' @export
 #' 

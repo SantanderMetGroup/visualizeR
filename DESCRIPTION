@@ -4,10 +4,10 @@ Depends:
 Imports:
     downscaleR,
     fields,
-    RColorBrewer
+    RColorBrewer,
     scales,
     mapplots,
-    vioplot
+    vioplot,
     abind
 Suggests:
     loadeR.ECOMS,
