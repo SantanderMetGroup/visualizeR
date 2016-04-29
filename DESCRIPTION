@@ -1,0 +1,35 @@
+Package: visualizeR
+Depends:
+    R(>= 3.1.0)
+Imports:
+    downscaleR,
+    fields,
+    RColorBrewer
+    scales,
+    mapplots,
+    vioplot
+    abind
+Suggests:
+    loadeR.ECOMS,
+    loadeR
+Type: Package
+Title: R Package with visualization tools for forecast verification. 
+Version: 1.0-0
+Date: 28-Apr-2016
+Authors@R: as.person(c(
+    "Maria Dolores Frias <friasmd@unican.es> [ctb, cre]",
+    "Jesus Fernandez <fernandej@unican.es> [ctb]",
+    "Joaquin Bedia <bediaj@unican.es> [ctb]",
+    "Max Tuni <max@predictia.es> [ctb]",
+    "Sixto Herrera <sixto@predictia.es> [ctb]",
+    "Antonio Cofino <antonio.cofino@unican.es> [ctb]",
+    "Maialen Iturbide <miturbide@ifca.unican.es> [ctb]",
+    "Jose Manuel Gutierrez <gutierjm@unican.es> [ctb]",
+    "Santander Meteorology Group <http://meteo.unican.es> [aut]"))
+BugReports: https://github.com/SantanderMetGroup/visualizeR/issues
+URL: https://github.com/SantanderMetGroup/visualizeR/wiki
+Description: Load climate data (forecasts and observations) into R and performs 
+    different type of verification plots. The package is
+    conceived for dealing with forecast (multi-member) data.
+License: GPL (>= 3)
+LazyData: true
