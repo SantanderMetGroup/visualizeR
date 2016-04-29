@@ -13,7 +13,6 @@
 #' 
 #' @importFrom abind asub
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom verification roc.area
 #'   
 #' @export
 #' 

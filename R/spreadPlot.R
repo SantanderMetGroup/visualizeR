@@ -17,8 +17,7 @@
 #'  the diagram. Otherwise ignored.
 #' 
 #' @importFrom abind asub
-#' @importFrom verification roc.area
-#' @import vioplot
+#' @import vioplot vioplot
 #'   
 #' @export
 #' 

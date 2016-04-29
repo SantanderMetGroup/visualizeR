@@ -6,14 +6,14 @@
 #' station object as a result of downscaling of a forecast using station data. See details.
 #' @param obs S4 object with the benchmarking observations for forecast verification
 #' @param select.year Year within the whole verification period to display the results for.
-#' @param detrend Logical indicating if the data should be detred. Default is TRUE
+#' @param detrend Logical indicating if the data should be detrended. Default is TRUE
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition or \code{"tcolor"} for a colorbar for each tercile, blue-grey-red
 #'  for below, normal and above terciles, respectively.
 #' 
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom verification roc.area
 #' @importFrom fields image.plot
+#' @importFrom downscaleR array3Dto2Dmat
 #'   
 #' @export
 #' 
@@ -79,15 +79,11 @@ tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = 
       cofinogram.data <- t(getData(probs.mm.obj)[,,,,])
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
-      # Area underneath a ROC curve
+      # Compute ROCSS
       i.yy <- !yy == select.year # Remove select.year for the score calculation
-      roca.t.u <- suppressWarnings(roc.area(obs.terciles[i.yy,3], cofinogram.data[i.yy,3]))
-      roca.t.m <- suppressWarnings(roc.area(obs.terciles[i.yy,2], cofinogram.data[i.yy,2]))
-      roca.t.l <- suppressWarnings(roc.area(obs.terciles[i.yy,1], cofinogram.data[i.yy,1]))
-      # ROCSS
-      rocss.t.u <- roca.t.u$A*2-1
-      rocss.t.m <- roca.t.m$A*2-1
-      rocss.t.l <- roca.t.l$A*2-1
+      rocss.t.u <- rocss.fun(obs.terciles[i.yy,3], cofinogram.data[i.yy,3])
+      rocss.t.m <- rocss.fun(obs.terciles[i.yy,2], cofinogram.data[i.yy,2])
+      rocss.t.l <- rocss.fun(obs.terciles[i.yy,1], cofinogram.data[i.yy,1])
       # Color selection
       if (color.pal=="tcolor"){
           t.color <- tercileBrewerColorRamp(10)     
