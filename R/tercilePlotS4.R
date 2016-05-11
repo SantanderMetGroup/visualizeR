@@ -13,8 +13,9 @@
 #'  @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom fields image.plot
-#' @importFrom downscaleR array3Dto2Dmat
+#' @importFrom fields image.plot 
+#' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom abind abind
 #'   
 #' @export
 #' 

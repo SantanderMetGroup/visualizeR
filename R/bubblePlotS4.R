@@ -14,6 +14,7 @@
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
 #' @param piechart Logical flag indicating if pie charts should be plot. Default is FALSE.
+#' @param only.at List with the LonLatCoords of those points selected from the whole grid. 
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
 #'  reversed (e.g for precipitation). Default is FALSE.
@@ -24,9 +25,10 @@
 #' the observations and/or models. Default is NULL. Not available for piecharts.
 #' 
 #' @importFrom scales alpha
-#' @importFrom mapplots draw.pie
-#' @importFrom mapplots add.pie
-#' @importFrom downscaleR array3Dto2Dmat
+#' @importFrom mapplots draw.pie add.pie
+#' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom fields world
+#' @importFrom abind abind
 #' 
 #' @export
 #' 

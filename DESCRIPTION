@@ -7,7 +7,6 @@ Imports:
     RColorBrewer,
     scales,
     mapplots,
-    vioplot,
     abind
 Suggests:
     loadeR.ECOMS,

@@ -51,50 +51,50 @@ deunshape <- function(x){
   return(x)
 }
 
-fldsubsample <- function(dsRobj, one.out.of = 2){
-  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
-  lon.dim <- grep("lon", dsRobj.dimNames)
-  lat.dim <- grep("lat", dsRobj.dimNames)
-  nx <- length(dsRobj$xyCoords$x)
-  ny <- length(dsRobj$xyCoords$y)
-  filter.x <- seq(1,nx,by=one.out.of)
-  filter.y <- seq(1,ny,by=one.out.of)
-  rval <- dsRobj
-  rval$xyCoords$x <- dsRobj$xyCoords$x[filter.x]
-  rval$xyCoords$y <- dsRobj$xyCoords$y[filter.y]
-  attr(rval$xyCoords, "resX") <- attr(dsRobj$xyCoords, "resX")*one.out.of
-  attr(rval$xyCoords, "resY") <- attr(dsRobj$xyCoords, "resY")*one.out.of
-  rval$Data <- extract(dsRobj$Data,
-                       indices=list(filter.x,filter.y),
-                       dims=c(lon.dim, lat.dim)
-  )
-  attr(rval$Data, "dimensions") <- attr(dsRobj$Data, "dimensions")
-  return(rval)
-}
+#fldsubsample <- function(dsRobj, one.out.of = 2){
+#  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
+#  lon.dim <- grep("lon", dsRobj.dimNames)
+#  lat.dim <- grep("lat", dsRobj.dimNames)
+#  nx <- length(dsRobj$xyCoords$x)
+#  ny <- length(dsRobj$xyCoords$y)
+#  filter.x <- seq(1,nx,by=one.out.of)
+#  filter.y <- seq(1,ny,by=one.out.of)
+#  rval <- dsRobj
+#  rval$xyCoords$x <- dsRobj$xyCoords$x[filter.x]
+#  rval$xyCoords$y <- dsRobj$xyCoords$y[filter.y]
+#  attr(rval$xyCoords, "resX") <- attr(dsRobj$xyCoords, "resX")*one.out.of
+#  attr(rval$xyCoords, "resY") <- attr(dsRobj$xyCoords, "resY")*one.out.of
+#  rval$Data <- extract(dsRobj$Data,
+#                       indices=list(filter.x,filter.y),
+#                       dims=c(lon.dim, lat.dim)
+#  )
+#  attr(rval$Data, "dimensions") <- attr(dsRobj$Data, "dimensions")
+#  return(rval)
+#}
 
 last <- function(x){
    return(x[length(x)])
 }
 
-summary.dsRgrid <- function(x){
-  cat(sprintf("Variable: %s\n", x$Variable$varName))
-  cat("Shape: ", dim(x$Data), "(", attr(x$Data, "dimensions"), ")\n")
-  nx <- length(x$xyCoords$x)
-  ny <- length(x$xyCoords$y)
-  nt <- length(x$Dates$start)
-  cat(sprintf("X range: %6.2f to %6.2f (%d values)\n", min(x$xyCoords$x), max(x$xyCoords$x),nx))
-  cat(sprintf("Y range: %6.2f to %6.2f (%d values)\n", min(x$xyCoords$y), max(x$xyCoords$y), ny))
-  available.months <- sort(unique(as.integer(substr(x$Dates$start, 6,7))))
-  if (identical(available.months, 1:12)) {
-    available.months <- "All year"
-  } else {
-    available.months <- sprintf("Season: %s", paste(available.months, collapse=' '))
-  }
-  cat(sprintf("time range: %s to %s (%d values, %s)\n", x$Dates$start[1], x$Dates$end[nt], nt, available.months))
-  if ("member" %in% attr(x$Data, "dimensions"))
-    member.dim <- grep("member", attr(x$Data, "dimensions"))
-  cat(sprintf("Members: %d\n", dim(x$Data)[member.dim]))
-}
+#summary.dsRgrid <- function(x){
+#  cat(sprintf("Variable: %s\n", x$Variable$varName))
+#  cat("Shape: ", dim(x$Data), "(", attr(x$Data, "dimensions"), ")\n")
+#  nx <- length(x$xyCoords$x)
+#  ny <- length(x$xyCoords$y)
+#  nt <- length(x$Dates$start)
+#  cat(sprintf("X range: %6.2f to %6.2f (%d values)\n", min(x$xyCoords$x), max(x$xyCoords$x),nx))
+#  cat(sprintf("Y range: %6.2f to %6.2f (%d values)\n", min(x$xyCoords$y), max(x$xyCoords$y), ny))
+#  available.months <- sort(unique(as.integer(substr(x$Dates$start, 6,7))))
+#  if (identical(available.months, 1:12)) {
+#    available.months <- "All year"
+#  } else {
+#    available.months <- sprintf("Season: %s", paste(available.months, collapse=' '))
+#  }
+#  cat(sprintf("time range: %s to %s (%d values, %s)\n", x$Dates$start[1], x$Dates$end[nt], nt, available.months))
+#  if ("member" %in% attr(x$Data, "dimensions"))
+#    member.dim <- grep("member", attr(x$Data, "dimensions"))
+#  cat(sprintf("Members: %d\n", dim(x$Data)[member.dim]))
+#}
 
 tercileBrewerColorRamp <- function(ncolors){
   ncolors <- ncolors-2
@@ -113,14 +113,14 @@ tercileColor <- function(){
   c("Blues", "Greys", "Reds")
 }
 
-tercileColorRamp <- function(ncolors){
-  alphas <- seq(0,255,len=ncolors)
-  tcols <- tercileColor()
-  t.low <- alpha(tcols[1],alphas)
-  t.mid <- alpha(tcols[2],alphas)
-  t.hi <- alpha(tcols[3],alphas)
-  return(data.frame(t.low,t.mid,t.hi))
-}
+#tercileColorRamp <- function(ncolors){
+#  alphas <- seq(0,255,len=ncolors)
+#  tcols <- tercileColor()
+#  t.low <- alpha(tcols[1],alphas)
+#  t.mid <- alpha(tcols[2],alphas)
+#  t.hi <- alpha(tcols[3],alphas)
+#  return(data.frame(t.low,t.mid,t.hi))
+#}
 
 unshape <- function(x, MAR=c(1)){
   attr(x, "shape") <- dim(x)
