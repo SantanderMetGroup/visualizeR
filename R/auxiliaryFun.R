@@ -485,8 +485,8 @@ detrend.forecast <- function(obj){
 
 
 # Modified from downscaleR to work with S4 class !!!!
-getYearsAsINDEX <- function(obj) {
-  season <- getSeason(obj)
+getYearsAsINDEX.S4 <- function(obj) {
+  season <- getSeason.S4(obj)
   aux.dates <- as.POSIXlt(getDates(obj)$start)
   yrs <- aux.dates$year + 1900
   if (!identical(season, sort(season))) {
@@ -503,7 +503,7 @@ getYearsAsINDEX <- function(obj) {
 }
 
 # Modified from downscaleR to work with S4 class !!!!
-getSeason <- function(obj) {
+getSeason.S4 <- function(obj) {
   aux <- as.POSIXlt(getDates(obj)$start)$mon + 1      
   return(unique(aux))
 }

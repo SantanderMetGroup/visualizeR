@@ -63,7 +63,7 @@
 bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
       # Check input datasets
       stopifnot(checkEnsemblesObs(mm.obj, obs))
-      yrs <- getYearsAsINDEX(mm.obj)
+      yrs <- getYearsAsINDEX.S4(mm.obj)
       yy <- unique(yrs)
       if (!select.year %in% yy) {
         stop("Target year outside temporal data range")
@@ -128,11 +128,11 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
         for (i.tercile in 1:3){
           rocss[i.tercile, , ] <- apply(
             array(c(obs.t[i.yy,,]==i.tercile, prob[i.tercile, 1,i.yy , ,]), dim=c(dim(obs.t[i.yy,,]),2)),
-            MAR=c(2,3),
+            MARGIN=c(2,3),
             FUN=function(x){rocss.fun(x[,1],x[,2])})
         }        
         # Select those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
-        t.obs.constant <- apply(obs.t[i.yy,,], MAR=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
+        t.obs.constant <- apply(obs.t[i.yy,,], MARGIN=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
         t.obs.constant <- as.vector(t.obs.constant)
         if (!piechart) { # Select the rocss for the tercile with max prob.
           rocss <- unshape(rocss)
@@ -208,8 +208,8 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
           }          
           # Highlight those whose ROCSS cannot be computed due to time seres with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
-            obs.na <- as.vector(apply(getData(sm.obs)[1,1,i.yy,,], MAR=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-            mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,i.yy,,], MAR=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
+            obs.na <- as.vector(apply(getData(sm.obs)[1,1,i.yy,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
+            mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,i.yy,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
             na.points <- (obs.na + mm.obj.na)>0
             points(yx[na.points, 2], yx[na.points, 1], cex=1, col="black", pch=pch.data.nan, xlab="", ylab="")
           }

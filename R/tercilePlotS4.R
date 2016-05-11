@@ -57,7 +57,7 @@ tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = 
       color.pal <- match.arg(color.pal, c("bw", "reds", "tcolor"))
       # Check input datasets
       stopifnot(checkEnsemblesObs(mm.obj, obs))
-      yrs <- getYearsAsINDEX(mm.obj)
+      yrs <- getYearsAsINDEX.S4(mm.obj)
       yy <- unique(yrs)
       if (!select.year %in% yy) {
         stop("Target year outside temporal data range")
