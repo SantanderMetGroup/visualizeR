@@ -1,3 +1,7 @@
+
+#' @import methods
+#' @export
+
 as.MrEnsemble <- function(obj.s3){
   lons <- obj.s3$xyCoords$x
   lats <- obj.s3$xyCoords$y

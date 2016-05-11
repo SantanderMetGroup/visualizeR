@@ -1,4 +1,3 @@
-#' @import methods
 
 MrData <-setClass("MrData", 
   slots = c(Data="array", xyCoords="list", Variable="list", Dates="list", Transformation="character"),

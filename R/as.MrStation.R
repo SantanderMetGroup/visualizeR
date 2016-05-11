@@ -1,3 +1,7 @@
+
+#' @import methods
+#' @export
+
 as.MrStation <- function(obj.s3){
   lons <- obj.s3$xyCoords[,1]
   lats <- obj.s3$xyCoords[,2]
