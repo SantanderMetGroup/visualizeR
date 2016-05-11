@@ -27,8 +27,8 @@
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
 #' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray 
-#' @importFrom fields world
 #' @importFrom abind abind
+#' @import fields
 #' 
 #' @export
 #' 
