@@ -129,31 +129,31 @@ unshape <- function(x, MAR=c(1)){
   return(x)
 }
 
-yearmean <- function(dsRobj, yrOfSeasonEnd = TRUE){
-  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
-  lon.dim <- grep("lon", dsRobj.dimNames)
-  lat.dim <- grep("lat", dsRobj.dimNames)
-  member.dim <- grep("member", dsRobj.dimNames)
-  time.dim <- grep("time", dsRobj.dimNames)
-  n.mem <- dim(dsRobj$Data)[member.dim]
-  if (yrOfSeasonEnd) {
-    yrs <- getYearsAsINDEX(dsRobj)
-  } else {
-    yrs <- as.integer(substr(dsRobj$Dates$start, 0,4))
-  }
-  rval <- dsRobj
-  margin <- c(lat.dim, lon.dim, member.dim)
-  rval$Data <- apply(dsRobj$Data, MARGIN = margin,
-    FUN = function(x) {tapply(x, INDEX = yrs, FUN = mean, na.rm = TRUE)}
-  )
-  # Recover the original dimension order
-  newdims <- c("time", dsRobj.dimNames[margin])
-  rval$Data <- aperm(rval$Data, match(dsRobj.dimNames, newdims))
-  attr(rval$Data, "dimensions") <- dsRobj.dimNames
-  rval$Dates$start <- tapply(dsRobj$Dates$start, INDEX=yrs, FUN=min)
-  rval$Dates$end <- tapply(dsRobj$Dates$end, INDEX=yrs, FUN=max)
-  return(rval)
-}
+#yearmean <- function(dsRobj, yrOfSeasonEnd = TRUE){
+#  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
+#  lon.dim <- grep("lon", dsRobj.dimNames)
+#  lat.dim <- grep("lat", dsRobj.dimNames)
+#  member.dim <- grep("member", dsRobj.dimNames)
+#  time.dim <- grep("time", dsRobj.dimNames)
+#  n.mem <- dim(dsRobj$Data)[member.dim]
+#  if (yrOfSeasonEnd) {
+#    yrs <- getYearsAsINDEX(dsRobj)
+#  } else {
+#    yrs <- as.integer(substr(dsRobj$Dates$start, 0,4))
+#  }
+#  rval <- dsRobj
+#  margin <- c(lat.dim, lon.dim, member.dim)
+#  rval$Data <- apply(dsRobj$Data, MARGIN = margin,
+#    FUN = function(x) {tapply(x, INDEX = yrs, FUN = mean, na.rm = TRUE)}
+#  )
+#  # Recover the original dimension order
+#  newdims <- c("time", dsRobj.dimNames[margin])
+#  rval$Data <- aperm(rval$Data, match(dsRobj.dimNames, newdims))
+#  attr(rval$Data, "dimensions") <- dsRobj.dimNames
+#  rval$Dates$start <- tapply(dsRobj$Dates$start, INDEX=yrs, FUN=min)
+#  rval$Dates$end <- tapply(dsRobj$Dates$end, INDEX=yrs, FUN=max)
+#  return(rval)
+#}
 
 #' @title Compute the ROC Area Skill Score
 #' @description Computes the skill score for the area under the ROC curve compared to an 
@@ -164,7 +164,7 @@ yearmean <- function(dsRobj, yrOfSeasonEnd = TRUE){
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @note Adapted from the roc.area function from the verification library. 
 #' @export
-#' @examples 
+
 rocss.fun <- function (obs, pred) {
   id <- is.finite(obs) & is.finite(pred)
   obs <- obs[id]
@@ -239,7 +239,6 @@ checkEnsemblesObs <- function(mm.obj, obs) {
 #' @return A S4 object with spatial mean. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-#' @examples 
 
 spatialMean <- function(obj) {
   if (isS4(obj)==TRUE){
@@ -279,9 +278,8 @@ spatialMean <- function(obj) {
 #' @description Get the seasonal mean from a S4 object with the dimensions c("var", "member", "time", "y", "x")
 #' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
 #' @return A S4 object with the seasonal mean. The object has dimensions c("var", "member", "time", "y", "x")
-#' @authors M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
+#' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-#' @examples 
 
 seasMean <- function(obj) {
   if (isS4(obj)==TRUE){
@@ -289,7 +287,7 @@ seasMean <- function(obj) {
     obj.dimNames <- attr(obj.Data, "dimensions")
     if (identical(obj.dimNames, c("var", "member", "time", "y", "x"))) {  
       obj.Dates <- getDates(obj)
-      yrs <- getYearsAsINDEX(obj)
+      yrs <- getYearsAsINDEX.S4(obj)
       yy <- unique(yrs)
       margin <- c(getDimIndex(obj,"var"), getDimIndex(obj,"member"), getDimIndex(obj,"y"), getDimIndex(obj,"x"))
       arr <- apply(getData(obj), MARGIN = margin,
@@ -321,9 +319,8 @@ seasMean <- function(obj) {
 #' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
 #' @param k order of the quantile/s (e.g. c(1/3, 2/3) for terciles)
 #' @return A S4 object with quantiles. The object has dimensions c("var", "member", "time", "y", "x")
-#' @authors M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
+#' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-#' @examples 
 
 MrQuantile <- function(obj, k=NULL){
   if (isS4(obj)==TRUE){
@@ -377,9 +374,8 @@ MrQuantile <- function(obj, k=NULL){
 #' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
 #' @param nbins number of bins derived from the quantiles selected (by default nbins=3, terciles)
 #' @return A S4 object with the exceedance probabilities. The object has dimensions c("var", "member", "time", "y", "x")
-#' @authors M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
+#' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-#' @examples 
 
 QuantileProbs <- function(obj, nbins=3){
   if (isS4(obj)==TRUE){
@@ -443,9 +439,8 @@ QuantileProbs <- function(obj, nbins=3){
 #' @description Detrend data from a S4 object with the dimensions c("var", "member", "time", "y", "x")
 #' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
 #' @return A S4 object with the data detrended. The object has dimensions c("var", "member", "time", "y", "x")
-#' @authors M. D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and J. Bedia
+#' @author M. D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and J. Bedia
 #' @export
-#' @examples 
 
 detrend.forecast <- function(obj){
   if (isS4(obj)==TRUE){

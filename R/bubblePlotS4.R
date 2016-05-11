@@ -13,14 +13,14 @@
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
-#' @param piecharts. Logical flag indicating if pie charts should be plot. Default is FALSE.
-#' @param subtitle. String to include a subtitle bellow the title. Default is NULL.
-#' @param color.reverse. Logical indicating if the color palete for the terciles (blue, grey, red) should be
+#' @param piechart Logical flag indicating if pie charts should be plot. Default is FALSE.
+#' @param subtitle String to include a subtitle bellow the title. Default is NULL.
+#' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
 #'  reversed (e.g for precipitation). Default is FALSE.
-#' @param pch.neg.score. pch value to highlight the negative score values. Default is NULL. Not available for piecharts.
-#' @param pch.obs.constant. pch value to highlight those whose score cannot be computed due to constant obs 
+#' @param pch.neg.score pch value to highlight the negative score values. Default is NULL. Not available for piecharts.
+#' @param pch.obs.constant pch value to highlight those whose score cannot be computed due to constant obs 
 #'  conditions (e.g. always dry). Default is NULL.
-#' @param pch.data.nan. pch value to highlight those whose score cannot be computed due to time series with all NA values in 
+#' @param pch.data.nan pch value to highlight those whose score cannot be computed due to time series with all NA values in 
 #' the observations and/or models. Default is NULL. Not available for piecharts.
 #' 
 #' @importFrom scales alpha
