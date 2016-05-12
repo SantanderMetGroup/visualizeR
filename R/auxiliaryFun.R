@@ -214,7 +214,7 @@ checkEnsemblesObs <- function(mm.obj, obs) {
     }
     # Temporal matching check (obs-pred)
     obs.dates <- as.POSIXlt(getDates(obs)$start)
-    mm.dates <- as.POSIXlt(getDates(mm.obj)$start)
+    mm.dates <- as.POSIXlt(getDates(mm.obj)$start) 
     # For monthly values
     if (diff.Date(mm.dates$yday)[1]>27 & diff.Date(obs.dates$yday)[1]>27){
       if (!identical(obs.dates$mon, mm.dates$mon) || !identical(obs.dates$year, mm.dates$year)) {
@@ -222,7 +222,7 @@ checkEnsemblesObs <- function(mm.obj, obs) {
         message("Forecast and verifying observations are not coincident in time")
       }  
     } else{
-      if (!identical(obs.dates$yday, mm.dates$yday) || !identical(obs.dates$year, mm.dates$year)) {
+      if (!identical(unique(obs.dates$yday), unique(mm.dates$yday)) || !identical(unique(obs.dates$year), unique(mm.dates$year))) {
         vec <- c(vec,FALSE)  
         message("Forecast and verifying observations are not coincident in time")
       }  
