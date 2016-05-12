@@ -4,7 +4,7 @@
 #'  class. MrEnsemble is a S4 class derived from the MrGrid. The data set must have the elements Variable, 
 #'  Dates, Data, xyCoords, InitializationDates and Members. This function is prepared to convert 
 #'  the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See the loadeR.ECOMS R 
-#'  package for more details (http://github.com/SantanderMetGroup/loadeR.ECOMS). 
+#'  package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage). 
 #' 
 #' @param obj.s3 A list the with the elements Variable, Dates, Data, xyCoords, InitializationDates 
 #'  and Members
