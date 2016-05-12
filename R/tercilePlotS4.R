@@ -15,7 +15,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray 
 #' @importFrom abind abind
-#' @import fields
+#' @importFrom fields image.plot
 #'   
 #' @export
 #' 

@@ -26,6 +26,7 @@ Authors@R: as.person(c(
     "Maialen Iturbide <miturbide@ifca.unican.es> [ctb]",
     "Jose Manuel Gutierrez <gutierjm@unican.es> [ctb]",
     "Andrea Taylor <A.L.Taylor@leeds.ac.uk> [ctb]",
+    "Aidan Slingsby <a.slingsby@city.ac.uk> [ctb]",
     "Santander Meteorology Group <http://meteo.unican.es> [aut]"))
 BugReports: https://github.com/SantanderMetGroup/visualizeR/issues
 URL: https://github.com/SantanderMetGroup/visualizeR/wiki

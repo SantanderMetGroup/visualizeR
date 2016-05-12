@@ -1,6 +1,26 @@
-
+#' @title Convert station data to a S4 class. 
+#' 
+#' @description Convert station data to the MrStation class. MrStation is a S4 class derived 
+#'  from the MrData. The data set must have the elements Variable, Dates, Data, xyCoords and 
+#'  MetaData. This function is prepared to convert the station data loaded from the ECOMS User 
+#'  Data Gateway (ECOMS-UDG). See the loadeR.ECOMS R package for more details 
+#'  (http://github.com/SantanderMetGroup/loadeR.ECOMS). 
+#' 
+#' @param obj.s3 A list the with the elements Variable, Dates, Data, xyCoords and MetaData. 
+#
 #' @import methods
 #' @export
+#' 
+#' @details  
+#'  The visualization functions are programmed to work with S4 class. This function converts  
+#'  station data to S4 to use those functions. 
+#'  
+#' @note For gridded data sets with just one ensemble member use as.MrGrid function.
+#'  For gridded data sets with more than one ensemble member use as.MrEnsemble function.
+#'  
+#' @author M.D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and Max Tuni
+#' 
+#' @family VisualizeR
 
 as.MrStation <- function(obj.s3){
   lons <- obj.s3$xyCoords[,1]
