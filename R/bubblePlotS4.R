@@ -28,6 +28,9 @@
 #' @importFrom mapplots draw.pie add.pie
 #' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray draw.world.lines
 #' @importFrom abind abind
+#' @importFrom grDevices gray
+#' @importFrom graphics par plot mtext points legend
+#' @importFrom stats complete.cases
 #' 
 #' @export
 #' 

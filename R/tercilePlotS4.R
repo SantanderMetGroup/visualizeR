@@ -10,12 +10,14 @@
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition or \code{"tcolor"} for a colorbar for each tercile, blue-grey-red
 #'  for below, normal and above terciles, respectively.
-#'  @param subtitle String to include a subtitle bellow the title. Default is NULL.
+#' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray 
 #' @importFrom abind abind
 #' @importFrom fields image.plot
+#' @importFrom grDevices grey.colors
+#' @importFrom graphics par image axis points mtext
 #'   
 #' @export
 #' 

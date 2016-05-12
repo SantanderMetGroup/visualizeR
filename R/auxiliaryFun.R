@@ -1,3 +1,5 @@
+#' @keywords internal
+#' @importFrom grDevices rgb col2rgb
 alpha <- function(col, alpha){
   alpha <- ifelse(is.na(alpha),0,alpha) # set NA to fully transparent
   alpha <- ifelse(alpha<0,0,alpha) # set negative to fully transparent
@@ -5,6 +7,9 @@ alpha <- function(col, alpha){
 }
 
 # Detrend: performs detrending of data
+#' @keywords internal
+#' @importFrom stats lm
+
 detrend <- function(x) {
   if (all(is.na(x))) {
     rep(NA, length(x))
@@ -321,6 +326,7 @@ seasMean <- function(obj) {
 #' @return A S4 object with quantiles. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
+#' @importFrom stats quantile
 
 MrQuantile <- function(obj, k=NULL){
   if (isS4(obj)==TRUE){
