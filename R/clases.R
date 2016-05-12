@@ -15,8 +15,8 @@ setMethod(f="initialize", signature="MrData",
 })
 
 MrGrid <-setClass("MrGrid", 
-  slots = c(InitializationDates="character", Members="character"),
-  prototype=list(InitializationDates=character(), Members=character()),
+  slots = c(InitializationDates="list", Members="character"),
+  prototype=list(InitializationDates=list(), Members=character()),
   contains = "MrData"
 )
 setMethod(f="initialize", signature="MrGrid", 

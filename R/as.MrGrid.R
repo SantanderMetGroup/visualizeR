@@ -48,7 +48,7 @@ as.MrGrid <- function(obj.s3){
       Data = newdata,  
       Transformation = obj.s3$Transformation, 
       xyCoords = xyCoords,
-      InitializationDates = obj.s3$InitializationDates,
+      InitializationDates = as.list(obj.s3$InitializationDates),
       Members = obj.s3$Members
     )   
   )
