@@ -50,7 +50,7 @@
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
 #' 
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez based on the original diagram 
-#' conceived by Slingsby et al 2009.
+#'  conceived by Slingsby et al 2009.
 #' 
 #' @family VisualizeR
 #' 
@@ -60,9 +60,7 @@
 #'  
 #'  Slingsby A., Lowe R., Dykes J., Stephenson D. B., Wood J., Jupp T. E. 2009. A pilot study for the collaborative 
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
-#'  Durham, UK, 1–3 April 2009.
-#'  
-
+#'  Durham, UK, 1-3 April 2009.
 
 bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
       # Check input datasets

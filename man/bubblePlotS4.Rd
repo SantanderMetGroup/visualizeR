@@ -40,7 +40,7 @@ reversed (e.g for precipitation). Default is FALSE.}
 conditions (e.g. always dry). Default is NULL.}
 
 \item{pch.data.nan}{pch value to highlight those whose score cannot be computed due to time series with all NA values in
-the observations and/or models. Default is NULL. Not available for piecharts.}
+ the observations and/or models. Default is NULL. Not available for piecharts.}
 }
 \description{
 Bubble plot for the visualization of the skill of an ensemble forecast prediction. It provides a
@@ -49,31 +49,37 @@ Bubble plot for the visualization of the skill of an ensemble forecast predictio
 }
 \details{
 For each member, the daily predictions are averaged to obtain a single seasonal forecast. The corresponding terciles
-for each ensemble member are then computed for the analysis period. Thus, each particular grid point, member and season,
-are categorized into three categories (above, between or below), according to their respective climatological
-terciles. Then, a probabilistic forecast is computed year by year by considering the number of members falling
-within each category. For instance, probabilities below 1/3 are very low, indicating that a minority of the members
-falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members
-falling in the same tercile). Color represents the tercile with the highest probability for the selected year. The bubble size
-indicates the probability of that tercile. This option is not plotted if the size.as.probability argument is FALSE.
+ for each ensemble member are then computed for the analysis period. Thus, each particular grid point, member and season,
+ are categorized into three categories (above, between or below), according to their respective climatological
+ terciles. Then, a probabilistic forecast is computed year by year by considering the number of members falling
+ within each category. For instance, probabilities below 1/3 are very low, indicating that a minority of the members
+ falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members
+ falling in the same tercile). Color represents the tercile with the highest probability for the selected year. The bubble size
+ indicates the probability of that tercile. This option is not plotted if the size.as.probability argument is FALSE.
 
-Finally, the ROC Skill Score (ROCSS) is computed. For each tercile, it provides a quantitative measure of the forecast skill,
-and it is commonly used to evaluate the performance of probabilistic systems (Joliffe and Stephenson 2003). The value of
-this score ranges from 1 (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill
-compared with a random prediction. The transparency of the bubble is associated to the ROCSS (negative values are
-plotted with x).  This option is not plotted if the score argument is FALSE.
+ Finally, the ROC Skill Score (ROCSS) is computed. For each tercile, it provides a quantitative measure of the forecast skill,
+ and it is commonly used to evaluate the performance of probabilistic systems (Joliffe and Stephenson 2003). The value of
+ this score ranges from 1 (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill
+ compared with a random prediction. The transparency of the bubble is associated to the ROCSS (negative values are
+ plotted with x).  This option is not plotted if the score argument is FALSE.
 }
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
 \author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram
+ conceived by Slingsby et al 2009.
 }
 \references{
-Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in
- Atmospheric Science, Wiley, NY
+Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in Atmospheric
+ Science, Wiley, NY.
+
+ Slingsby A., Lowe R., Dykes J., Stephenson D. B., Wood J., Jupp T. E. 2009. A pilot study for the collaborative
+ development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK,
+ Durham, UK, 1-3 April 2009.
 }
 \seealso{
-Other res: \code{\link{tercilePlotS4}}
+Other VisualizeR: \code{\link{as.MrEnsemble}};
+  \code{\link{as.MrGrid}}; \code{\link{as.MrStation}}
 }
 
