@@ -9,10 +9,10 @@ devtools::install_github("SantanderMetGroup/visualizeR")
 ```
 Alternatively, you can download the sources from the [Releases Tab](https://github.com/SantanderMetGroup/visualizeR/releases)
 
----
-_IMPORTANT:_ Note that `downscaleR` need to be previously installed on your system [(installation info)](https://github.com/SantanderMetGroup/downscaleR/wiki)
----
 
+**IMPORTANT:** Note that `downscaleR` need to be previously installed on your system [(installation info)](https://github.com/SantanderMetGroup/downscaleR/wiki)
+
+---
 To know more about the `loadeR` bundle and its components, visit the `loadeR` [GitHub repo](https://github.com/SantanderMetGroup/loadeR).
 
 
