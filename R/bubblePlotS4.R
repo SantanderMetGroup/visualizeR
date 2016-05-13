@@ -8,7 +8,7 @@
 #'  downscaling of a forecast using station data. See details.
 #' @param obs The benchmarking observations for forecast verification. 
 #' @param select.year Year within the whole verification period to display the results for.
-#' @param detrend Logical indicating if the data should be detreded. Default is TRUE
+#' @param detrend Logical indicating if the data should be detrended. Default is TRUE
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
