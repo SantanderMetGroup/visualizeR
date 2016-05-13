@@ -182,6 +182,57 @@ rocss.fun <- function (obs, pred) {
 }
 
 
+#' @title Convert a dataset to a S4 class. 
+#' 
+#' @description Convert a data set to a S4 class. The data set must have the elements Variable, 
+#'  Dates, Data, xyCoords. Depending of the kind of data it must also have the elements Members 
+#'  and InitializationDates (for gridded data) or MetaData (for station data). This function is 
+#'  prepared to convert the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
+#'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage). 
+#' 
+#' @param obj A list the with the elements Variable, Dates, Data, xyCoords and Members 
+#'  and InitializationDates (for gridded data) or MetaData (for station data)
+#
+#' @import methods
+#' 
+#' @details  
+#'  The visualization functions are programmed to work with S4 class. This function converts  
+#'  datasets into S4 to use those functions. 
+#'  
+#' @note For gridded data sets with just one ensemble member use as.MrGrid function.
+#'  For station data use as.MrStation function.
+#'  
+#' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez 
+#' 
+#' @family VisualizeR
+
+convertIntoS4 <- function(obj) {   
+  if(class(obj)=="list"){
+    if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
+      if(!is.null(obj$Members)){
+        if(length(obj$Members)>1){
+          # The input dataset is a multi-member ensemble.
+          obj.o <- as.MrEnsemble(obj)
+        } else{
+          # The input dataset is not a multi-member ensemble.
+          obj.o <- as.MrGrid(obj)
+        }
+      } else{
+        if(!is.null(obj$Metadata)){
+          obj.o <- as.MrStation
+        } else{
+          obj.o <- as.MrGrid(obj)
+        }    
+      }
+    } else {
+      obj.o <- obj
+    }
+    return(obj.o)
+  } else{
+    stop ('The input data is not a list')
+  }
+}
+
 ###################################
 # Functions for S4 objects
 ###################################
@@ -198,7 +249,7 @@ getCountIndex <- function(obj, dim) {
 
 # Check the validation of the data for the VisualizeR plots
 checkEnsemblesObs <- function(mm.obj, obs) {
-  if (isS4(mm.obj)==TRUE & isS4(obs)==TRUE){
+  if(isS4(mm.obj)==TRUE & isS4(obs)==TRUE){
     vec <- c()
     if (!class(mm.obj)[1]=="MrEnsemble") {
       vec <- c(vec,FALSE)

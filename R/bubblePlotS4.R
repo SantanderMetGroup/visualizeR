@@ -67,6 +67,12 @@
 
 bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
       # Check input datasets
+      if (isS4(mm.obj)==FALSE){
+        mm.obj <- convertIntoS4(mm.obj)
+      }
+      if (isS4(obs)==FALSE){
+        obs <- convertIntoS4(obs)
+      }
       stopifnot(checkEnsemblesObs(mm.obj, obs))
       yrs <- unique(getYearsAsINDEX.S4(mm.obj))
       yy <- unique(yrs)

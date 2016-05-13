@@ -60,6 +60,12 @@
 tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = c("bw", "reds", "tcolor"), subtitle = NULL){
       color.pal <- match.arg(color.pal, c("bw", "reds", "tcolor"))
       # Check input datasets
+      if (isS4(mm.obj)==FALSE){
+        mm.obj <- convertIntoS4(mm.obj)
+      }
+      if (isS4(obs)==FALSE){
+        obs <- convertIntoS4(obs)
+      }
       stopifnot(checkEnsemblesObs(mm.obj, obs))
       yrs <- unique(getYearsAsINDEX.S4(mm.obj))
       yy <- unique(yrs)
