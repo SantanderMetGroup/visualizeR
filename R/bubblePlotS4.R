@@ -74,8 +74,7 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
         obs <- convertIntoS4(obs)
       }
       stopifnot(checkEnsemblesObs(mm.obj, obs))
-      yrs <- unique(getYearsAsINDEX.S4(mm.obj))
-      yy <- unique(yrs)
+      yy <- unique(getYearsAsINDEX.S4(mm.obj))
       if (!select.year %in% yy) {
         stop("Target year outside temporal data range")
       }
