@@ -9,7 +9,6 @@
 #' @param obj.s3 A list the with the elements Variable, Dates, Data, xyCoords and MetaData. 
 #
 #' @import methods
-#' @export
 #' 
 #' @details  
 #'  The visualization functions are programmed to work with S4 class. This function converts  

@@ -10,7 +10,6 @@
 #'  and Members
 #
 #' @import methods
-#' @export
 #' 
 #' @details  
 #'  The visualization functions are programmed to work with S4 class. This function converts gridded 
