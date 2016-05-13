@@ -8,7 +8,8 @@ Imports:
     RColorBrewer,
     scales,
     mapplots,
-    abind
+    abind,
+    RCurl
 Suggests:
     loadeR.ECOMS,
     loadeR
