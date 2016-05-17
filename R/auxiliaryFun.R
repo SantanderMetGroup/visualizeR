@@ -219,7 +219,7 @@ convertIntoS4 <- function(obj) {
         }
       } else{
         if(!is.null(obj$Metadata)){
-          obj.o <- as.MrStation
+          obj.o <- as.MrStation(obj)
         } else{
           obj.o <- as.MrGrid(obj)
         }    
