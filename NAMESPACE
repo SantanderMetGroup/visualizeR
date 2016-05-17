@@ -2,9 +2,6 @@
 
 export(MrQuantile)
 export(QuantileProbs)
-export(as.MrEnsemble)
-export(as.MrGrid)
-export(as.MrStation)
 export(bubblePlotS4)
 export(detrend.forecast)
 export(rocss.fun)

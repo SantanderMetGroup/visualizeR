@@ -80,6 +80,7 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
 }
 \seealso{
 Other VisualizeR: \code{\link{as.MrEnsemble}},
-  \code{\link{as.MrGrid}}, \code{\link{as.MrStation}}
+  \code{\link{as.MrGrid}}, \code{\link{as.MrStation}},
+  \code{\link{convertIntoS4}}
 }
 

@@ -30,6 +30,7 @@ M.D. Frias \email{mariadolores.frias@unican.es}, J. Fernandez and Max Tuni
 }
 \seealso{
 Other VisualizeR: \code{\link{as.MrEnsemble}},
-  \code{\link{as.MrStation}}, \code{\link{bubblePlotS4}}
+  \code{\link{as.MrStation}}, \code{\link{bubblePlotS4}},
+  \code{\link{convertIntoS4}}
 }
 
