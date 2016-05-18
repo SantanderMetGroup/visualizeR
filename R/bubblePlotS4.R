@@ -155,8 +155,9 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
         }
       }
       # Starting with the plot
-      mons <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons[1],last(mons), select.year)
+      mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
+      mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1],last(mons.end), select.year)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
       mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)
@@ -236,9 +237,9 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
       # Add legend
       if (size.as.probability) {
         if (score & !is.null(pch.neg.score)){
-          legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75% likelihood)", "Above (size: 100% likelihood)", "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1),horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
+          legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)", "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1),horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
         } else{
-          legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75% likelihood)", "Above (size: 100% likelihood)"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1),horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
+          legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1),horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
         }
       } else {
         if (score & !is.null(pch.neg.score)){
