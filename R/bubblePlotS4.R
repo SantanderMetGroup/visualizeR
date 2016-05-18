@@ -237,9 +237,20 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
       # Add legend
       if (size.as.probability) {
         if (score & !is.null(pch.neg.score)){
-          legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)", "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1),horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
+          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)", "Negative score")
+          xcoords <- c(0, 0.55, 0.95, 1.35)
+          secondvector <- (1:length(legtext))-1
+          textwidths <- xcoords/secondvector 
+          textwidths[1] <- 0
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz = T, bty = "n", text.width=textwidths, xjust=0)      
         } else{
-          legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1),horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
+          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")
+          xcoords <- c(0, 0.55, 0.95)
+          secondvector <- (1:length(legtext))-1
+          textwidths <- xcoords/secondvector 
+          textwidths[1] <- 0
+          #legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1), horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1), horiz = T, bty = "n", text.width=textwidths, xjust=0)     
         }
       } else {
         if (score & !is.null(pch.neg.score)){
