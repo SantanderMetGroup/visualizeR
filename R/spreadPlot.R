@@ -13,8 +13,6 @@
 #' graph. Default is FALSE.
 #' @param pch Single character or an integer code for one of the set of R graphics symbols. Cross is the default symbol. 
 #' Only consider if add.points is TRUE. 
-#' @param stationId In case of multi-member multi-station objects, one station can be selected to plot
-#' the diagram. Otherwise ignored.
 #' 
 #' @import sm
 #' @import vioplot 
@@ -33,8 +31,7 @@
 #' graph in a boxplot or a violin plot (to unveil multimodalities in the data) or/and the values of the ensemble members. 
 #' 
 #' In case of multi-member fields, the field is spatially averaged to obtain one single time series
-#' for each member prior to data analysis, with a warning. In case of multi-member stations, one single station
-#' can be selected through the \code{stationId} argument, otherwise all station series are also averaged.
+#' for each member prior to data analysis, with a warning. 
 #'   
 #' 
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
@@ -43,7 +40,7 @@
 #' 
 #' @family VisualizeR
 
-spreadPlot <- function(mm.obj, year.target, detrend = TRUE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL, stationId = NULL) {
+spreadPlot <- function(mm.obj, year.target, detrend = TRUE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
      # Check input datasets
      if (isS4(mm.obj)==FALSE){
        mm.obj <- convertIntoS4(mm.obj)
