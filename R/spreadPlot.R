@@ -17,6 +17,7 @@
 #' the diagram. Otherwise ignored.
 #' 
 #' @importFrom vioplot vioplot
+#' @importFrom sm sm.density
 #'   
 #' @export
 #' 
