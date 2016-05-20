@@ -9,6 +9,7 @@ Imports:
     scales,
     mapplots,
     abind,
+    vioplot,
     RCurl
 Suggests:
     loadeR.ECOMS,
