@@ -1,12 +1,12 @@
-#' @title Tercile plot for visualization of the skill of an ensemble forecast prediction
+#' @title Tercile plot for visualization of forecast skill of ensemble predictions.
 #' 
-#' @description Tercile plot for the visualization of the skill of an ensemble forecast prediction.
+#' @description Tercile plot for the visualization of forecast skill of ensemble predictions.
 #' 
-#' @param mm.obj A multi-member S4 object (MrEnsemble class) with predictions, either a field or a multi-member 
+#' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
 #' station object as a result of downscaling of a forecast using station data. See details.
-#' @param obs S4 object with the benchmarking observations for forecast verification
-#' @param select.year Year within the whole verification period to display the results for.
-#' @param detrend Logical indicating if the data should be detrended. Default is TRUE
+#' @param obs List with the benchmarking observations for forecast verification.
+#' @param year.target Year within the whole verification period to display the results for.
+#' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition or \code{"tcolor"} for a colorbar for each tercile, blue-grey-red
 #'  for below, normal and above terciles, respectively.
@@ -30,16 +30,16 @@
 #' between or below), according to their respective climatological terciles. Then, a probabilistic forecast is computed 
 #' year by year by considering the number of members falling within each category. This probability is represented by the
 #' colorbar. For instance, probabilities below 1/3 are very low, indicating that a minority of the members 
-#'  falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members
-#'  falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the white circles.
+#' falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members
+#' falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the white circles.
 #'  
-#'  Finally, the ROC Skill Score (ROCSS) is indicated in the secondary (right) Y axis. For each tercile, it provides a 
-#'  quantitative measure of the forecast skill, and it is commonly used to evaluate the performance of probabilistic systems
-#'  (Joliffe and Stephenson 2003). The value of this score ranges from 1 (perfect forecast system) to -1 
-#'  (perfectly bad forecast system). A value zero indicates no skill compared with a random prediction.
+#' Finally, the ROC Skill Score (ROCSS) is indicated in the secondary (right) Y axis. For each tercile, it provides a 
+#' quantitative measure of the forecast skill, and it is commonly used to evaluate the performance of probabilistic systems
+#' (Joliffe and Stephenson 2003). The value of this score ranges from 1 (perfect forecast system) to -1 
+#' (perfectly bad forecast system). A value zero indicates no skill compared with a random prediction.
 #'  
-#'  In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
-#'  for each member prior to data analysis, with a warning.   
+#' In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
+#' for each member prior to data analysis, with a warning.   
 #' 
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
 #' 
@@ -57,7 +57,7 @@
 #' Atmospheri Science, Wiley, NY
 #'  
 
-tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = c("bw", "reds", "tcolor"), subtitle = NULL){
+tercilePlot <- function(mm.obj, obs, year.target, detrend = TRUE, color.pal = c("bw", "reds", "tcolor"), subtitle = NULL){
       color.pal <- match.arg(color.pal, c("bw", "reds", "tcolor"))
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
@@ -66,9 +66,9 @@ tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = 
       if (isS4(obs)==FALSE){
         obs <- convertIntoS4(obs)
       }
-      stopifnot(checkEnsemblesObs(mm.obj, obs))
+      stopifnot(checkData(mm.obj, obs))
       yy <- unique(getYearsAsINDEX.S4(mm.obj))      
-      if (!select.year %in% yy) {
+      if (!year.target %in% yy) {
         stop("Target year outside temporal data range")
       }
       # Detrend
@@ -89,7 +89,7 @@ tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = 
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
       # Compute ROCSS
-      i.yy <- !yy == select.year # Remove select.year for the score calculation
+      i.yy <- !yy == year.target # Remove year.target for the score calculation
       rocss.t.u <- rocss.fun(obs.terciles[i.yy,3], cofinogram.data[i.yy,3])
       rocss.t.m <- rocss.fun(obs.terciles[i.yy,2], cofinogram.data[i.yy,2])
       rocss.t.l <- rocss.fun(obs.terciles[i.yy,1], cofinogram.data[i.yy,1])
@@ -132,7 +132,7 @@ tercilePlotS4 <- function(mm.obj, obs, select.year, detrend = TRUE, color.pal = 
           image.plot(add = TRUE, horizontal = T, smallplot = c(0.15,0.8,0.25,0.33), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
       }
       mons <- unique(months(as.POSIXlt(as.POSIXlt(getDates(obs)$start)), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons[1],last(mons), select.year)
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons[1],last(mons), year.target)
       mtext(title, side=3, line=-2, adj=0, cex=1.2, font=2)
       mtext (title)
       if (!is.null(subtitle)){

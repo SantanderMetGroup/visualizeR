@@ -1,14 +1,14 @@
-#' @title Bubble plot for visualization of the skill of an ensemble forecast prediction
+#' @title Bubble plot for visualization of forecast skill of ensemble predictions.
 #' 
-#' @description Bubble plot for the visualization of the skill of an ensemble forecast prediction. It provides a
+#' @description Bubble plot for visualization of forecast skill of ensemble predictions. It provides a
 #'  spatially-explicit representation of the skill, resolution and reliability of a probabilistic predictive system in
 #'  a single map.
 #' 
-#' @param mm.obj A multi-member object with predictions, either a field or a multi-member station object as a result of
-#'  downscaling of a forecast using station data. See details.
+#' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
+#' station object as a result of downscaling of a forecast using station data. See details.
 #' @param obs The benchmarking observations for forecast verification. 
-#' @param select.year Year within the whole verification period to display the results for.
-#' @param detrend Logical indicating if the data should be detrended. Default is TRUE
+#' @param year.target Year within the whole verification period to display the results for.
+#' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
@@ -65,7 +65,7 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
+bubblePlot <- function(mm.obj, obs, year.target, detrend=TRUE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
         mm.obj <- convertIntoS4(mm.obj)
@@ -73,12 +73,12 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
       if (isS4(obs)==FALSE){
         obs <- convertIntoS4(obs)
       }
-      stopifnot(checkEnsemblesObs(mm.obj, obs))
+      stopifnot(checkData(mm.obj, obs))
       yy <- unique(getYearsAsINDEX.S4(mm.obj))
-      if (!select.year %in% yy) {
+      if (!year.target %in% yy) {
         stop("Target year outside temporal data range")
       }
-      iyear <- which(yy == select.year)
+      iyear <- which(yy == year.target)
       #
       #### INCLUIR AQUI LA INTEGRACION DE GRIDS ENTRE OBS Y MM: interpGridData(obs, new.grid = getGrid(prd), method = "nearest")
       #
@@ -132,8 +132,8 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
       df$color[df$t.max.prob == 1] <- t.colors[1]      
       # Compute ROCSS for all terciles
       if (score) { 
-        # Remove select.year to the score calculation
-        i.yy <- !yy == select.year
+        # Remove year.target to the score calculation
+        i.yy <- !yy == year.target
         rocss <- array(dim=dim(prob)[-2:-3]) # remove year and member dimensions       
         for (i.tercile in 1:3){
           rocss[i.tercile, , ] <- apply(
@@ -157,7 +157,7 @@ bubblePlotS4 <- function(mm.obj, obs, select.year, detrend=TRUE, score=TRUE, siz
       # Starting with the plot
       mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
       mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1],last(mons.end), select.year)
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1],last(mons.end), year.target)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
       mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)

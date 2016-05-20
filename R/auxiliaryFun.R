@@ -247,43 +247,53 @@ getCountIndex <- function(obj, dim) {
   return(dim(obj.Data)[getDimIndex(obj, dim)])
 }
 
-# Check the validation of the data for the VisualizeR plots
-checkEnsemblesObs <- function(mm.obj, obs) {
-  if(isS4(mm.obj)==TRUE & isS4(obs)==TRUE){
-    vec <- c()
+# Check the data format and dates before performing plots
+checkData <- function(mm.obj, obs) {
+  vec <- c()
+  if(isS4(mm.obj)==TRUE){
     if (!class(mm.obj)[1]=="MrEnsemble") {
       vec <- c(vec,FALSE)
-      message("The input data for forecasts is not a multimember field")
+      message("The input data for forecasts is not a multimember field ")
     }
-    if (class(obs)[1]=="MrEnsemble") {
-      vec <- c(vec,FALSE)
-      message("The verifying observations can't be a multimember")
-    }
-    if (length(getVarName(mm.obj))>1 | length(getVarName(obs))>1) {
+    if (length(getVarName(mm.obj))>1) {
       vec <- c(vec,FALSE)
       message("Multifields are not a valid input")
     }
-    # Temporal matching check (obs-pred)
-    obs.dates <- as.POSIXlt(getDates(obs)$start)
-    mm.dates <- as.POSIXlt(getDates(mm.obj)$start) 
-    # For monthly values
-    if (diff.Date(mm.dates$yday)[1]>27 & diff.Date(obs.dates$yday)[1]>27){
-      if (!identical(obs.dates$mon, mm.dates$mon) || !identical(obs.dates$year, mm.dates$year)) {
-        vec <- c(vec,FALSE)
-        message("Forecast and verifying observations are not coincident in time")
+    if (!missing(obs)){
+      if(isS4(obs)==TRUE){
+        if (class(obs)[1]=="MrEnsemble") {
+          vec <- c(vec,FALSE)
+          message("The verifying observations can't be a multimember")
+        }
+        if (length(getVarName(obs))>1) {
+          vec <- c(vec,FALSE)
+          message("Multifields are not a valid input for observations")
+        }
+        # Temporal matching check (obs-pred)
+        obs.dates <- as.POSIXlt(getDates(obs)$start)
+        mm.dates <- as.POSIXlt(getDates(mm.obj)$start) 
+        # For monthly values
+        if (diff.Date(mm.dates$yday)[1]>27 & diff.Date(obs.dates$yday)[1]>27){
+          if (!identical(obs.dates$mon, mm.dates$mon) || !identical(obs.dates$year, mm.dates$year)) {
+            vec <- c(vec,FALSE)
+            message("Forecast and verifying observations are not coincident in time")
+          }  
+        } else{
+          if (!identical(unique(obs.dates$yday), unique(mm.dates$yday)) || !identical(unique(obs.dates$year), unique(mm.dates$year))) {
+            vec <- c(vec,FALSE)  
+            message("Forecast and verifying observations are not coincident in time")
+          }  
+        }
+      } else{
+        stop("The obs data is not S4 object")
       }  
-    } else{
-      if (!identical(unique(obs.dates$yday), unique(mm.dates$yday)) || !identical(unique(obs.dates$year), unique(mm.dates$year))) {
-        vec <- c(vec,FALSE)  
-        message("Forecast and verifying observations are not coincident in time")
-      }  
-    }
+    } 
     if (is.null(vec)){
       vec <- TRUE
     }   
-    return(vec)    
+    return(vec)   
   } else{
-      stop("The input data are not S4 objects")    
+    stop("The forecast is not S4 object")    
   } 
 }
 
