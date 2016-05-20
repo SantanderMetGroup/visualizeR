@@ -16,8 +16,8 @@
 #' @param stationId In case of multi-member multi-station objects, one station can be selected to plot
 #' the diagram. Otherwise ignored.
 #' 
-#' @import vioplot
-#' @importFrom sm sm.density
+#' @import sm
+#' @import vioplot 
 #'   
 #' @export
 #' 

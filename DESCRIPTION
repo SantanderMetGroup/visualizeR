@@ -1,6 +1,7 @@
 Package: visualizeR
 Depends:
-    R(>= 3.1.0)
+    R(>= 3.1.0),
+    sm
 Imports:
     methods,
     downscaleR,
@@ -10,7 +11,6 @@ Imports:
     mapplots,
     abind,
     vioplot,
-    sm,
     RCurl
 Suggests:
     loadeR.ECOMS,
