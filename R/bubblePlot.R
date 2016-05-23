@@ -1,13 +1,16 @@
 #' @title Bubble plot for visualization of forecast skill of ensemble predictions.
 #' 
 #' @description Bubble plot for visualization of forecast skill of ensemble predictions. It provides a
-#'  spatially-explicit representation of the skill, resolution and reliability of a probabilistic predictive system in
-#'  a single map.
+#'  spatially-explicit representation of the skill, resolution and reliability of a probabilistic predictive 
+#'  system in a single map. 
+#'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
+#'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
 #' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
 #' station object as a result of downscaling of a forecast using station data. See details.
 #' @param obs The benchmarking observations for forecast verification. 
-#' @param year.target Year within the whole verification period to display the results for.
+#' @param year.target Year within the whole verification period to display the results for. This year is not
+#'  included in the computation of the score (operational point of view). 
 #' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 #'  details. Default is TRUE
@@ -48,7 +51,8 @@
 #'  and it is commonly used to evaluate the performance of probabilistic systems (Joliffe and Stephenson 2003). The value of 
 #'  this score ranges from 1 (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill 
 #'  compared with a random prediction. The transparency of the bubble is associated to the ROCSS (negative values are
-#'  plotted with x).  This option is not plotted if the score argument is FALSE.
+#'  plotted with x). This option is not plotted if the score argument is FALSE. The target year is not
+#'  included in the computation of the score (operational point of view). 
 #' 
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
 #' 

@@ -1,6 +1,8 @@
 #' @title Tercile plot for visualization of forecast skill of ensemble predictions.
 #' 
 #' @description Tercile plot for the visualization of forecast skill of ensemble predictions.
+#'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
+#'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
 #' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
 #' station object as a result of downscaling of a forecast using station data. See details.
