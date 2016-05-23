@@ -45,10 +45,10 @@ spreadPlot <- function(mm.obj, year.target, detrend = TRUE, boxplot=TRUE, violin
      mm.dates <-as.POSIXlt(mm.obj$Dates$start)
      if (diff.Date(mm.dates$mday)[1]==0){
        # Annual data
-       if (!diff.Date(mm.dates$year)[1]==1){
+       if (diff.Date(mm.dates$year)[1]==1){
          stop("Data are not at daily time scale")
        } # Monthly data
-       if (!diff.Date(mm.dates$mon)[1]==1){
+       if (diff.Date(mm.dates$mon)[1]==1){
          stop("Data are not at daily time scale")
        } 
      }
