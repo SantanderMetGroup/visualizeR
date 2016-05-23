@@ -71,7 +71,6 @@ spreadPlot <- function(mm.obj, year.target, detrend = TRUE, boxplot=TRUE, violin
      ma <- function(x, n=31){filter(x, rep(1/n, n), sides=2)} # Time filter (moving average)
      arr <- getData(sp.mm.obj)[1,,,1,1]
      mm.ma <- t(apply(arr, MARGIN=1, FUN=ma)) 
-     #mm.dates <- as.POSIXlt(getDates(sp.mm.obj)$start, tz="GMT")
      days <- sprintf("%02d%02d", mm.dates$mon+1, mm.dates$mday)
      days <- factor(days, levels=unique(days))
      # Quantiles mixing for each day all the years and members
