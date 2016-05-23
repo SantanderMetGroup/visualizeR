@@ -43,7 +43,7 @@
 spreadPlot <- function(mm.obj, year.target, detrend = TRUE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
      # Check data temporal scale. Daily or subdaily required.
      mm.dates <-as.POSIXlt(mm.obj$Dates$start)
-     if (diff.Date(dates$mday)[1]==0){
+     if (diff.Date(mm.dates$mday)[1]==0){
        # Annual data
        if (!diff.Date(mm.dates$year)[1]==1){
          stop("Data are not at daily time scale")
