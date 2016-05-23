@@ -157,7 +157,7 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=TRUE, score=TRUE, size.
       # Starting with the plot
       mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
       mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1],last(mons.end), year.target)
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end), year.target)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
       mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)

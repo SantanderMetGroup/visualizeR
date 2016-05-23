@@ -5,7 +5,8 @@
 #' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
 #' station object as a result of downscaling of a forecast using station data. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
-#' @param year.target Year within the whole verification period to display the results for.
+#' @param year.target Year within the whole verification period to display the results for. This year is not
+#'  included in the computation of the score (operational point of view). 
 #' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition or \code{"tcolor"} for a colorbar for each tercile, blue-grey-red
@@ -36,7 +37,8 @@
 #' Finally, the ROC Skill Score (ROCSS) is indicated in the secondary (right) Y axis. For each tercile, it provides a 
 #' quantitative measure of the forecast skill, and it is commonly used to evaluate the performance of probabilistic systems
 #' (Joliffe and Stephenson 2003). The value of this score ranges from 1 (perfect forecast system) to -1 
-#' (perfectly bad forecast system). A value zero indicates no skill compared with a random prediction.
+#' (perfectly bad forecast system). A value zero indicates no skill compared with a random prediction. The target year 
+#' is not included in the computation of the score (operational point of view). 
 #'  
 #' In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 #' for each member prior to data analysis, with a warning.   
@@ -131,8 +133,9 @@ tercilePlot <- function(mm.obj, obs, year.target, detrend = TRUE, color.pal = c(
           #image.plot(add = TRUE, legend.only = TRUE, breaks = brks, col = cbar, smallplot = c(0.96,0.99,0.2,0.8), zlim=c(0,1), legend.lab="Probability of the tercile")            
           image.plot(add = TRUE, horizontal = T, smallplot = c(0.15,0.8,0.25,0.33), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
       }
-      mons <- unique(months(as.POSIXlt(as.POSIXlt(getDates(obs)$start)), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons[1],last(mons), year.target)
+      mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
+      mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end), year.target)
       mtext(title, side=3, line=-2, adj=0, cex=1.2, font=2)
       mtext (title)
       if (!is.null(subtitle)){
