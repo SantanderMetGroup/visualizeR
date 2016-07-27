@@ -13,7 +13,8 @@ station object as a result of downscaling of a forecast using station data. See 
 
 \item{obs}{List with the benchmarking observations for forecast verification.}
 
-\item{year.target}{Year within the whole verification period to display the results for.}
+\item{year.target}{Year within the whole verification period to display the results for. This year is not
+included in the computation of the score (operational point of view).}
 
 \item{detrend}{Logical indicating if the data should be detrended. Default is TRUE.}
 
@@ -25,6 +26,8 @@ for below, normal and above terciles, respectively.}
 }
 \description{
 Tercile plot for the visualization of forecast skill of ensemble predictions.
+ This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See
+ the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 }
 \details{
 For each member, the daily predictions are averaged to obtain a single seasonal forecast. For
@@ -40,7 +43,8 @@ falling in the same tercile). The observed terciles (the events that actually oc
 Finally, the ROC Skill Score (ROCSS) is indicated in the secondary (right) Y axis. For each tercile, it provides a
 quantitative measure of the forecast skill, and it is commonly used to evaluate the performance of probabilistic systems
 (Joliffe and Stephenson 2003). The value of this score ranges from 1 (perfect forecast system) to -1
-(perfectly bad forecast system). A value zero indicates no skill compared with a random prediction.
+(perfectly bad forecast system). A value zero indicates no skill compared with a random prediction. The target year
+is not included in the computation of the score (operational point of view).
 
 In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 for each member prior to data analysis, with a warning.
