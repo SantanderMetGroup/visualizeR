@@ -5,8 +5,8 @@
 #' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014:
 #' http://rsif.royalsocietypublishing.org/content/11/96/20131162
 #' 
-#' @param obs m*n matrix of observations (m = years, n = locations)
-#' @param prd m*n*l matrix of predictions (m = members, n = years, l = locations)
+#' @param obs Grid of observations
+#' @param prd Grid of predictions 
 #' @param nbins (optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3
 #' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
@@ -15,7 +15,7 @@
 #' @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 #' @param xlim Required if diagrams = TRUE. Limits for maps
 #' @param ylim Required if diagrams = TRUE. Limits for maps
-#' @return List with the following elements:
+#' @return Same as prd but with an aditional list ($ReliabilityCategories) containing the following elements:
 #' catcol: color of the reliability category
 #' catname: reliability category
 #' sl: slope of the reliability line
@@ -30,12 +30,31 @@
 
 
 
+
 reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05, 
-                        diagrams = TRUE, 
-                        coordinates = NULL,
-                        xlim = NULL, ylim = NULL) {
+                        diagrams = TRUE, xlim = NULL, ylim = NULL) {
+      if(!identical(getGrid(obs)$y, getGrid(seasonal)$y) | !identical(getGrid(obs)$x, getGrid(seasonal)$x)){
+            stop("obs and prd are not spatially consistent. Try using function interpGrid from package downscaleR")
+      }
+      prd <- downscaleR:::redim(prd)
+      coordinates <- expand.grid(obs$xyCoords$x, obs$xyCoords$y)
+      ob <- array3Dto2Dmat(obsi$Data)
+      memind <- which(downscaleR:::getDim(seasonal)=="member")
+      timeind <- which(downscaleR:::getDim(seasonal)=="time")
       
-      sl <- calculateReliability(obs, prd, nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05)
+      nmem <- dim(seasonal$Data)[memind]
+      ntime <- dim(seasonal$Data)[timeind]
+      se <- array(dim = c(nmem, ntime, length(seasonal$xyCoords$x) * length(seasonal$xyCoords$y)))
+      for(i in 1:nmem){
+            seasonalarray <- seasonal$Data[i,,,]
+            attr(seasonalarray, "dimensions") <-  attr(seasonal$Data, "dimensions")[-memind]
+            se[i,,] <- array3Dto2Dmat(seasonalarray)
+      }
+      naind <- which(!is.na(ob[1,]))
+      obna <- ob[,naind]
+      sena <- se[,,naind]
+      corna <- unname(as.matrix(coordinates[naind,]))
+      sl <- calculateReliability(obna, sena, nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05)
       message("[", Sys.time(), "] Calculating categories...")
       ## colores
       red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
@@ -106,15 +125,15 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
             }
             if (diagrams) {
                   ## mapa
-                  aux <- vector2matrix(rep(cat[ibins], 1, dim(coordinates)[1]), coordinates)
+                  aux <- vector2matrix(rep(cat[ibins], 1, dim(corna)[1]), corna)
                   
                   if (!is.null(xlim) & !is.null(ylim)) {
                         image(aux$xnod, aux$ynod, aux$data, xlim = xlim, 
                               ylim = ylim, col = catcol[ibins], 
                               main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
                   } else if (is.null(xlim) | is.null(ylim)) {
-                        image(aux$xnod, aux$ynod, aux$data, xlim = c(min(coordinates[,1]), max(coordinates[,1])), 
-                              ylim = c(min(coordinates[,2]), max(coordinates[,2])), col = catcol[ibins], 
+                        image(aux$xnod, aux$ynod, aux$data, xlim = c(min(corna[,1]), max(corna[,1])), 
+                              ylim = c(min(corna[,2]), max(corna[,2])), col = catcol[ibins], 
                               main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
                   }
                   map(add=T)
@@ -181,7 +200,10 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
       result$sl_lower <- sl_lower
       result$sl_upper <- sl_upper
       message("[", Sys.time(), "] Done.")
-      return(result)
+      result.grid <- seasonal
+      result.grid$ReliabilityCategories <- result
+      attr(result.grid$ReliabilityCategories, "observationData") <- attr(obs, "dataset")
+return(result.grid)
 }
 
 
@@ -223,7 +245,6 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
 #' @importFrom abind abind
 #' @importFrom downscaleR makeMultiGrid
 #' @import verification
-#' @importFrom R.utils eps
 
 
 
