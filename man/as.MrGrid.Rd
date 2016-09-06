@@ -31,6 +31,7 @@ M.D. Frias \email{mariadolores.frias@unican.es}, J. Fernandez and Max Tuni
 \seealso{
 Other VisualizeR: \code{\link{as.MrEnsemble}};
   \code{\link{as.MrStation}}; \code{\link{bubblePlot}};
-  \code{\link{convertIntoS4}}; \code{\link{spreadPlot}}
+  \code{\link{convertIntoS4}}; \code{\link{spreadPlot}};
+  \code{\link{tercileBarplot}}
 }
 

@@ -23,9 +23,9 @@
 #' sl_lower: upper bound confidence for slope (according to "sigboot") 
 #' @export
 #' @author R. Manzanas \& M.Iturbide
-#' @import verification
-#' @import plot3D
-#' @import maps
+# @import verification
+# @import plot3D
+# @import maps
 
 
 
@@ -256,7 +256,7 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
 #' @author R. Manzanas \& M.Iturbide
 #' @importFrom abind abind
 #' @importFrom downscaleR makeMultiGrid
-#' @import verification
+# @import verification
 
 
 
@@ -561,7 +561,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
       # (call the attribute.R function from verification R-package: 
       # http://cran.r-project.org/web/packages/verification/verification.pdf)
       
-      require(verification)
+#       require(verification)
       
       dataRelDiagram <- list()
       
