@@ -32,28 +32,32 @@
 
 
 reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05, 
-                        diagrams = TRUE, xlim = NULL, ylim = NULL) {
-      if(!identical(getGrid(obs)$y, getGrid(seasonal)$y) | !identical(getGrid(obs)$x, getGrid(seasonal)$x)){
+                                  diagrams = TRUE){ #, regions = NULL) {
+      if(!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)){
             stop("obs and prd are not spatially consistent. Try using function interpGrid from package downscaleR")
       }
+      xlim <- getGrid(seasonal)$x
+      ylim <- getGrid(seasonal)$y
       prd <- downscaleR:::redim(prd)
-      coordinates <- expand.grid(obs$xyCoords$x, obs$xyCoords$y)
-      ob <- array3Dto2Dmat(obsi$Data)
-      memind <- which(downscaleR:::getDim(seasonal)=="member")
-      timeind <- which(downscaleR:::getDim(seasonal)=="time")
+      coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
+      coordinates <- cbind(coordinates[,2], coordinates[,1])
+      ob <- array3Dto2Dmat(obs$Data)
+      memind <- which(downscaleR:::getDim(prd)=="member")
+      timeind <- which(downscaleR:::getDim(prd)=="time")
       
-      nmem <- dim(seasonal$Data)[memind]
-      ntime <- dim(seasonal$Data)[timeind]
-      se <- array(dim = c(nmem, ntime, length(seasonal$xyCoords$x) * length(seasonal$xyCoords$y)))
+      
+      nmem <- dim(prd$Data)[memind]
+      ntime <- dim(prd$Data)[timeind]
+      se <- array(dim = c(nmem, ntime, length(prd$xyCoords$x) * length(prd$xyCoords$y)))
       for(i in 1:nmem){
-            seasonalarray <- seasonal$Data[i,,,]
-            attr(seasonalarray, "dimensions") <-  attr(seasonal$Data, "dimensions")[-memind]
-            se[i,,] <- array3Dto2Dmat(seasonalarray)
+            prdarray <- prd$Data[i,,,]
+            attr(prdarray, "dimensions") <-  attr(prd$Data, "dimensions")[-memind]
+            se[i,,] <- array3Dto2Dmat(prdarray)
       }
-      naind <- which(!is.na(ob[1,]))
-      obna <- ob[,naind]
-      sena <- se[,,naind]
-      corna <- unname(as.matrix(coordinates[naind,]))
+      naind <- which(is.na(ob[1,]))
+      obna <- ob[,-naind]
+      sena <- se[,,-naind]
+      #       corna <- unname(as.matrix(coordinates[-naind,]))
       sl <- calculateReliability(obna, sena, nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05)
       message("[", Sys.time(), "] Calculating categories...")
       ## colores
@@ -123,22 +127,30 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
                         catname[ibins] <- "dangerous"
                   } 
             }
+            obsplot <- obs 
+            obsplot$Data[which(!is.na(obsplot$Data))] <- cat[ibins]
             if (diagrams) {
-                  ## mapa
-                  aux <- vector2matrix(rep(cat[ibins], 1, dim(corna)[1]), corna)
-                  
-                  if (!is.null(xlim) & !is.null(ylim)) {
-                        image(aux$xnod, aux$ynod, aux$data, xlim = xlim, 
-                              ylim = ylim, col = catcol[ibins], 
-                              main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
-                  } else if (is.null(xlim) | is.null(ylim)) {
-                        image(aux$xnod, aux$ynod, aux$data, xlim = c(min(corna[,1]), max(corna[,1])), 
-                              ylim = c(min(corna[,2]), max(corna[,2])), col = catcol[ibins], 
-                              main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
-                  }
+                  #                   ## mapa
+                  #                   aux <- rep(NA, nrow(coordinates))
+                  #                   aux[-naind] <- cat[ibins]
+                  #                   aux <- cbind(aux, coordinates)
+                  #                   
+                  #                   if (!is.null(xlim) & !is.null(ylim)) {
+                  #                         image(aux[,2], aux[,3], aux[,1], xlim = xlim, 
+                  #                               ylim = ylim, col = catcol[ibins], 
+                  #                               main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
+                  #                   } else if (is.null(xlim) | is.null(ylim)) {
+                  #                         image(aux$xnod, aux$ynod, aux$data, xlim = c(min(corna[,1]), max(corna[,1])), 
+                  #                               ylim = c(min(corna[,2]), max(corna[,2])), col = catcol[ibins], 
+                  #                               main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
+                  #                   }
+                  #                   map(add=T)
+                  #                   grid(col = "lightgray", lty = 2, lwd = 0.1)
+                  image(obsplot$xyCoords$x,obsplot$xyCoords$y, t(obsplot$Data[1,,]), 
+                        xlim = xlim, 
+                        ylim = ylim, col = catcol[ibins], 
+                        main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
                   map(add=T)
-                  grid(col = "lightgray", lty = 2, lwd = 0.1)
-                  
                   ## reliability diagram
                   x1 <- 1/nbins
                   y1 <- 1/nbins
@@ -178,9 +190,9 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
                   ## puntos del reliability diagram (escalados por el peso)
                   par(new = TRUE)
                   plot(c(0.1, 0.1), c(0.65, 0.8), pch = 19, cex = c(1,10), xlim = c(0,1), ylim = c(0,1),
-                                             xlab = "forecast prob.", ylab = "obs. freq.") 
-#                   plot(c(0.1, 0.1), c(0.65, 0.8), pch = 19, cex = c(1,10), xlim = c(0,1), ylim = c(0,1),
-#                        xlab = "forecast prob.", ylab = "obs. freq.") !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!cambiar tamaños -> frequencia del max y min
+                       xlab = "forecast prob.", ylab = "obs. freq.") 
+                  #                   plot(c(0.1, 0.1), c(0.65, 0.8), pch = 19, cex = c(1,10), xlim = c(0,1), ylim = c(0,1),
+                  #                        xlab = "forecast prob.", ylab = "obs. freq.") !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!cambiar tamaños -> frequencia del max y min
                   text(0.2, 0.8, sprintf("n=%d", n), cex=1.25, font=2, pos=4)
                   text(0.2, 0.65, "n=1", cex=1.25, font=2, pos=4)
                   par(new = TRUE)
@@ -200,10 +212,10 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
       result$sl_lower <- sl_lower
       result$sl_upper <- sl_upper
       message("[", Sys.time(), "] Done.")
-      result.grid <- seasonal
+      result.grid <- prd
       result.grid$ReliabilityCategories <- result
       attr(result.grid$ReliabilityCategories, "observationData") <- attr(obs, "dataset")
-return(result.grid)
+      return(result.grid)
 }
 
 
@@ -322,9 +334,10 @@ calculateReliability <- function(obs, prd, nbins = 3, nbinsprob = 10, nboot = 10
       # intercept_boot <- matrix(NA, nboot, nbins)
       message("[", Sys.time(), "] Computing bootstrapping...")
       for (iboot in 1:nboot){
-#             if (abs(iboot/50 - round(iboot/50)) < eps()) {
-#                   print(sprintf("... computing bootstrapping %d ...", iboot))
-#             }
+            print(iboot)
+            #             if (abs(iboot/50 - round(iboot/50)) < eps()) {
+            #                   print(sprintf("... computing bootstrapping %d ...", iboot))
+            #             }
             
             indmembperm <- sample(1:nmemb, nmemb, replace = TRUE)
             indyearperm <- sample(1:nyear, nyear, replace = TRUE)
@@ -607,7 +620,7 @@ vector2matrix <- function(data, coordinates) {
       
       for (ixnod in 1:length(xnod)) {
             for (iynod in 1:length(ynod)) { 
-                  indnod <- which(grid[, 1] == xnod[ixnod] & grid[, 2] == ynod[iynod])    
+                  indnod <- which(coordinates[, 1] == xnod[ixnod] & coordinates[, 2] == ynod[iynod])    
                   if (length(indnod) > 0) {
                         new.data[ixnod, iynod] <- data[indnod]
                   }

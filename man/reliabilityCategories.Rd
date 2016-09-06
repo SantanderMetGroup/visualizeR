@@ -5,7 +5,7 @@
 \title{Reliability categories of a probabilistic prediction.}
 \usage{
 reliabilityCategories(obs, prd, nbins = 3, nbinsprob = 10, nboot = 100,
-  sigboot = 0.05, diagrams = TRUE, xlim = NULL, ylim = NULL)
+  sigboot = 0.05, diagrams = TRUE)
 }
 \arguments{
 \item{obs}{Grid of observations}
@@ -22,11 +22,11 @@ reliabilityCategories(obs, prd, nbins = 3, nbinsprob = 10, nboot = 100,
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
 
+\item{nod}{Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)}
+
 \item{xlim}{Required if diagrams = TRUE. Limits for maps}
 
 \item{ylim}{Required if diagrams = TRUE. Limits for maps}
-
-\item{nod}{Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)}
 }
 \value{
 Same as prd but with an aditional list ($ReliabilityCategories) containing the following elements:
