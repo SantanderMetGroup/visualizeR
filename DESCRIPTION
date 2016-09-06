@@ -11,7 +11,9 @@ Imports:
     mapplots,
     abind,
     vioplot,
-    RCurl
+    RCurl,
+    maps,
+    verification
 Suggests:
     loadeR.ECOMS,
     loadeR

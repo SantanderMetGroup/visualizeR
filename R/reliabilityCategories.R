@@ -25,7 +25,7 @@
 #' @author R. Manzanas \& M.Iturbide
 # @import verification
 # @import plot3D
-# @import maps
+#' @import maps 
 
 
 
@@ -543,7 +543,7 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
 #' bincat: list with two elements:  
 #' bin: 3D-array of binary (0/1) observations, dimensions = (nbins, time, npoints)
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
-#'
+#' @import verification
 #' @author R. Manzanas \& M.Iturbide
 
 concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
