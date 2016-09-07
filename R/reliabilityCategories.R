@@ -36,8 +36,8 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
       if(!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)){
             stop("obs and prd are not spatially consistent. Try using function interpGrid from package downscaleR")
       }
-      xlim <- getGrid(seasonal)$x
-      ylim <- getGrid(seasonal)$y
+      xlim <- getGrid(prd)$x
+      ylim <- getGrid(prd)$y
       prd <- downscaleR:::redim(prd)
       coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
       coordinates <- cbind(coordinates[,2], coordinates[,1])
