@@ -31,7 +31,7 @@
 
 
 
-reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05, 
+reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot = 100, sigboot = 0.05, 
                                   diagrams = TRUE){ #, regions = NULL) {
       if(!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)){
             stop("obs and prd are not spatially consistent. Try using function interpGrid from package downscaleR")
@@ -55,10 +55,14 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 10, nboot = 
             se[i,,] <- array3Dto2Dmat(prdarray)
       }
       naind <- which(is.na(ob[1,]))
-      obna <- ob[,-naind]
-      sena <- se[,,-naind]
+      obna0 <- ob[,-naind]
+      sena0 <- se[,,-naind]
+      naind <- which(is.na(sena0[1,1,]))
+      obna <- obna0[,-naind]
+      sena <- sena0[,,-naind]
+      
       #       corna <- unname(as.matrix(coordinates[-naind,]))
-      sl <- calculateReliability(obna, sena, nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05)
+      sl <- calculateReliability(obna, sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
       message("[", Sys.time(), "] Calculating categories...")
       ## colores
       red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
