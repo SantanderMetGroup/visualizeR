@@ -58,11 +58,15 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
       obna0 <- ob[,-naind]
       sena0 <- se[,,-naind]
       naind <- which(is.na(sena0[1,1,]))
-      obna <- obna0[,-naind]
-      sena <- sena0[,,-naind]
-      
+      if(length(naind) != 0){
+            obna <- obna0[,-naind]
+            sena <- sena0[,,-naind]
+      }else{
+            obna <- obna0
+            sena <- sena0
+      }
       #       corna <- unname(as.matrix(coordinates[-naind,]))
-      sl <- calculateReliability(obna, sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
+      sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
       message("[", Sys.time(), "] Calculating categories...")
       ## colores
       red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
