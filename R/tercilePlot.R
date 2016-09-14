@@ -110,7 +110,7 @@ tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.p
       } else{
           cbar <- switch(color.pal, 
               "reds" <- c("#fff5f0", "#fff5f0", brewer.pal(8,"Reds")),
-              "bw" = rev(grey.colors(10), 
+              "bw" = rev(grey.colors(10)), 
               "ypb" = rev(c("#000066FF","#0000C1FF","#1600FFFF","#5D00FFFF","#A412EDFF","#EB3FC0FF","#FF6D92FF","#FF9A65FF","#FFC738FF","#FFF50AFF")))
          )
          brks <- c(seq(0,1,length=length(cbar)+1))
