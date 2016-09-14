@@ -61,7 +61,7 @@
 #' Atmospheri Science, Wiley, NY
 #'  
 
-tercilePlot <- function(mm.obj, obs, year.target, detrend = TRUE, color.pal = c("bw", "reds", "tcolor"), subtitle = NULL){
+tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.pal = c("bw", "reds", "tcolor"), subtitle = NULL){
       color.pal <- match.arg(color.pal, c("bw", "reds", "tcolor"))
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
@@ -71,9 +71,11 @@ tercilePlot <- function(mm.obj, obs, year.target, detrend = TRUE, color.pal = c(
         obs <- convertIntoS4(obs)
       }
       stopifnot(checkData(mm.obj, obs))
-      yy <- unique(getYearsAsINDEX.S4(mm.obj))      
-      if (!year.target %in% yy) {
-        stop("Target year outside temporal data range")
+      yy <- unique(getYearsAsINDEX.S4(mm.obj))  
+      if (!is.null(year.target)){
+        if (!year.target %in% yy) {
+          stop("Target year outside temporal data range")
+        }
       }
       # Detrend
       if (detrend){
@@ -93,7 +95,11 @@ tercilePlot <- function(mm.obj, obs, year.target, detrend = TRUE, color.pal = c(
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
       # Compute ROCSS
-      i.yy <- !yy == year.target # Remove year.target for the score calculation
+      if (!is.null(year.target)){
+        i.yy <- !yy == year.target # Remove year.target for the score calculation
+      } else{
+        i.yy <- yy == yy
+      }
       rocss.t.u <- rocss.fun(obs.terciles[i.yy,3], cofinogram.data[i.yy,3])
       rocss.t.m <- rocss.fun(obs.terciles[i.yy,2], cofinogram.data[i.yy,2])
       rocss.t.l <- rocss.fun(obs.terciles[i.yy,1], cofinogram.data[i.yy,1])
@@ -137,7 +143,7 @@ tercilePlot <- function(mm.obj, obs, year.target, detrend = TRUE, color.pal = c(
       }
       mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
       mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end), year.target)
+      title <- sprintf("%s, %s to %s", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end))
       mtext(title, side=3, line=-2, adj=0, cex=1.2, font=2)
       mtext (title)
       if (!is.null(subtitle)){
