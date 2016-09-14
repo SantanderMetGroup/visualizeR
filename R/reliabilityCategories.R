@@ -55,8 +55,13 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
             se[i,,] <- array3Dto2Dmat(prdarray)
       }
       naind <- which(is.na(ob[1,]))
-      obna0 <- ob[,-naind]
-      sena0 <- se[,,-naind]
+      if(length(naind) != 0){
+            obna0 <- ob[,-naind]
+            sena0 <- se[,,-naind]
+      }else{
+            obna0 <- ob
+            sena0 <- se
+      }
       naind <- which(is.na(sena0[1,1,]))
       if(length(naind) != 0){
             obna <- obna0[,-naind]
@@ -98,7 +103,7 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
       for (ibins in 1:nbins) {
             sl[ibins] <- slope[ibins]
             
-            aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot))
+            aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot), na.rm = T)
             slope_lower <- aux[[1]]
             slope_upper <- aux[[2]]
             rm(aux)
