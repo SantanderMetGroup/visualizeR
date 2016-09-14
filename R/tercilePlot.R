@@ -61,7 +61,7 @@
 #' Atmospheri Science, Wiley, NY
 #'  
 
-tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.pal = c("bw", "reds", "ypb" "tcolor"), subtitle = NULL){
+tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
       color.pal <- match.arg(color.pal, c("bw", "reds", "ypb", "tcolor"))
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
