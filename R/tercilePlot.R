@@ -11,8 +11,8 @@
 #'  included in the computation of the score (operational point of view). 
 #' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
-#'  \code{"reds"} for a white-red transition or \code{"tcolor"} for a colorbar for each tercile, blue-grey-red
-#'  for below, normal and above terciles, respectively.
+#'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
+#'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
@@ -62,7 +62,7 @@
 #'  
 
 tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.pal = c("bw", "reds", "tcolor"), subtitle = NULL){
-      color.pal <- match.arg(color.pal, c("bw", "reds", "tcolor"))
+      color.pal <- match.arg(color.pal, c("bw", "reds", "ypb", "tcolor"))
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
         mm.obj <- convertIntoS4(mm.obj)
@@ -107,10 +107,11 @@ tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.p
       if (color.pal=="tcolor"){
           t.color <- tercileBrewerColorRamp(10)     
           brks <- c(seq(0,1,length=nrow(t.color)+1))
-      } else {
+      } else{
           cbar <- switch(color.pal, 
               "reds" <- c("#fff5f0", "#fff5f0", brewer.pal(8,"Reds")),
-              "bw" = rev(grey.colors(10))
+              "bw" = rev(grey.colors(10), 
+              "ypb" = rev(c("#000066FF","#0000C1FF","#1600FFFF","#5D00FFFF","#A412EDFF","#EB3FC0FF","#FF6D92FF","#FF9A65FF","#FFC738FF","#FFF50AFF")))
          )
          brks <- c(seq(0,1,length=length(cbar)+1))
       }
