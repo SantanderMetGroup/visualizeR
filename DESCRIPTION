@@ -1,10 +1,10 @@
 Package: visualizeR
 Depends:
-    R(>= 3.1.0),
+    R(>= 0.1-0),
     sm
 Imports:
+    transformeR,
     methods,
-    downscaleR,
     fields,
     RColorBrewer,
     scales,
@@ -27,6 +27,7 @@ Authors@R: as.person(c(
     "Joaquin Bedia <bediaj@unican.es> [ctb]",
     "Max Tuni <max@predictia.es> [ctb]",
     "Sixto Herrera <sixto@predictia.es> [ctb]",
+    "Rodrigo Manzanas <rmanzanas@ifca.unican.es> [ctb]",
     "Antonio Cofino <antonio.cofino@unican.es> [ctb]",
     "Maialen Iturbide <miturbide@ifca.unican.es> [ctb]",
     "Jose Manuel Gutierrez <gutierjm@unican.es> [ctb]",

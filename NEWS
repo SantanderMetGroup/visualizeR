@@ -1,5 +1,5 @@
 visualizeR
 ==========
 
-* Embedded S4 class constructor
+* New function for reliability diagram, implementing the approach in Weisheimer and Palmer 2014 (DOI: 10.1098/rsif.2013.1162) 
 * Other minor bug fixes and enhancements
