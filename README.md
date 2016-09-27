@@ -5,7 +5,7 @@
 The recommended installation procedure is to use the `install_github` command from the devtools R package. 
 
 ```r
-devtools::install_github(c("SantanderMetGroup/transformeR, "SantanderMetGroup/visualizeR"))
+devtools::install_github(c("SantanderMetGroup/transformeR", "SantanderMetGroup/visualizeR"))
 ```
 Alternatively, you can download the sources from the [Releases Tab](https://github.com/SantanderMetGroup/visualizeR/releases)
 
