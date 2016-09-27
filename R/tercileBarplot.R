@@ -10,9 +10,10 @@
 #' @param year.target Year within the whole verification period to display the results for. This year is not
 #'  included in the computation of the score (operational point of view).
 #' @param score.threshold Threshold to remark high positive score values in the figure.
+#' @param detrend Logical. Should data be detrended prior to verification? Default to \code{TRUE}.
 #' 
 #' @importFrom fields image.plot
-#' @importFrom downscaleR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
 #'   
 #' @export
 #' 
@@ -50,7 +51,7 @@
 #'  Atmospheri Science, Wiley, NY
 #'
 
-tercileBarplot <- function(mm.obj, obs, year.target, detrend=TRUE, score.threshold=NULL) {
+tercileBarplot <- function(mm.obj, obs, year.target, detrend = TRUE, score.threshold=NULL) {
   # Check input datasets
   if (isS4(mm.obj)==FALSE){
     mm.obj <- convertIntoS4(mm.obj)

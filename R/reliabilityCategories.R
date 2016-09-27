@@ -29,7 +29,10 @@
 
 
 
-
+#' @importFrom transformeR redim getDim
+#' @importFrom maps map
+#' @importFrom graphics image
+#' @keywords internal
 
 reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot = 100, sigboot = 0.05, 
                                   diagrams = TRUE){ #, regions = NULL) {
@@ -38,12 +41,12 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
       }
       xlim <- getGrid(prd)$x
       ylim <- getGrid(prd)$y
-      prd <- downscaleR:::redim(prd)
+      prd <- redim(prd)
       coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
       coordinates <- cbind(coordinates[,2], coordinates[,1])
       ob <- array3Dto2Dmat(obs$Data)
-      memind <- which(downscaleR:::getDim(prd)=="member")
-      timeind <- which(downscaleR:::getDim(prd)=="time")
+      memind <- which(getDim(prd)=="member")
+      timeind <- which(getDim(prd)=="time")
       
       
       nmem <- dim(prd$Data)[memind]
@@ -246,7 +249,7 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
 #' @param nbins (optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3
 #' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
-#' @param sigboot
+#' @param sigboot sigboot
 #'
 #' @return List with the following elements:
 #' nbins = nbins
@@ -268,8 +271,10 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
 #' 
 #' @author R. Manzanas \& M.Iturbide
 #' @importFrom abind abind
-#' @importFrom downscaleR makeMultiGrid
-# @import verification
+#' @importFrom transformeR makeMultiGrid
+#' @import verification
+#' 
+#' @keywords internal
 
 
 
@@ -477,16 +482,16 @@ obs2bin <- function(obs, nbins){
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param prd 3D-array of predictions, dimensions = (member, time, npoints)
-#' @param prd4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
-#' @param dimensions (member, time, npoints)
 #' @param nbins Number of categories (3 for terciles)
-#'
+#' @param prd4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
+
 #' @return 
 #' prdprob: 3D-array of probabilistic predictions, dimensions = (nbins, time, npoints)
 #' @note For prd4cats, categories are calculated at model- (not at member-) level
 #' @author R. Manzanas \& M.Iturbide
+#' @keywords internal
 
-prd2prob <- function(prd, nbins, prd4cats = NULL){
+prd2prob <- function(prd, nbins, prd4cats = NULL) {
       
       prob <- array(NA, c(nbins, dim(prd)[2], dim(prd)[3]))
       cat <- array(NA, c(dim(prd)[1], dim(prd)[2], dim(prd)[3]))
@@ -551,6 +556,7 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
 #' 
 #' @param obs 2D-matrix of observations, dimensions = (time, npoints)
 #' @param nbins number of categories (3 for terciles)
+#' @param nbinsprob nbinsprob
 #'
 #' @return 
 #' bincat: list with two elements:  
@@ -558,6 +564,7 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 #' @import verification
 #' @author R. Manzanas \& M.Iturbide
+#' @keywords internal
 
 concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
       # Description
