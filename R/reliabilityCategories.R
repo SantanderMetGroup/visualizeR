@@ -1,9 +1,7 @@
-
 #' @title Reliability categories of a probabilistic prediction.
 #' 
-#' @description This function calculates (and draws) 
-#' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014:
-#' http://rsif.royalsocietypublishing.org/content/11/96/20131162
+#' @description Calculates (and draws) 
+#' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
 #' 
 #' @param obs Grid of observations
 #' @param prd Grid of predictions 
@@ -12,9 +10,9 @@
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
 #' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.05
 #' @param diagrams Logical (default = TRUE). Plotting results.  
-#' @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
-#' @param xlim Required if diagrams = TRUE. Limits for maps
-#' @param ylim Required if diagrams = TRUE. Limits for maps
+# @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
+# @param xlim Required if diagrams = TRUE. Limits for maps
+# @param ylim Required if diagrams = TRUE. Limits for maps
 #' @return Same as prd but with an aditional list ($ReliabilityCategories) containing the following elements:
 #' catcol: color of the reliability category
 #' catname: reliability category
@@ -26,18 +24,19 @@
 # @import verification
 # @import plot3D
 #' @import maps 
+#' @importFrom transformeR getGrid redim getDim
+#' @importFrom graphics plot.new abline polygon text grid title
+#' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
 
-
-
-#' @importFrom transformeR redim getDim
-#' @importFrom maps map
-#' @importFrom graphics image
-#' @keywords internal
-
-reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot = 100, sigboot = 0.05, 
-                                  diagrams = TRUE){ #, regions = NULL) {
-      if(!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)){
-            stop("obs and prd are not spatially consistent. Try using function interpGrid from package downscaleR")
+reliabilityCategories <- function(obs,
+                                  prd,
+                                  nbins = 3,
+                                  nbinsprob = 100,
+                                  nboot = 100,
+                                  sigboot = 0.05, 
+                                  diagrams = TRUE) { #, regions = NULL) {
+      if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
+            stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
       xlim <- getGrid(prd)$x
       ylim <- getGrid(prd)$y
@@ -207,8 +206,7 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
                   par(new = TRUE)
                   plot(c(0.1, 0.1), c(0.65, 0.8), pch = 19, cex = c(1,10), xlim = c(0,1), ylim = c(0,1),
                        xlab = "forecast prob.", ylab = "obs. freq.") 
-                  #                   plot(c(0.1, 0.1), c(0.65, 0.8), pch = 19, cex = c(1,10), xlim = c(0,1), ylim = c(0,1),
-                  #                        xlab = "forecast prob.", ylab = "obs. freq.") !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!cambiar tamaños -> frequencia del max y min
+                  
                   text(0.2, 0.8, sprintf("n=%d", n), cex=1.25, font=2, pos=4)
                   text(0.2, 0.65, "n=1", cex=1.25, font=2, pos=4)
                   par(new = TRUE)
@@ -262,50 +260,17 @@ reliabilityCategories <- function(obs, prd,  nbins = 3, nbinsprob = 100, nboot =
 #' slope = slope of the reliability line, per category (e.g. per tercile)
 #' slope_boot = nboot*nbins matrix, with all the boostrapped values for the slope of the reliability line 
 #' 
-#' @references
-#' Lawson, B.D. & Armitage, O.B., 2008. Weather guide for the Canadian Forest Fire Danger Rating System. Northern Forestry Centre, Edmonton (Canada).
-#' 
-#' van Wagner, C.E., 1987. Development and structure of the Canadian Forest Fire Weather Index (Forestry Tech. Rep. No. 35). Canadian Forestry Service, Ottawa, Canada.
-#' 
-#' van Wagner, C.E., Pickett, T.L., 1985. Equations and FORTRAN program for the Canadian forest fire weather index system (Forestry Tech. Rep. No. 33). Canadian Forestry Service, Ottawa, Canada.
-#' 
 #' @author R. Manzanas \& M.Iturbide
 #' @importFrom abind abind
 #' @importFrom transformeR makeMultiGrid
 #' @import verification
-#' 
 #' @keywords internal
 
 
 
-# Description:
-# This function provides the object needed by "calculateReliability_v2.R" 
-# for calculating the reliability categories of a probabilistic prediction.
-# Usage:
-# caculateReliability(obs, prd, varargin) 
-# Arguments:
-# obs: m*n matrix of observations (m = years, n = locations)
-# prd: m*n*l matrix of predictions (m = members, n = years, l = locations)
-# nbins (optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3
-# nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
-# nboot: number of samples considered for bootstrapping. By default nboot = 100
-# Value: List with the following elements:
-# nbins = nbins
-# nyear = number of years
-# npoint = number of locations
-# n = nyear*npoint
-# prdprob = probability bins (center), per category (e.g. per tercile)
-# obsfreq = observed frequency, per category (e.g. per tercile)
-# prdfreq = predicted frequency, per category (e.g. per tercile)
-# slope = slope of the reliability line, per category (e.g. per tercile)
-# slope_boot = nboot*nbins matrix, with all the boostrapped values for the slope of the reliability line
-##
 
 
-
-
-
-calculateReliability <- function(obs, prd, nbins = 3, nbinsprob = 10, nboot = 100, sigboot = 0.05) {
+calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot) {
       if (!(dim(obs)[1] == dim(prd)[2] & dim(obs)[2] == dim(prd)[3])) {
             stop("Observations and predictions are not congruent in size")
       }
@@ -440,6 +405,7 @@ calculateReliability <- function(obs, prd, nbins = 3, nbinsprob = 10, nboot = 10
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 #'
 #' @author R. Manzanas \& M.Iturbide
+#' @keywords internal
 
 
 obs2bin <- function(obs, nbins){
@@ -459,7 +425,7 @@ obs2bin <- function(obs, nbins){
                         cat[indcat, inod] <- ibins
                   }
             }, error = function(ex) {
-                  message("Imposible calcular categorias el punto de grid %d", inod)
+                  message("Imposible calcular categorias en el punto de grid %d", inod)
             })
       }
       rm(auxobscat)
@@ -482,38 +448,38 @@ obs2bin <- function(obs, nbins){
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param prd 3D-array of predictions, dimensions = (member, time, npoints)
-#' @param nbins Number of categories (3 for terciles)
 #' @param prd4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
-
+#' @param dimensions (member, time, npoints)
+#' @param nbins Number of categories (3 for terciles)
+#'
 #' @return 
 #' prdprob: 3D-array of probabilistic predictions, dimensions = (nbins, time, npoints)
 #' @note For prd4cats, categories are calculated at model- (not at member-) level
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-prd2prob <- function(prd, nbins, prd4cats = NULL) {
+prd2prob <- function(prd, nbins, prd4cats = NULL){
       
       prob <- array(NA, c(nbins, dim(prd)[2], dim(prd)[3]))
       cat <- array(NA, c(dim(prd)[1], dim(prd)[2], dim(prd)[3]))
       
       for (inod in 1:dim(prd)[3]) {
+            ## categorias prd
+            ## calculo los terciles de la prediccion a nivel de modelo (concateno todos los miembros)      
+            if (!is.null(prd4cats)) {
+                  tmpprd4catscat <- lapply(1:dim(prd4cats)[1], function(x) prd4cats[x, , inod])      
+                  tmpprd4catscat <- do.call("c", tmpprd4catscat)
+            }      
+            tmpprdcat <- lapply(1:dim(prd)[1], function(x) prd[x, , inod])
+            tmpprdcat <- do.call("c", tmpprdcat)
+            
+            if (!is.null(prd4cats)) {
+                  catsprd <- quantile(tmpprd4catscat, 0:nbins/nbins, na.rm = TRUE) 
+                  rm(tmpprd4catscat)
+            } else {
+                  catsprd <- quantile(tmpprdcat, 0:nbins/nbins, na.rm = TRUE) 
+            }
             tryCatch({
-                  ## categorias prd
-                  ## calculo los terciles de la prediccion a nivel de modelo (concateno todos los miembros)      
-                  if (!is.null(prd4cats)) {
-                        tmpprd4catscat <- lapply(1:dim(prd4cats)[1], function(x) prd4cats[x, , inod])      
-                        tmpprd4catscat <- do.call("c", tmpprd4catscat)
-                  }      
-                  tmpprdcat <- lapply(1:dim(prd)[1], function(x) prd[x, , inod])
-                  tmpprdcat <- do.call("c", tmpprdcat)
-                  
-                  if (!is.null(prd4cats)) {
-                        catsprd <- quantile(tmpprd4catscat, 0:nbins/nbins, na.rm = TRUE) 
-                        rm(tmpprd4catscat)
-                  } else {
-                        catsprd <- quantile(tmpprdcat, 0:nbins/nbins, na.rm = TRUE) 
-                  }
-                  
                   catsprd <- quantile2disc(tmpprdcat, catsprd)
                   rm(tmpprdcat)
                   catsprd$mids <- sort(catsprd$mids)
@@ -532,11 +498,13 @@ prd2prob <- function(prd, nbins, prd4cats = NULL) {
                   cat[, , inod] <- tmp2
                   rm(tmp2)
             }, error = function(ex) {
-                  message("Problemas en el punto de grid %d, imposible calcular categorias", inod)
+                  message("Problemas en el punto de grid, imposible calcular categorias. Eliminando punto del analisis.", inod)
+                  nmemb<-dim(prd)[2]
+                  ntime<-dim(prd)[1]
+                  cat[, , inod] <- matrix(NA,nmemb,ntime)
             })
       }  
       rm(auxprd)
-      
       probcat <- list()
       probcat$prob <- prob
       probcat$cat <- cat
@@ -581,7 +549,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
       # (call the attribute.R function from verification R-package: 
       # http://cran.r-project.org/web/packages/verification/verification.pdf)
       
-#       require(verification)
+      #       require(verification)
       
       dataRelDiagram <- list()
       
@@ -598,16 +566,16 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
       
       for (ibins in 1:nbins) {    
             obsbinconca <- as.vector(obsbin[ibins, ,])
-            prdprobconca <- as.vector(prdprob[ibins, ,])
+            prdprobconca <- as.vector(prdprob[ibins, ,])  
+            # nodos sin NAs
+            indnona = unique(c(which(!is.na(obsbinconca)), which(!is.na(prdprobconca))))  
+            aux <- verify(obsbinconca[indnona], 
+                          prdprobconca[indnona], 
+                          obs.type = "binary", frcst.type = "prob",
+                          thresholds = seq(0, 1, 1/nbinsprob), show = FALSE)
+            aux$n <- length(length(indnona))
+            eval(parse(text = sprintf("dataRelDiagram$cat%d = aux",ibins)))   
             
-            if (identical(which(is.na(obsbinconca)), which(is.na(prdprobconca)))) {
-                  aux <- verify(obsbinconca[which(is.na(obsbinconca) == FALSE)], 
-                                prdprobconca[which(is.na(prdprobconca) == FALSE)], 
-                                obs.type = "binary", frcst.type = "prob",
-                                thresholds = seq(0, 1, 1/nbinsprob), show = FALSE)
-                  aux$n <- length(length(which(is.na(obsbinconca) == FALSE)))
-                  eval(parse(text = sprintf("dataRelDiagram$cat%d = aux",ibins)))   
-            }  
       }
       
       rm(obsbin, obsbinconca, prdprob, prdprobconca)
@@ -631,6 +599,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
 #' ynod: vector (length my) of latitudes
 #'
 #' @author R. Manzanas \& M.Iturbide
+#' @keywords internal
 
 vector2matrix <- function(data, coordinates) {
       xnod <- sort(unique(coordinates[, 1]))
