@@ -12,6 +12,8 @@ prd2prob(prd, nbins, prd4cats = NULL)
 \item{nbins}{Number of categories (3 for terciles)}
 
 \item{prd4cats}{Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)}
+
+\item{dimensions}{(member, time, npoints)}
 }
 \value{
 prdprob: 3D-array of probabilistic predictions, dimensions = (nbins, time, npoints)

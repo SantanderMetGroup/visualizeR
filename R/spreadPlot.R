@@ -18,6 +18,7 @@
 #' 
 #' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
 #' @importFrom stats filter
+#' @importFrom graphics lines
 #' @import sm
 #' @import vioplot 
 #'   

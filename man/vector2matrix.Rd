@@ -23,4 +23,5 @@ Function to convert a vector of data into a matrix
 \author{
 R. Manzanas \& M.Iturbide
 }
+\keyword{internal}
 

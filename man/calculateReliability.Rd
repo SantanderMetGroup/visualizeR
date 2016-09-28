@@ -4,8 +4,8 @@
 \alias{calculateReliability}
 \title{Generate object needed by function reliability}
 \usage{
-calculateReliability(obs, prd, nbins = 3, nbinsprob = 10, nboot = 100,
-  sigboot = 0.05)
+calculateReliability(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
+  nboot = nboot, sigboot = sigboot)
 }
 \arguments{
 \item{obs}{m*n matrix of observations (m = years, n = locations)}
@@ -38,13 +38,6 @@ for calculating the reliability categories of a probabilistic prediction.
 }
 \author{
 R. Manzanas \& M.Iturbide
-}
-\references{
-Lawson, B.D. & Armitage, O.B., 2008. Weather guide for the Canadian Forest Fire Danger Rating System. Northern Forestry Centre, Edmonton (Canada).
-
-van Wagner, C.E., 1987. Development and structure of the Canadian Forest Fire Weather Index (Forestry Tech. Rep. No. 35). Canadian Forestry Service, Ottawa, Canada.
-
-van Wagner, C.E., Pickett, T.L., 1985. Equations and FORTRAN program for the Canadian forest fire weather index system (Forestry Tech. Rep. No. 33). Canadian Forestry Service, Ottawa, Canada.
 }
 \keyword{internal}
 

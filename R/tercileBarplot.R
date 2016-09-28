@@ -14,6 +14,7 @@
 #' 
 #' @importFrom fields image.plot
 #' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom graphics barplot
 #'   
 #' @export
 #' 

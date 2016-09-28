@@ -21,12 +21,6 @@ reliabilityCategories(obs, prd, nbins = 3, nbinsprob = 100, nboot = 100,
 \item{sigboot}{Optional. Confidence interval for the reliability line. By default sigboot = 0.05}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
-
-\item{nod}{Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)}
-
-\item{xlim}{Required if diagrams = TRUE. Limits for maps}
-
-\item{ylim}{Required if diagrams = TRUE. Limits for maps}
 }
 \value{
 Same as prd but with an aditional list ($ReliabilityCategories) containing the following elements:
@@ -37,12 +31,13 @@ sl_lower: lower bound confidence for slope (according to "sigboot")
 sl_lower: upper bound confidence for slope (according to "sigboot")
 }
 \description{
-This function calculates (and draws) 
-reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014:
-http://rsif.royalsocietypublishing.org/content/11/96/20131162
+Calculates (and draws) 
+reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
 }
 \author{
 R. Manzanas \& M.Iturbide
 }
-\keyword{internal}
+\references{
+Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
+}
 

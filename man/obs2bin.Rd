@@ -23,4 +23,5 @@ for calculating the reliability categories of a probabilistic prediction.
 \author{
 R. Manzanas \& M.Iturbide
 }
+\keyword{internal}
 
