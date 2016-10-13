@@ -552,8 +552,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
       #       require(verification)
       
       dataRelDiagram <- list()
-      
-      if (identical(dim(obsbin), dim(prdprob))) {
+      if (identical(as.vector(dim(obsbin)), as.vector(dim(prdprob)))){
             nbins <- dim(obsbin)[1]
             nyear <- dim(obsbin)[2]
             npoint <- dim(obsbin)[3]
