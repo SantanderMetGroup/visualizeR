@@ -408,7 +408,7 @@ MrQuantile <- function(obj, k=NULL){
       count <- seq(1,length(k)*n.var,length(k))
       newvar <- character(length = 0)
 #       mar <- setdiff(1:length(dim(obj.Data[1,,,,])), which(dim(obj.Data[1,,,,])==dim(obj.Data)[getDimIndex(obj, "time")]))  
-      mar <- getDimIndex(obj, "time") - 1 
+      mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time") - 1)
       for (ivar in 1:n.var){ 
         if (is.null(dim(obj.Data[1,,,,]))){
           arr[count[ivar]:(count[ivar]+length(k)-1),,,,] <- quantile(obj.Data[ivar,,,,], probs = k, na.rm = TRUE)
