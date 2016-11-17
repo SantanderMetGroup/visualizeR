@@ -173,7 +173,6 @@ reliabilityCategories <- function(obs,
                   y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
                   a <- (y2-y1)/(x2-x1)
                   b <- y1-((x1*(y2-y1))/(x2-y1))
-                  
                   plot.new()
                   abline(b, a, col = "black", lty = 3)
                   polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
