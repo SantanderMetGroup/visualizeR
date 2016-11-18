@@ -10,15 +10,25 @@ alpha <- function(col, alpha){
 #' @keywords internal
 #' @importFrom stats lm
 
-detrend <- function(x) {
+detrend <- function(x,tt,y=NULL,tty=NULL) { #############aniadir otro flag para que calcule los residuos de forecast
+  #tt <- as.POSIXct(tt)
+  tt <- as.numeric(as.Date(tt))
   if (all(is.na(x))) {
-    rep(NA, length(x))
+    xd <- rep(NA, length(x))
   } else if (any(is.na(x))){ 
-    x2 <- rep(NA,length(x))
-    x2[!is.na(x)]<-lm(x ~ I(1:length(x)))$resid
-    x2
+    xd <- rep(NA,length(x))
+    mod <- lm(x ~ tt)
+    xd[!is.na(x)]<-mod$residuals
   } else { 
-    lm(x ~ I(1:length(x)))$resid
+    mod <- lm(x ~ tt)
+    xd <- mod$residuals
+  }
+  if (!is.null(y) & !is.null(tty) & !all(is.na(x))){
+    tty <- as.numeric(as.Date(tty))
+    yd <- y-(coef(mod)[1]+tty*coef(mod)[2])
+    return(yd)
+  } else{
+    return(xd)
   }
 } 
 
@@ -253,7 +263,7 @@ checkData <- function(mm.obj, obs) {
   if(isS4(mm.obj)==TRUE){
     if (!class(mm.obj)[1]=="MrEnsemble") {
       vec <- c(vec,FALSE)
-      message("The input data for forecasts is not a multimember field ")
+      message("The input data for hindcast is not a multimember field ")
     }
     if (length(getVarName(mm.obj))>1) {
       vec <- c(vec,FALSE)
@@ -276,12 +286,12 @@ checkData <- function(mm.obj, obs) {
         if (diff.Date(mm.dates$yday)[1]>27 & diff.Date(obs.dates$yday)[1]>27){
           if (!identical(obs.dates$mon, mm.dates$mon) || !identical(obs.dates$year, mm.dates$year)) {
             vec <- c(vec,FALSE)
-            message("Forecast and verifying observations are not coincident in time")
+            message("Hindcast and verifying observations are not coincident in time")
           }  
         } else{
           if (!identical(unique(obs.dates$yday), unique(mm.dates$yday)) || !identical(unique(obs.dates$year), unique(mm.dates$year))) {
             vec <- c(vec,FALSE)  
-            message("Forecast and verifying observations are not coincident in time")
+            message("Hindcast and verifying observations are not coincident in time")
           }  
         }
       } else{
@@ -356,15 +366,21 @@ seasMean <- function(obj) {
       yrs <- getYearsAsINDEX.S4(obj)
       yy <- unique(yrs)
       margin <- c(getDimIndex(obj,"var"), getDimIndex(obj,"member"), getDimIndex(obj,"y"), getDimIndex(obj,"x"))
-      arr <- apply(getData(obj), MARGIN = margin,
+      arr <- apply(obj.Data, MARGIN = margin,
                    FUN = function(x) {tapply(x, INDEX = yrs, FUN = mean, na.rm = TRUE)}
       )
+      newdim <- c(length(yy), getCountIndex(obj,"var"), getCountIndex(obj,"member"), getCountIndex(obj,"x"), getCountIndex(obj,"y"))
+      dim(arr) <- newdim
       dimnames(arr)<-NULL
-      newdims <- c("time", obj.dimNames[margin])
-      arr <- aperm(arr, match(obj.dimNames, newdims))  
+      newdimNames <- c("time", obj.dimNames[margin])
+      arr <- aperm(arr, match(obj.dimNames, newdimNames))  
       attr(arr, "dimensions") <- obj.dimNames
       dates.start.index <- which(duplicated(yrs)==FALSE)
-      dates.end.index <- c(dates.start.index[2:length(dates.start.index)]-1,length(yrs))
+      if (length(yy)==1){
+        dates.end.index <- length(yrs)
+      } else {
+        dates.end.index <- c(dates.start.index[2:length(dates.start.index)]-1,length(yrs))
+      }
       obj.Dates$start <- getDates(obj)$start[dates.start.index]
       obj.Dates$end <- getDates(obj)$end[dates.end.index] 
       slot(obj, "Data") <- arr
@@ -438,13 +454,16 @@ MrQuantile <- function(obj, k=NULL){
 
 #' @title Get exceedance probabilities from a S4 object
 #' @description Get exceedance probabilities from a S4 object with the dimensions c("var", "member", "time", "y", "x")
-#' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
+#' @param obj S4 object (hindcast or forecast) with dimensions c("var", "member", "time", "y", "x") 
+#' it can be a station, field, multi-member field, etc. Probabilities will be computed for this object.
+#' @param obj2 same S4 object (hindcast) as obj. The default is NULL. The cuantiles from obj2 are used to compute 
+#' the obj probabilities. 
 #' @param nbins number of bins derived from the quantiles selected (by default nbins=3, terciles)
 #' @return A S4 object with the exceedance probabilities. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
 
-QuantileProbs <- function(obj, nbins=3){
+QuantileProbs <- function(obj, obj2=NULL, nbins=3){
   if (isS4(obj)==TRUE){
     obj.Data <- getData(obj)
     obj.dimNames <- attr(obj.Data, "dimensions")
@@ -456,7 +475,15 @@ QuantileProbs <- function(obj, nbins=3){
       n.dates <- getCountIndex(obj,"time")
       n.y <- getCountIndex(obj,"y")
       n.x <- getCountIndex(obj,"x")
-      quantiles <- MrQuantile(obj, k)
+      if (!is.null(obj2)){
+        if (isS4(obj2)==TRUE){
+          quantiles <- MrQuantile(obj2, k)
+        } else{
+          stop("The input data is not a S4 object")   
+        }
+      } else {
+        quantiles <- MrQuantile(obj, k)
+      }
       quantiles.Data <- getData(quantiles)
       probs <- array(NA, c(nbins*n.var, 1, n.dates, n.y, n.x))
       count <-  seq(1,nbins*n.var,nbins)
@@ -473,12 +500,21 @@ QuantileProbs <- function(obj, nbins=3){
               probs[count[ivar]+nbins-1,1,,iy,ix] <- obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix] 
               probs <- probs*1
             } else { 
-              n.mem.nn <- colSums(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
-              probs[count[ivar],1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
-              for (ibins in 1:(nbins-2)){
-                probs[count[ivar]+ibins,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar]+ibins,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
+              if (n.dates==1){
+                n.mem.nn <- sum(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
+                probs[count[ivar],1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], na.rm=T)/n.mem.nn
+                for (ibins in 1:(nbins-2)){
+                  probs[count[ivar]+ibins,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar]+ibins,,,iy,ix], na.rm=T)/n.mem.nn
+                }
+                probs[count[ivar]+nbins-1,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], na.rm=T)/n.mem.nn
+              } else {
+                n.mem.nn <- colSums(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
+                probs[count[ivar],1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
+                for (ibins in 1:(nbins-2)){
+                  probs[count[ivar]+ibins,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar]+ibins,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
+                }
+                probs[count[ivar]+nbins-1,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
               }
-              probs[count[ivar]+nbins-1,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
             }        
           }
         }
@@ -510,33 +546,32 @@ QuantileProbs <- function(obj, nbins=3){
 #' @export
 
 detrend.forecast <- function(obj){
-  if (isS4(obj)==TRUE){
-    obj.Data <- getData(obj)
-    obj.dimNames <- attr(obj.Data, "dimensions")
-    if (identical(obj.dimNames, c("var", "member", "time", "y", "x"))) {
-      obj.Dates <- getDates(obj)
-      obj.Variable <- getVariable(obj)
-      obj.xyCoords <- getxyCoords(obj)
-      n.var <- getCountIndex(obj,"var")
-      n.mem <- getCountIndex(obj,"member")    
-      for (ivar in 1:n.var){  
-        aux.list <- lapply(1:n.mem, function(x) {
-          arr <- array(obj.Data[ivar,x,,,], dim(obj.Data)[-1:-2])
-          attr(arr, "dimensions") <- c("time", "lat", "lon")
-          mat <- array3Dto2Dmat(arr)
-          aux <- apply(mat, 2, detrend)
-          mat2Dto3Darray(aux, obj.xyCoords$x, obj.xyCoords$y)
-        })
-        obj.Data[ivar,,,,] <- unname(do.call("abind", c(aux.list, along = -1)))
-      }
-      slot(obj, "Data") <- obj.Data
-      slot(obj, "Transformation") <- c(getTransformation(obj), "detrend")
-      return(obj)
-    } else {
-      stop("Invalid input data array. Dimensions should be 'var', 'member', 'time', 'y', 'x'")
-    } 
-  } else{
-    stop("The input data is not a S4 object")    
+  if (isS4(obj)==FALSE){
+    obj <- convertIntoS4(obj)
+  }
+  obj.Data <- getData(obj)
+  obj.dimNames <- attr(obj.Data, "dimensions")
+  if (identical(obj.dimNames, c("var", "member", "time", "y", "x"))) {
+    obj.Dates <- getDates(obj)
+    obj.Variable <- getVariable(obj)
+    obj.xyCoords <- getxyCoords(obj)
+    n.var <- getCountIndex(obj,"var")
+    n.mem <- getCountIndex(obj,"member")    
+    for (ivar in 1:n.var){  
+      aux.list <- lapply(1:n.mem, function(x) {
+        arr <- array(obj.Data[ivar,x,,,], dim(obj.Data)[-1:-2])
+        attr(arr, "dimensions") <- c("time", "lat", "lon")
+        mat <- array3Dto2Dmat(arr)
+        aux <- apply(mat, 2, detrend, tt=obj.Dates$start)
+        mat2Dto3Darray(aux, obj.xyCoords$x, obj.xyCoords$y)
+      })
+      obj.Data[ivar,,,,] <- unname(do.call("abind", c(aux.list, along = -1)))
+    }
+    slot(obj, "Data") <- obj.Data
+    slot(obj, "Transformation") <- c(getTransformation(obj), "detrend")
+    return(obj)
+  } else {
+    stop("Invalid input data array. Dimensions should be 'var', 'member', 'time', 'y', 'x'")
   } 
 }    
 

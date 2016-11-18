@@ -43,7 +43,7 @@
 #' 
 #' @family VisualizeR
 
-spreadPlot <- function(mm.obj, year.target, detrend = TRUE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
+spreadPlot <- function(mm.obj, year.target, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
      # Check data temporal scale. Daily or subdaily required.
      mm.dates <-as.POSIXlt(mm.obj$Dates$start)
      if (diff.Date(mm.dates$mday)[1]==0){

@@ -4,19 +4,20 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
+#' @param mm.obj A multi-member list with hindcast, either a field or a multi-member 
 #' station object as a result of downscaling of a forecast using station data. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
-#' @param year.target Year within the whole verification period to display the results for. This year is not
-#'  included in the computation of the score (operational point of view). 
+#' @param forecast A multi-member list with forecasts, either a field or a multi-member 
+#' station object as a result of downscaling of a forecast using station data. Default is NULL. See details. 
+#' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
-#' @param subtitle String to include a subtitle bellow the title. Default is NULL.
+#' @param subtitle String to include a subtitle below the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray getYearsAsINDEX
 #' @importFrom abind abind
 #' @importFrom fields image.plot
 #' @importFrom grDevices grey.colors
@@ -26,7 +27,7 @@
 #' 
 #' @details 
 #'  
-#' For each member, the daily predictions are averaged to obtain a single seasonal forecast. For
+#' For each member, the daily hindcasts are averaged to obtain seasonal values. For
 #' rectangular spatial domains (i.e., for fields), the spatial average is first computed (with a warning) to obtain a
 #' unique series for the whole domain. The corresponding terciles for each ensemble member are then computed
 #' for the analysis period. Thus, each particular member and season, are categorized into three categories (above, 
@@ -34,13 +35,16 @@
 #' year by year by considering the number of members falling within each category. This probability is represented by the
 #' colorbar. For instance, probabilities below 1/3 are very low, indicating that a minority of the members 
 #' falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members
-#' falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the white circles.
+#' falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the 
+#' white circles. If the forecast object is not NULL, then the probabilities for this season are also ploted next to the 
+#' hindcast results.  
 #'  
-#' Finally, the ROC Skill Score (ROCSS) is indicated in the secondary (right) Y axis. For each tercile, it provides a 
-#' quantitative measure of the forecast skill, and it is commonly used to evaluate the performance of probabilistic systems
-#' (Joliffe and Stephenson 2003). The value of this score ranges from 1 (perfect forecast system) to -1 
-#' (perfectly bad forecast system). A value zero indicates no skill compared with a random prediction. The target year 
-#' is not included in the computation of the score (operational point of view). 
+#' Finally, the ROC Skill Score (ROCSS) is computed for the hindcasts. It is indicated in the secondary (right) Y axis. 
+#' For each tercile, it provides a quantitative measure of the forecast skill, and it is commonly used to evaluate the 
+#' performance of probabilistic systems (Joliffe and Stephenson 2003). The value of this score ranges from 1 
+#' (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill compared with a random 
+#' prediction. If year.target is not NULL, this year is not included in the computation of the score (operational point 
+#' of view). 
 #'  
 #' In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 #' for each member prior to data analysis, with a warning.   
@@ -61,8 +65,20 @@
 #' Atmospheri Science, Wiley, NY
 #'  
 
-tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
+tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
       color.pal <- match.arg(color.pal, c("bw", "reds", "ypb", "tcolor"))
+      yy <- unique(getYearsAsINDEX(mm.obj))  
+      if (!is.null(year.target)){
+        if (!year.target %in% yy) {
+          stop("Target year outside temporal data range")
+        }
+      }
+      if (is.null(forecast) & !is.null(year.target)){
+        forecast <- subsetGrid(mm.obj, years=year.target)
+        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=year.target])
+        obs <- subsetGrid(obs, years=yy[yy!=year.target])
+        yy <- yy[yy!=year.target]
+      }
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
         mm.obj <- convertIntoS4(mm.obj)
@@ -71,10 +87,11 @@ tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.p
         obs <- convertIntoS4(obs)
       }
       stopifnot(checkData(mm.obj, obs))
-      yy <- unique(getYearsAsINDEX.S4(mm.obj))  
-      if (!is.null(year.target)){
-        if (!year.target %in% yy) {
-          stop("Target year outside temporal data range")
+      if (!is.null(forecast)){
+        yy.forecast <- unique(getYearsAsINDEX(forecast))
+        year.target <- NULL
+        if (isS4(forecast)==FALSE){
+          forecast <- convertIntoS4(forecast)
         }
       }
       # Detrend
@@ -95,14 +112,16 @@ tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.p
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
       # Compute ROCSS
-      if (!is.null(year.target)){
-        i.yy <- !yy == year.target # Remove year.target for the score calculation
-      } else{
-        i.yy <- yy == yy
+      rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3])
+      rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2])
+      rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1])
+      # Calculations for the forecast
+      if (!is.null(forecast)){
+        sp.forecast <- spatialMean(forecast)
+        sm.forecast <- seasMean(sp.forecast)
+        probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
+        cofinogram.data <- rbind(cofinogram.data,rep(NaN,3),t(getData(probs.forecast)[,,,,]))
       }
-      rocss.t.u <- rocss.fun(obs.terciles[i.yy,3], cofinogram.data[i.yy,3])
-      rocss.t.m <- rocss.fun(obs.terciles[i.yy,2], cofinogram.data[i.yy,2])
-      rocss.t.l <- rocss.fun(obs.terciles[i.yy,1], cofinogram.data[i.yy,1])
       # Color selection
       if (color.pal=="tcolor"){
           t.color <- tercileBrewerColorRamp(10)     
@@ -118,35 +137,38 @@ tercilePlot <- function(mm.obj, obs, year.target = NULL, detrend = TRUE, color.p
       opar <- par(no.readonly=TRUE)
       par(mar = c(4, 5, 0, 3)) #change lines of the margins
       par(oma = c(0, 0, 0, 3)) #change size of the outer margins
+      n.x <- 1:nrow(cofinogram.data)
       if (color.pal=="tcolor"){          
-          image(yy, c(-1.5,-0.5), matrix(cofinogram.data[,1]), breaks=brks, col=t.color$low, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE)      
-          image(yy, c(-0.5,0.5), matrix(cofinogram.data[,2]), breaks=brks, col=t.color$middle, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE, add=TRUE)      
-          image(yy, c(0.5,1.5), matrix(cofinogram.data[,3]), breaks=brks, col=t.color$high, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE, add=TRUE)      
+          image(n.x, c(-1.5,-0.5), matrix(cofinogram.data[,1]), breaks=brks, col=t.color$low, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE)      
+          image(n.x, c(-0.5,0.5), matrix(cofinogram.data[,2]), breaks=brks, col=t.color$middle, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE, add=TRUE)      
+          image(n.x, c(0.5,1.5), matrix(cofinogram.data[,3]), breaks=brks, col=t.color$high, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE, add=TRUE)      
       } else{         
-         image(yy, c(-1,0,1), cofinogram.data, breaks=brks, col=cbar, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE)      
+         image(n.x, c(-1,0,1), cofinogram.data, breaks=brks, col=cbar, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE)      
       }         
-      axis(1, at = yy, pos=-1.5)      
-      points(yy, obs.t, pch = 21, bg = "white")
-      axis(2, at=-1:1, labels=c("Below", "Normal", "Above"), las="2")
+      axis(1, at = 1:length(yy), labels=yy, pos=-1.5, cex.axis=0.75) 
+      if (!is.null(forecast)){
+        axis(1, at = (length(yy)+2):(length(yy)+1+length(yy.forecast)), labels=yy.forecast, pos=-1.5, cex.axis=0.75) 
+      }
+      points(1:length(obs.t), obs.t, pch = 21, bg = "white")
+      axis(2, at=-1:1, labels=c("Below", "Normal", "Above"), las="2", cex.axis=0.75)
       # Add skill score values to the plot    
-      axis(4, at=c(-1:1,2.3), labels=c(round(rocss.t.l,2), round(rocss.t.m,2), round(rocss.t.u,2), "ROCSS"), las="2", tick = FALSE)
+      axis(4, at=c(-1:1,2.3), labels=c(round(rocss.t.l,2), round(rocss.t.m,2), round(rocss.t.u,2), "ROCSS"), las="2", tick = FALSE, cex.axis=0.8)
       if (color.pal=="tcolor"){       
           #par(oma = c(7, 0, 2, 5.7))
-          image.plot(add = TRUE, horizontal = T, smallplot = c(0.15,0.8,0.3,0.35), legend.only = TRUE, breaks = brks, lab.breaks=c(rep("", length(brks))), col = t.color[,3], zlim=c(0,1))
+          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.3,0.35), legend.only = TRUE, breaks = brks, lab.breaks=c(rep("", length(brks))), col = t.color[,3], zlim=c(0,1))
           #par(oma = c(7, 0, 2, 4.2))
-          image.plot(add = TRUE, horizontal = T, smallplot = c(0.15,0.8,0.23,0.28), legend.only = TRUE, breaks = brks, lab.breaks=c(rep("", length(brks))), col = t.color[,2], zlim=c(0,1))
+          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.23,0.28), legend.only = TRUE, breaks = brks, lab.breaks=c(rep("", length(brks))), col = t.color[,2], zlim=c(0,1))
           #par(oma = c(7, 0, 2, 2.7))
-          image.plot(add = TRUE, horizontal = T, smallplot = c(0.15,0.8,0.16,0.21), legend.only = TRUE, breaks = brks, col = t.color[,1], zlim=c(0,1), legend.lab="Probability of the tercile")          
+          image.plot(add = TRUE, horizontal = T, smallplot = c(00.20,0.85,0.16,0.21), legend.only = TRUE, breaks = brks, col = t.color[,1], zlim=c(0,1), legend.lab="Probability of the tercile")          
       } else{          
           #par(oma = c(5, 0, 2, 3.2))
           #image.plot(add = TRUE, legend.only = TRUE, breaks = brks, col = cbar, smallplot = c(0.96,0.99,0.2,0.8), zlim=c(0,1), legend.lab="Probability of the tercile")            
-          image.plot(add = TRUE, horizontal = T, smallplot = c(0.15,0.8,0.25,0.33), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
+          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.25,0.28), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
       }
       mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
       mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
       title <- sprintf("%s, %s to %s", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end))
-      mtext(title, side=3, line=-2, adj=0, cex=1.2, font=2)
-      mtext (title)
+      mtext(title, side=3, line=-4, adj=0, cex=1.2, font=2)
       if (!is.null(subtitle)){
         mtext(subtitle, side=3, line=-3, adj=0, cex=0.8)
       }

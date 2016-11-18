@@ -52,7 +52,7 @@
 #'  Atmospheri Science, Wiley, NY
 #'
 
-tercileBarplot <- function(mm.obj, obs, year.target, detrend = TRUE, score.threshold=NULL) {
+tercileBarplot <- function(mm.obj, obs, year.target, detrend = FALSE, score.threshold=NULL) {
   # Check input datasets
   if (isS4(mm.obj)==FALSE){
     mm.obj <- convertIntoS4(mm.obj)

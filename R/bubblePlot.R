@@ -69,7 +69,7 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(mm.obj, obs, year.target, detrend=TRUE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
+bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
         mm.obj <- convertIntoS4(mm.obj)
