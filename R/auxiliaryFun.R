@@ -8,7 +8,7 @@ alpha <- function(col, alpha){
 
 # Detrend: performs detrending of data
 #' @keywords internal
-#' @importFrom stats lm
+#' @importFrom stats lm coef
 
 detrend <- function(x,tt,y=NULL,tty=NULL) { #############aniadir otro flag para que calcule los residuos de forecast
   #tt <- as.POSIXct(tt)

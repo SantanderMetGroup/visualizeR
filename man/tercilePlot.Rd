@@ -4,17 +4,20 @@
 \alias{tercilePlot}
 \title{Tercile plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-tercilePlot(mm.obj, obs, year.target = NULL, detrend = TRUE,
-  color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL)
+tercilePlot(mm.obj, obs, forecast = NULL, year.target = NULL,
+  detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"),
+  subtitle = NULL)
 }
 \arguments{
-\item{mm.obj}{A multi-member list with predictions, either a field or a multi-member 
+\item{mm.obj}{A multi-member list with hindcast, either a field or a multi-member 
 station object as a result of downscaling of a forecast using station data. See details.}
 
 \item{obs}{List with the benchmarking observations for forecast verification.}
 
-\item{year.target}{Year within the whole verification period to display the results for. This year is not
-included in the computation of the score (operational point of view).}
+\item{forecast}{A multi-member list with forecasts, either a field or a multi-member 
+station object as a result of downscaling of a forecast using station data. Default is NULL. See details.}
+
+\item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
 \item{detrend}{Logical indicating if the data should be detrended. Default is TRUE.}
 
@@ -22,7 +25,7 @@ included in the computation of the score (operational point of view).}
 \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.}
 
-\item{subtitle}{String to include a subtitle bellow the title. Default is NULL.}
+\item{subtitle}{String to include a subtitle below the title. Default is NULL.}
 }
 \description{
 Tercile plot for the visualization of forecast skill of ensemble predictions.
@@ -30,7 +33,7 @@ Tercile plot for the visualization of forecast skill of ensemble predictions.
  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 }
 \details{
-For each member, the daily predictions are averaged to obtain a single seasonal forecast. For
+For each member, the daily hindcasts are averaged to obtain seasonal values. For
 rectangular spatial domains (i.e., for fields), the spatial average is first computed (with a warning) to obtain a
 unique series for the whole domain. The corresponding terciles for each ensemble member are then computed
 for the analysis period. Thus, each particular member and season, are categorized into three categories (above, 
@@ -38,13 +41,16 @@ between or below), according to their respective climatological terciles. Then, 
 year by year by considering the number of members falling within each category. This probability is represented by the
 colorbar. For instance, probabilities below 1/3 are very low, indicating that a minority of the members 
 falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members
-falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the white circles.
+falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the 
+white circles. If the forecast object is not NULL, then the probabilities for this season are also ploted next to the 
+hindcast results.  
  
-Finally, the ROC Skill Score (ROCSS) is indicated in the secondary (right) Y axis. For each tercile, it provides a 
-quantitative measure of the forecast skill, and it is commonly used to evaluate the performance of probabilistic systems
-(Joliffe and Stephenson 2003). The value of this score ranges from 1 (perfect forecast system) to -1 
-(perfectly bad forecast system). A value zero indicates no skill compared with a random prediction. The target year 
-is not included in the computation of the score (operational point of view). 
+Finally, the ROC Skill Score (ROCSS) is computed for the hindcasts. It is indicated in the secondary (right) Y axis. 
+For each tercile, it provides a quantitative measure of the forecast skill, and it is commonly used to evaluate the 
+performance of probabilistic systems (Joliffe and Stephenson 2003). The value of this score ranges from 1 
+(perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill compared with a random 
+prediction. If year.target is not NULL, this year is not included in the computation of the score (operational point 
+of view). 
  
 In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 for each member prior to data analysis, with a warning.

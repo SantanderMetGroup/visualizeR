@@ -2,7 +2,7 @@
 % Please edit documentation in R/rdas.R
 \name{psl.cfs}
 \alias{psl.cfs}
-\title{NCEP CFSv2 hindcast for DJF mean sea-level pressure for the entire globe.}
+\title{NCEP CFSv2 hindcast of DJF mean sea-level pressure for the entire globe.}
 \format{A grid}
 \source{
 Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}

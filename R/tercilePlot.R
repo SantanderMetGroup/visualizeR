@@ -17,7 +17,7 @@
 #' @param subtitle String to include a subtitle below the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray getYearsAsINDEX
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray getYearsAsINDEX subsetGrid
 #' @importFrom abind abind
 #' @importFrom fields image.plot
 #' @importFrom grDevices grey.colors
