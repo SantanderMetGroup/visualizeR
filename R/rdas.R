@@ -52,3 +52,31 @@ NULL
 #' plotClimatology(climatology(tas.cfs), backdrop.theme = "coastline")
 #' }
 NULL
+
+
+#' @title NCEP/NCAR reanalysis DJF total precipitation amount for the entire globe.
+#' @description NCEP/NCAR reanalysis DJF total precipitation amount for the entire globe (1949-2010). Data are annually aggregated.
+#' @format A grid
+#' @source Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
+#' @name tp.ncep
+#' @examples
+#' data(tp.ncep)
+#' require(transformeR)
+#' plotClimatology(climatology(tp.ncep), backdrop.theme = "coastline")
+NULL
+
+
+#' @title NCEP CFSv2 hindcast of DJF total precipitation amount for the entire globe.
+#' @description NCEP CFSv2 hindcast of DJF total precipitation amount for the entire globe (1983-2010). Data are annually aggregated.
+#' Ensemble of 24 members, corresponding to the lead month 1 predictions (November initializations)
+#' @format A grid
+#' @description For further detail on ensemble member definition, see \url{http://www.meteo.unican.es/ecoms-udg/dataserver/datasets/CFSv2}
+#' @source Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
+#' @name tp.cfs
+#' @references Saha, S. et al. 2013. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
+#' @examples \dontrun{
+#' data(tp.cfs)
+#' require(transformeR)
+#' plotClimatology(climatology(tp.cfs), backdrop.theme = "coastline")
+#' }
+NULL
