@@ -1,6 +1,6 @@
 visualizeR
 ==========
 
-* New built-in datasets: DJF global mean sea-level pressure and temperature from NCEP/NCAR reanalysis and NCEP-CFSv2 hindcast
+* New built-in datasets: DJF global mean sea-level pressure, temperature and total precipitation from NCEP/NCAR reanalysis and NCEP-CFSv2 hindcast
 * New function for reliability diagram, implementing the approach in Weisheimer and Palmer 2014 (DOI: 10.1098/rsif.2013.1162) 
 * Other minor bug fixes and enhancements

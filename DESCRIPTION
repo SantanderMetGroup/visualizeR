@@ -20,7 +20,7 @@ Suggests:
 Type: Package
 Title: R Package with visualization tools for forecast verification
 Version: 0.1-0
-Date: 2016-11-21
+Date: 2016-11-30
 Authors@R: as.person(c(
     "Maria Dolores Frias <friasmd@unican.es> [ctb, cre]",
     "Jesus Fernandez <fernandej@unican.es> [ctb]",
