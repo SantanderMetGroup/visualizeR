@@ -4,7 +4,7 @@
 \alias{spreadPlot}
 \title{Box plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-spreadPlot(mm.obj, year.target, detrend = TRUE, boxplot = TRUE,
+spreadPlot(mm.obj, year.target, detrend = FALSE, boxplot = TRUE,
   violin = FALSE, add.points = FALSE, pch = NULL)
 }
 \arguments{

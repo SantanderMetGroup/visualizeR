@@ -4,7 +4,7 @@
 \alias{bubblePlot}
 \title{Bubble plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-bubblePlot(mm.obj, obs, year.target, detrend = TRUE, score = TRUE,
+bubblePlot(mm.obj, obs, year.target, detrend = FALSE, score = TRUE,
   size.as.probability = TRUE, piechart = FALSE, only.at = NULL,
   subtitle = NULL, color.reverse = FALSE, pch.neg.score = NULL,
   pch.obs.constant = NULL, pch.data.nan = NULL)

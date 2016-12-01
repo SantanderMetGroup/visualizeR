@@ -4,7 +4,7 @@
 \alias{tercileBarplot}
 \title{Tercile bar plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-tercileBarplot(mm.obj, obs, year.target, detrend = TRUE,
+tercileBarplot(mm.obj, obs, year.target, detrend = FALSE,
   score.threshold = NULL)
 }
 \arguments{

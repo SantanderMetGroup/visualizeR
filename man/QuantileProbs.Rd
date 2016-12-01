@@ -4,10 +4,14 @@
 \alias{QuantileProbs}
 \title{Get exceedance probabilities from a S4 object}
 \usage{
-QuantileProbs(obj, nbins = 3)
+QuantileProbs(obj, obj2 = NULL, nbins = 3)
 }
 \arguments{
-\item{obj}{S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc}
+\item{obj}{S4 object (hindcast or forecast) with dimensions c("var", "member", "time", "y", "x") 
+it can be a station, field, multi-member field, etc. Probabilities will be computed for this object.}
+
+\item{obj2}{same S4 object (hindcast) as obj. The default is NULL. The cuantiles from obj2 are used to compute 
+the obj probabilities.}
 
 \item{nbins}{number of bins derived from the quantiles selected (by default nbins=3, terciles)}
 }
