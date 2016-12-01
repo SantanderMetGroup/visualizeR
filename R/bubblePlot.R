@@ -11,7 +11,7 @@
 #' @param obs The benchmarking observations for forecast verification. 
 #' @param year.target Year within the whole verification period to display the results for. This year is not
 #'  included in the computation of the score (operational point of view). 
-#' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
+#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
@@ -25,7 +25,7 @@
 #' @param pch.obs.constant pch value to highlight those whose score cannot be computed due to constant obs 
 #'  conditions (e.g. always dry). Default is NULL.
 #' @param pch.data.nan pch value to highlight those whose score cannot be computed due to time series with all NA values in 
-#'  the observations and/or models. Default is NULL. Not available for piecharts.
+#'  the observations and/or models. 
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
@@ -69,7 +69,25 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL) {
+bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+      yy <- unique(getYearsAsINDEX(mm.obj))
+      # Interpolate observations to the hindcast grid
+      obs <- interpGrid(obs, new.coordinates = getGrid(mm.obj), method = "nearest")
+      if (!is.null(year.target)){
+        if (!year.target %in% yy) {
+          stop("Target year outside temporal data range")
+        }
+      }
+      if (is.null(forecast)){
+        if (is.null(year.target)){
+          year.target <- last(yy)
+        }
+        yy.forecast <- year.target
+        forecast <- subsetGrid(mm.obj, years=yy.forecast)
+        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast])
+        obs <- subsetGrid(obs, years=yy[yy!=yy.forecast])
+        yy <- yy[yy!=yy.forecast]
+      }      
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
         mm.obj <- convertIntoS4(mm.obj)
@@ -78,54 +96,74 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size
         obs <- convertIntoS4(obs)
       }
       stopifnot(checkData(mm.obj, obs))
-      yy <- unique(getYearsAsINDEX.S4(mm.obj))
-      if (!year.target %in% yy) {
-        stop("Target year outside temporal data range")
+      if (!is.null(forecast)){
+        yy.forecast <- unique(getYearsAsINDEX(forecast))
+        if (length(yy.forecast)>1) {
+          stop("Select just one year for forecast")
+        }
+        year.target <- NULL
+        if (isS4(forecast)==FALSE){
+          forecast <- convertIntoS4(forecast)
+        }
       }
-      iyear <- which(yy == year.target)
-      #
-      #### INCLUIR AQUI LA INTEGRACION DE GRIDS ENTRE OBS Y MM: interpGridData(obs, new.grid = getGrid(prd), method = "nearest")
-      #
       # Detrend
       if (detrend){
         mm.obj <- detrend.forecast(mm.obj)
         obs <- detrend.forecast(obs)
-      }
+      }      
+      #iyear <- which(yy == year.target) ######### QUITAR?????
       # Computation of seasonal mean
       sm.mm.obj <- seasMean(mm.obj)
       sm.obs <- seasMean(obs)
+      # Detect gridpoints with time series with all NA values 
+      obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
+      mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
       # Computation exceedance probabilities
       probs.mm.obj <- QuantileProbs(sm.mm.obj)
       probs.obs <- QuantileProbs(sm.obs)
-      # Tercile for the maximum probability
-      margin <- c(getDimIndex(probs.mm.obj,"member"), getDimIndex(probs.mm.obj,"time"), getDimIndex(probs.mm.obj,"y"), getDimIndex(probs.mm.obj,"x"))
-      prob <- getData(probs.mm.obj)
-      mask.nallnan.mm.obj <- apply(prob, MARGIN = margin, FUN = function(x) {sum(!is.na(x))}) # Mask for cases with no all NaN probs
-      t.max.prob <- apply(prob, MARGIN = margin, FUN = which.max)
-      t.max.prob[mask.nallnan.mm.obj==0] <- NaN
-      obs.t <- getData(probs.obs)[1,,,,]+getData(probs.obs)[2,,,,]*2+getData(probs.obs)[3,,,,]*3     
-      idxmat.max.prob <- cbind(c(as.numeric(t.max.prob[,iyear,,])), 1:prod(dim(t.max.prob[,iyear,,]))) # ... as index matrix for the target year
-      # Probability of the most likely tercile
-      max.prob <- apply(prob, MARGIN = margin, FUN = max)      
-      # Select a year and remove in model data the NaN cases detected for the observations. 
-      v.max.prob <- as.vector(max.prob[1,iyear, , ])
-      v.t.max.prob <- as.vector(t.max.prob[1,iyear, , ], mode="numeric") 
-      v.valid <- complete.cases(as.vector(obs.t[iyear, , ]), v.max.prob)
-      ve.max.prob <- v.max.prob[v.valid]
-      if (!size.as.probability){
-        ve.max.prob <- rep(1, length(ve.max.prob))
+      # Calculations for the forecast
+      if (!is.null(forecast)){
+        sm.forecast <- seasMean(forecast)
+        probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
       }
-      v.prob <- array(dim = c(length(v.valid),3))
+      # Tercile for the maximum probability
+      prob <- getData(probs.mm.obj)
+      prob.forecast <- getData(probs.forecast)
+      margin <- c(getDimIndex(probs.mm.obj,"member"), getDimIndex(probs.mm.obj,"time"), getDimIndex(probs.mm.obj,"y"), getDimIndex(probs.mm.obj,"x"))
+      t.max <- function(t.probs, margin.dim){
+        # Mask for cases with no all probs equal to NAN. This avoid errors in ROCSS computation.  
+        mask.nallnan <- apply(t.probs, MARGIN = margin.dim, FUN = function(x) {sum(!is.na(x))}) 
+        t.max.prob <- apply(t.probs, MARGIN = margin.dim, FUN = which.max)
+        t.max.prob[mask.nallnan==0] <- NaN
+        return(t.max.prob)
+      } 
+      t.max.prob <- t.max(prob, margin)
+      t.max.forecast <- t.max(prob.forecast, margin)
+      obs.t <- getData(probs.obs)[1,,,,]+getData(probs.obs)[2,,,,]*2+getData(probs.obs)[3,,,,]*3  
+      idxmat.max.prob <- cbind(c(as.numeric(t.max.forecast)), 1:prod(dim(t.max.forecast))) # ... as index matrix for the target year????
+      # Probability of the most likely tercile
+      max.prob.forecast <- apply(prob.forecast, MARGIN = margin, FUN = max)      
+      # Remove in model data the NaN cases detected for the observations. 
+      ve.max.prob <- as.vector(max.prob.forecast)
+      v.t.max.prob <- as.vector(t.max.forecast, mode="numeric") 
+      #v.valid <- complete.cases(as.vector(obs.t[iyear, , ]), v.max.prob)
+      #ve.max.prob <- v.max.prob[v.valid]
+      gridpoints <- length(ve.max.prob)
+      if (!size.as.probability){
+        ve.max.prob <- rep(1, gridpoints)
+      }
+      v.prob <- array(dim = c(gridpoints,3))
       for (i in 1:3){
-        v.prob[,i] <- as.vector(prob[i,1,iyear,,])
+        v.prob[,i] <- as.vector(prob.forecast[i,1,1,,])
       }
       # Select the corresponding lon and lat
       x.mm <- attr(getxyCoords(mm.obj),"longitude") 
-      y.mm <- attr(getxyCoords(mm.obj),"latitude")       
-      yx <- as.matrix(expand.grid(y.mm, x.mm))
-      nn.yx <- yx[v.valid, ]  # remove NaN               
+      y.mm <- attr(getxyCoords(mm.obj),"latitude")  
+      nn.yx <- as.matrix(expand.grid(y.mm, x.mm))
+      #yx <- as.matrix(expand.grid(y.mm, x.mm))
+      #nn.yx <- yx[v.valid, ]  # remove NaN               
       # Define colors
-      df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob[v.valid])
+      df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
       df$color <- "black"
       t.colors <- c("blue", "darkgrey", "red")
       if (color.reverse){
@@ -137,23 +175,23 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size
       # Compute ROCSS for all terciles
       if (score) { 
         # Remove year.target to the score calculation
-        i.yy <- !yy == year.target
+        #i.yy <- !yy == year.target
         rocss <- array(dim=dim(prob)[-2:-3]) # remove year and member dimensions       
         for (i.tercile in 1:3){
           rocss[i.tercile, , ] <- apply(
-            array(c(obs.t[i.yy,,]==i.tercile, prob[i.tercile, 1,i.yy , ,]), dim=c(dim(obs.t[i.yy,,]),2)),
+            array(c(obs.t==i.tercile, prob[i.tercile, 1, , ,]), dim=c(dim(obs.t),2)),
             MARGIN=c(2,3),
             FUN=function(x){rocss.fun(x[,1],x[,2])})
         }        
         # Select those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
-        t.obs.constant <- apply(obs.t[i.yy,,], MARGIN=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
+        t.obs.constant <- apply(obs.t, MARGIN=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
         t.obs.constant <- as.vector(t.obs.constant)
         if (!piechart) { # Select the rocss for the tercile with max prob.
           rocss <- unshape(rocss)
-          max.rocss <- rocss[idxmat.max.prob]
+          v.score <- rocss[idxmat.max.prob]
           rocss <- deunshape(rocss)
-          dim(max.rocss) <- dim(rocss)[-1]
-          v.score <- c(max.rocss)[v.valid]
+          #dim(max.rocss) <- dim(rocss)[-1]
+          #v.score <- c(max.rocss)
           pos.val <- v.score >= 0
           neg.val <- v.score < 0
         }
@@ -161,7 +199,7 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size
       # Starting with the plot
       mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
       mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end), year.target)
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end), yy.forecast)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
       mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)
@@ -183,33 +221,44 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size
           colors <- array(dim=dim(rocss))
           t.colors[2] <- gray(0.2)
           for (i.tercile in 1:3) {colors[i.tercile,] <- alpha(t.colors[i.tercile],255*rocss[i.tercile,])}          
-          score.valid <- v.valid
+          #score.valid <- v.valid
         } else {
-          colors <- matrix(rep(t.colors, length(v.valid)), nrow = 3)
-          score.valid <- v.valid
+          colors <- matrix(rep(t.colors, gridpoints), nrow = 3)
+          #score.valid <- v.valid
         }
-        if (!is.null(only.at)) { ##### Comprobar que funciona en este caso
-          ns <- nrow(only.at$Stations$LonLatCoords)
-          score.valid <- rep(FALSE, length(score.valid))
-          for (i.station in 1:ns){
-            score.valid[which.min((only.at$Stations$LonLatCoords[i.station,1] - nn.yx[,2])^2 +
-                                    (only.at$Stations$LonLatCoords[i.station,2] - nn.yx[,1])^2)] <- TRUE
-          }
-        }
-        for (i.loc in 1:sum(score.valid)){
-          add.pie(v.prob[which(score.valid)[i.loc],], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=colors[,which(score.valid)[i.loc]],
+        #if (!is.null(only.at)) { ##### Comprobar que funciona en este caso
+        #  ns <- nrow(only.at$Stations$LonLatCoords)
+        #  score.valid <- rep(FALSE, length(score.valid))
+        #  for (i.station in 1:ns){
+        #    score.valid[which.min((only.at$Stations$LonLatCoords[i.station,1] - nn.yx[,2])^2 +
+        #                            (only.at$Stations$LonLatCoords[i.station,2] - nn.yx[,1])^2)] <- TRUE
+        #  }
+        #}
+        for (i.loc in 1:gridpoints){
+          add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=colors[,i.loc],
                   radius=radius, init.angle=90, clockwise = F, border="lightgray", labels=NA
           )  
         }
-        # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)       
-        if (score & !is.null(pch.obs.constant)){
-          if (!is.null(only.at)) {score.valid <- rep(TRUE, sum(v.valid))} ##### Comprobar que funciona en este caso
-          valid.points <- intersect(which(t.obs.constant),which(score.valid))
-          for (i.loc in valid.points){              
-              add.pie(v.prob[i.loc,], yx[i.loc, 2], yx[i.loc, 1], col=NA,
-                    radius=radius, init.angle=90, clockwise = F, border="black", labels=NA)            
+        if (score){
+          # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)       
+          if (!is.null(pch.obs.constant)){
+            #if (!is.null(only.at)) {score.valid <- rep(TRUE, gridpoints)} ##### Comprobar que funciona en este caso
+            #valid.points <- intersect(which(t.obs.constant),which(score.valid))
+            valid.points <- which(t.obs.constant)
+            for (i.loc in valid.points){   
+              add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=NA,
+                      radius=radius, init.angle=90, clockwise = F, border="black", labels=NA)            
+            }
           }
-        }  
+          # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
+          if (!is.null(pch.data.nan)){
+            valid.points <- which((obs.na + mm.obj.na)>0)
+            for (i.loc in valid.points){   
+              add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=NA,
+                      radius=radius, init.angle=90, clockwise = F, border="black", labels=NA)            
+            }
+          }
+        }
       } else { # Plot with bubbles
         if (score) {
           points(nn.yx[pos.val, 2], nn.yx[pos.val, 1], cex=symb.size[pos.val], col=alpha(df$color[pos.val], 255*v.score[pos.val]), pch=16, xlab="", ylab="")          
@@ -219,14 +268,12 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size
           }
           # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
           if (!is.null(pch.obs.constant)){
-            points(nn.yx[which(t.obs.constant[v.valid]), 2], nn.yx[which(t.obs.constant[v.valid]), 1], cex=1, col="black", pch=pch.obs.constant, xlab="", ylab="")
+            points(nn.yx[which(t.obs.constant), 2], nn.yx[which(t.obs.constant), 1], cex=1, col="black", pch=pch.obs.constant, xlab="", ylab="")
           }          
-          # Highlight those whose ROCSS cannot be computed due to time seres with all NA values in the observations and/or models
+          # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
-            obs.na <- as.vector(apply(getData(sm.obs)[1,1,i.yy,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-            mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,i.yy,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
             na.points <- (obs.na + mm.obj.na)>0
-            points(yx[na.points, 2], yx[na.points, 1], cex=1, col="black", pch=pch.data.nan, xlab="", ylab="")
+            points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=1, col="black", pch=pch.data.nan, xlab="", ylab="")
           }
         } else {
           points(nn.yx[ , 2], nn.yx[ , 1], cex=symb.size, col=df$color, pch=16, xlab="", ylab="")
@@ -265,3 +312,4 @@ bubblePlot <- function(mm.obj, obs, year.target, detrend=FALSE, score=TRUE, size
       }
 }
 # End
+      

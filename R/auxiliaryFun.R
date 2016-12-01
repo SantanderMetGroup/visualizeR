@@ -369,7 +369,7 @@ seasMean <- function(obj) {
       arr <- apply(obj.Data, MARGIN = margin,
                    FUN = function(x) {tapply(x, INDEX = yrs, FUN = mean, na.rm = TRUE)}
       )
-      newdim <- c(length(yy), getCountIndex(obj,"var"), getCountIndex(obj,"member"), getCountIndex(obj,"x"), getCountIndex(obj,"y"))
+      newdim <- c(length(yy), getCountIndex(obj,"var"), getCountIndex(obj,"member"), getCountIndex(obj,"y"), getCountIndex(obj,"x"))
       dim(arr) <- newdim
       dimnames(arr)<-NULL
       newdimNames <- c("time", obj.dimNames[margin])
@@ -423,8 +423,8 @@ MrQuantile <- function(obj, k=NULL){
       arr <- array(NA, c(length(k)*n.var, n.mem, 1, n.y, n.x))
       count <- seq(1,length(k)*n.var,length(k))
       newvar <- character(length = 0)
-#       mar <- setdiff(1:length(dim(obj.Data[1,,,,])), which(dim(obj.Data[1,,,,])==dim(obj.Data)[getDimIndex(obj, "time")]))  
-      mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time") - 1)
+      mar <- setdiff(1:length(dim(obj.Data[1,,,,])), which(dim(obj.Data[1,,,,])==dim(obj.Data)[getDimIndex(obj, "time")]))  
+#      mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time") - 1)
       for (ivar in 1:n.var){ 
         if (is.null(dim(obj.Data[1,,,,]))){
           arr[count[ivar]:(count[ivar]+length(k)-1),,,,] <- quantile(obj.Data[ivar,,,,], probs = k, na.rm = TRUE)

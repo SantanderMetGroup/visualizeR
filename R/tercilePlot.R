@@ -10,7 +10,7 @@
 #' @param forecast A multi-member list with forecasts, either a field or a multi-member 
 #' station object as a result of downscaling of a forecast using station data. Default is NULL. See details. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
+#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
