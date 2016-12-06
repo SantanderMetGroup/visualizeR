@@ -1,10 +1,12 @@
-#' @title Reliability categories of a probabilistic prediction.
+#' @title Reliability categories of a probabilistic prd.
 #' 
 #' @description Calculates (and draws) 
 #' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
 #' 
 #' @param obs Grid of observations
-#' @param prd Grid of predictions 
+#' @param prd Grid of forecast data
+#' @param regions SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
+#' the relaiability is calculated. Default is NULL (See details).
 #' @param nbins (optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3
 #' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
@@ -13,228 +15,272 @@
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
 # @param ylim Required if diagrams = TRUE. Limits for maps
-#' @return Same as prd but with an aditional list ($ReliabilityCategories) containing the following elements:
-#' catcol: color of the reliability category
-#' catname: reliability category
-#' sl: slope of the reliability line
-#' sl_lower: lower bound confidence for slope (according to "sigboot") 
-#' sl_lower: upper bound confidence for slope (according to "sigboot") 
+
+#' @details If parameter regions is NULL (default) the whole region in \code{obs} and \code{prd} is considered 
+#' for computing reliability. A subregion will be considered If the corresponding SpatialPolygons* object
+#' is provided. In these cases, if parameter \code{diagrams = TRUE}, reliability diagrams are plotted for 
+#' each specified category. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed 
+#' separately for each region and reliability maps are plotted instead. 
+#' 
+#' A SpartialPolygons* object is easily obtained by reading a shapefile with function 
+#' \code{\link[rgdal]{readOGR}}.
+#' 
+#' @return Grid of reliability categories with an additional data dimension for categories 
+#' and an additional slot ($ReliabilityCategories) containing the following elements:
+#' catname: reliability categories.
+#' slope: \code{$slope} slope of the reliability line; \code{$lower} lower bound confidence for slope (according to "sigboot"); 
+#' \code{$upper} upper bound confidence for slope (according to "sigboot").
+#' 
+#' @examples \dontrun{
+#' data("tas.cfs")
+#' data("tas.ncep")
+#' data("AR5regions")
+#' require(transformeR)
+#' tas.cfs2 <- interpGrid(tas.cfs, getGrid(tas.ncep))
+#' tas.ncep2 <- subsetGrid(tas.ncep, years = 1983:2009)
+#' tas.cfs2 <- subsetGrid(tas.cfs2, years = 1983:2009)
+#' rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2, 
+#'                            nboot = 100, regions = AR5regions)
+#' rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2, 
+#'                            nboot = 100)
+#' }
+#' 
 #' @export
 #' @author R. Manzanas \& M.Iturbide
 # @import verification
 # @import plot3D
-#' @import maps 
 #' @importFrom transformeR getGrid redim getDim
+#' @importFrom sp SpatialPoints SpatialPolygons Polygons over
 #' @importFrom graphics plot.new abline polygon text grid title
 #' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
 
 reliabilityCategories <- function(obs,
                                   prd,
+                                  regions = NULL,
                                   nbins = 3,
-                                  nbinsprob = 100,
+                                  nbinsprob = 10,
                                   nboot = 100,
                                   sigboot = 0.05, 
-                                  diagrams = TRUE) { #, regions = NULL) {
+                                  diagrams = TRUE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
-      xlim <- getGrid(prd)$x
-      ylim <- getGrid(prd)$y
+      regs <- regions
+      if(is.null(regs)){
+            bbox <- getGrid(obs) 
+            esquinas <- matrix(ncol = 2, nrow = 5)
+            esquinas[1,] <- c(bbox$x[1], bbox$y[1])
+            esquinas[2,] <- c(bbox$x[1], bbox$y[2])
+            esquinas[3,] <- c(bbox$x[2], bbox$y[2])
+            esquinas[4,] <- c(bbox$x[2], bbox$y[1])
+            esquinas[5,] <- c(bbox$x[1], bbox$y[1])
+            regs <- sp::SpatialPolygons(list(sp::Polygons(list(Polygon(list(esquinas))), ID = "region")))
+      }
+      if(class(regs) == "SpatialPolygonsDataFrame"){
+            regs <-  SpatialPolygons(regs@polygons)
+      }
       prd <- redim(prd)
-      coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
-      coordinates <- cbind(coordinates[,2], coordinates[,1])
-      ob <- array3Dto2Dmat(obs$Data)
       memind <- which(getDim(prd)=="member")
       timeind <- which(getDim(prd)=="time")
-      
-      
       nmem <- dim(prd$Data)[memind]
       ntime <- dim(prd$Data)[timeind]
-      se <- array(dim = c(nmem, ntime, length(prd$xyCoords$x) * length(prd$xyCoords$y)))
-      for(i in 1:nmem){
-            prdarray <- prd$Data[i,,,]
-            attr(prdarray, "dimensions") <-  attr(prd$Data, "dimensions")[-memind]
-            se[i,,] <- array3Dto2Dmat(prdarray)
-      }
-      naind <- which(is.na(ob[1,]))
-      if(length(naind) != 0){
-            obna0 <- ob[,-naind]
-            sena0 <- se[,,-naind]
-      }else{
-            obna0 <- ob
-            sena0 <- se
-      }
-      naind <- which(is.na(sena0[1,1,]))
-      if(length(naind) != 0){
-            obna <- obna0[,-naind]
-            sena <- sena0[,,-naind]
-      }else{
-            obna <- obna0
-            sena <- sena0
-      }
-      #       corna <- unname(as.matrix(coordinates[-naind,]))
-      sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
-      message("[", Sys.time(), "] Calculating categories...")
-      ## colores
-      red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
-      orange <- rgb(1, 0.65, 0.3, 1, names = "orange", maxColorValue = 1)
-      yellow <- rgb(1, 1, 0, 1, names = "yellow", maxColorValue = 1)
-      dark_yellow <- rgb(0.8, 0.8, 0, 1, names = "dark_yellow", maxColorValue = 1)
-      cyan <- rgb(0, 1, 1, 1, names = "cyan", maxColorValue = 1)
-      green <- rgb(0, 1, 0, 1, names = "green", maxColorValue = 1)
-      
-      n <- sl$n
-      nyear <- sl$nyear
-      npoint <- sl$npoint
-      slope <- sl$slope
-      slope_boot <- sl$slope_boot
-      prdprob <- sl$prdprob
-      obsfreq <- sl$obsfreq
-      prdfreq <- sl$prdfreq
-      
-      cat <- rep(NA, 1, nbins)
-      catcol <- rep(NA, 1, nbins)
-      catname <- rep("", 1, nbins)
-      sl <- rep(NA, 1, nbins)
-      sl_lower <- rep(NA, 1, nbins)
-      sl_upper <- rep(NA, 1, nbins)
-      
-      if (diagrams) {
-            par(mfcol = c(2, nbins)) 
-      }
-      for (ibins in 1:nbins) {
-            sl[ibins] <- slope[ibins]
-            
-            aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot), na.rm = T)
-            slope_lower <- aux[[1]]
-            slope_upper <- aux[[2]]
-            rm(aux)
-            
-            sl_lower[] <- slope_lower
-            sl_upper[] <- slope_upper
-            
-            if (!is.na(slope[ibins])) {
-                  if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
-                        cat[ibins] <- 5 
-                        catcol[ibins] <- green 
-                        catname[ibins] <- "perfect"
-                  } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
-                                   (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
-                        cat[ibins] <- 4  
-                        catcol[ibins] <- cyan
-                        catname[ibins] <- "still useful"
-                        ## OJO: nueva categoria! 
-                  } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
-                        cat[ibins] <- 3.5  
-                        catcol[ibins] <- dark_yellow  
-                        catname[ibins] <- "marginally useful*"
-                  } else if (slope[ibins] > 0 & slope_lower > 0) {
-                        cat[ibins] <- 3  
-                        catcol[ibins] <- yellow 
-                        catname[ibins] <- "marginally useful"
-                  } else if (slope[ibins] > 0 & slope_lower < 0) {
-                        cat[ibins] <- 2  
-                        catcol[ibins] <- orange
-                        catname[ibins] <- "not useful"
-                  } else if (slope[ibins] < 0) {
-                        cat[ibins] <- 1  
-                        catcol[ibins] <- red 
-                        catname[ibins] <- "dangerous"
-                  } 
+      coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
+      coords <- as.data.frame(cbind(coordinates[,2], coordinates[,1]))
+      spoints <- SpatialPoints(coords)
+      suppressMessages(
+            obs.fin <- transformeR:climatology(obs)
+      )
+      ob.full <- array3Dto2Dmat(obs$Data)
+      ob.clim <- array(dim = c(nbins, dim(ob.full)[-1]))
+      lower <- array(dim = c(length(regs), (nbins)))
+      rownames(lower) <- names(regs)
+      upper <- array(dim = c(length(regs), (nbins)))
+      rownames(upper) <- names(regs)
+      sl <- array(dim = c(length(regs), (nbins)))
+      rownames(sl) <- names(regs)
+      ob.slope <- list("sl" = sl, "lower" = lower, "upper" = upper)
+      ob.catname  <- array(dim = c(length(regs), (nbins)))
+      rownames(ob.catname) <- names(regs)
+      for(l in 1:length(regs)){
+            o <- over(spoints, regs[l,])
+            w <- which(!is.na(o))
+            ob <- ob.full[, w]
+            se <- array(dim = c(nmem, ntime, length(w)))
+            for(i in 1:nmem){
+                  prdarray <- prd$Data[i,,,]
+                  attr(prdarray, "dimensions") <-  attr(prd$Data, "dimensions")[-memind]
+                  se[i,,] <- array3Dto2Dmat(prdarray)[, w]
             }
-            obsplot <- obs 
-            obsplot$Data[which(!is.na(obsplot$Data))] <- cat[ibins]
-            if (diagrams) {
-                  #                   ## mapa
-                  #                   aux <- rep(NA, nrow(coordinates))
-                  #                   aux[-naind] <- cat[ibins]
-                  #                   aux <- cbind(aux, coordinates)
-                  #                   
-                  #                   if (!is.null(xlim) & !is.null(ylim)) {
-                  #                         image(aux[,2], aux[,3], aux[,1], xlim = xlim, 
-                  #                               ylim = ylim, col = catcol[ibins], 
-                  #                               main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
-                  #                   } else if (is.null(xlim) | is.null(ylim)) {
-                  #                         image(aux$xnod, aux$ynod, aux$data, xlim = c(min(corna[,1]), max(corna[,1])), 
-                  #                               ylim = c(min(corna[,2]), max(corna[,2])), col = catcol[ibins], 
-                  #                               main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
-                  #                   }
-                  #                   map(add=T)
-                  #                   grid(col = "lightgray", lty = 2, lwd = 0.1)
-                  image(obsplot$xyCoords$x,obsplot$xyCoords$y, t(obsplot$Data[1,,]), 
-                        xlim = xlim, 
-                        ylim = ylim, col = catcol[ibins], 
-                        main = sprintf("category %d (%s)", ibins, catname[ibins]), xlab = "lon",  ylab = "lat")
-                  map(add=T)
-                  ## reliability diagram
-                  x1 <- 1/nbins
-                  y1 <- 1/nbins
-                  x2 <- 1
-                  y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
-                  a <- (y2-y1)/(x2-x1)
-                  b <- y1-((x1*(y2-y1))/(x2-y1))
-                  
-                  plot.new()
-                  abline(b, a, col = "black", lty = 3)
-                  polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
-                          border = NA, col = "lightgray")
-                  polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
-                          border = NA, col = "lightgray")
-                  abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
-                  abline(h = 1/nbins, col = "black", lty = 3)
-                  abline(v = 1/nbins, col = "black", lty = 3)  
-                  
-                  ## intervalo de confianza para la pendiente
-                  ## lower bound
-                  a_lower <- slope_lower      
-                  b_lower <- (1-slope_lower)/nbins
-                  rm(slope_lower)
-                  ## upper bound
-                  a_upper <- slope_upper
-                  b_upper <- (1-slope_upper)/nbins
-                  rm(slope_upper)
-                  
-                  polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
-                          border = NA, col = catcol[ibins])
-                  polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
-                          border = NA, col = catcol[ibins])
-                  abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
-                  abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
-                  abline((1-slope[ibins])/nbins, slope[ibins], col = "black", lwd = 2)
-                  
-                  ## puntos del reliability diagram (escalados por el peso)
-                  par(new = TRUE)
-                  plot(c(0.1, 0.1), c(0.65, 0.8), pch = 19, cex = c(1,10), xlim = c(0,1), ylim = c(0,1),
-                       xlab = "forecast prob.", ylab = "obs. freq.") 
-                  
-                  text(0.2, 0.8, sprintf("n=%d", n), cex=1.25, font=2, pos=4)
-                  text(0.2, 0.65, "n=1", cex=1.25, font=2, pos=4)
-                  par(new = TRUE)
-                  plot(prdprob[[ibins]], obsfreq[[ibins]], pch = 19, 
-                       cex = ((((prdfreq[[ibins]]*nyear*npoint)-1)*(10-1)) / ((nyear*npoint)-1)) + 1,
-                       xlim = c(0,1), ylim = c(0,1),
-                       xlab = "forecast prob.", ylab = "obs. freq.")  
-                  grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
-                  title(sprintf("%d data, %d points", nyear, npoint))
-            }  
+            #remove empty pixels
+            naind.obs <- which(is.na(ob[1,]))
+            naind.prd <- which(is.na(se[1,1,]))
+            naind <- unique(c(naind.obs, naind.prd))
+            if(length(naind) != 0){
+                  obna <- ob[,-naind]
+                  sena <- se[,,-naind]
+            }else{
+                  obna <- ob
+                  sena <- se
+            }
+            message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
+            sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
+            
+            n <- sl$n
+            nyear <- sl$nyear
+            npoint <- sl$npoint
+            slope <- sl$slope
+            slope_boot <- sl$slope_boot
+            prdprob <- sl$prdprob
+            obsfreq <- sl$obsfreq
+            prdfreq <- sl$prdfreq
+            
+            cat <- rep(NA, nbins)
+            catcol <- rep(NA, nbins)
+            catname <- rep("", nbins)
+            
+            for (ibins in 1:nbins) {
+                  aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot), na.rm = T)
+                  slope_lower <- aux[[1]]
+                  slope_upper <- aux[[2]]
+                  rm(aux)
+                  if (!is.na(slope[ibins])) {
+                        if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
+                              cat[ibins] <- 5 
+                              catcol[ibins] <- "green" 
+                              catname[ibins] <- "perfect"
+                        } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
+                                         (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
+                              cat[ibins] <- 4  
+                              catcol[ibins] <- "cyan"
+                              catname[ibins] <- "still useful"
+                              ## OJO: nueva categoria! 
+                        } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
+                              cat[ibins] <- 3.5  
+                              catcol[ibins] <- "yellow" 
+                              catname[ibins] <- "marginally useful*"
+                        } else if (slope[ibins] > 0 & slope_lower > 0) {
+                              cat[ibins] <- 3  
+                              catcol[ibins] <- "gold" 
+                              catname[ibins] <- "marginally useful"
+                        } else if (slope[ibins] > 0 & slope_lower < 0) {
+                              cat[ibins] <- 2  
+                              catcol[ibins] <- "orange"
+                              catname[ibins] <- "not useful"
+                        } else if (slope[ibins] < 0) {
+                              cat[ibins] <- 1  
+                              catcol[ibins] <- "red" 
+                              catname[ibins] <- "dangerous"
+                        } 
+                  }
+                  ob.clim[ibins, w] <- cat[ibins]
+                  ob.slope$lower[l , ibins] <- slope_lower
+                  ob.slope$upper[l , ibins] <- slope_upper
+                  ob.slope$sl[l ,] <- slope
+                  ob.catname[l ,] <- catname
+            }
       }
+      l.obs.fin <- list()
+      for(i in 1:nbins){
+            obs.fin$Data <- mat2Dto3Darray(as.matrix(ob.clim[i, , drop = F]), x = obs$xyCoords$x, y = obs$xyCoords$y)
+            suppressMessages(
+                  cats <- transformeR::climatology(obs.fin)
+            )
+            attr(cats$Variable, "longname") <- paste("category ", i)
+            l.obs.fin[[i]] <- cats
+      }
+      a <- makeMultiGrid(l.obs.fin)
+      if (diagrams) {
+            if(length(regs) > 1){
+                  pc <- transformeR::plotClimatology(a,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
+                                        col.regions = c("red", "orange", "gold", "yellow", "cyan", "green"),
+                                        colorkey = list(labels = list( 
+                                              cex = 1,
+                                              at = c(1, 2, 2.75, 3.25, 4, 5), 
+                                              labels = c("dangerous", "not usefull","marginally usefull",
+                                                         "marginally useful*","still usefull","perfect"))))
+                  
+                  print(pc)
+            }else{
+                  par(mfrow = c(1, nbins), pty="s", oma=c(0,0,2,0), mgp=c(2,1,0)) 
+                  for(i in 1:nbins){
+                        ## reliability diagram
+                        x1 <- 1/nbins
+                        y1 <- 1/nbins
+                        x2 <- 1
+                        y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
+                        a <- (y2-y1)/(x2-x1)
+                        b <- y1-((x1*(y2-y1))/(x2-y1))
+                        
+                        plot(b, a, col = "black", lty = 3, typ = "l",
+                             xlim = c(0,1), ylim = c(0,1),
+                             xlab = "prd prob.", ylab = "obs. freq.",
+                             main = paste("Category ", i), 
+                             sub = list(catname[i], cex = 1.2),
+                             font.sub=4)
+                        abline(b, a, col = "black", lty = 3)
+                        polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
+                                border = NA, col = "lightgray")
+                        polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
+                                border = NA, col = "lightgray")
+                        abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
+                        abline(h = 1/nbins, col = "black", lty = 3)
+                        abline(v = 1/nbins, col = "black", lty = 3)  
+                        
+                        ## intervalo de confianza para la pendiente
+                        ## lower bound
+                        a_lower <- ob.slope$lower[ , i] #<- #slope_lower 
+                        b_lower <- (1-ob.slope$lower[ , i])/nbins
+                        ## upper bound
+                        a_upper <- ob.slope$upper[ , i]
+                        b_upper <- (1-ob.slope$upper[ , i])/nbins
+                        polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
+                                border = NA, col = catcol[i])
+                        polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
+                                border = NA, col = catcol[i])
+                        abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
+                        abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
+                        abline((1-slope[i])/nbins, slope[i], col = "black", lwd = 2)
+                        
+                        ## puntos del reliability diagram (escalados por el peso)
+                        points(0.1, .8, pch = 19, cex = 1)
+                        text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
+                        points(prdprob[[i]], obsfreq[[i]], pch = 19, 
+                               cex = ((((prdfreq[[i]]*nyear*npoint)-1)*(10-1)) / ((nyear*npoint)-1)) + 1)
+                        grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
+                  }
+                  title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
+                  
+            }
+      }
+      result.grid <- a
+      attr(result.grid$Data, "dimensions") <- c("cat", "var", "member", "time", "lat", "lon")
+      attr(result.grid$Data, "climatology:fun") <- NULL
       result <- list()
-      # result$cat <- cat
-      result$catcol <- catcol
-      result$catname <- catname
-      result$sl <- sl
-      result$sl_lower <- sl_lower
-      result$sl_upper <- sl_upper
+      colnames(ob.catname) <- attr(a$Variable, "longname")
+      result$catname <- ob.catname
+      colnames(ob.slope$sl) <- attr(a$Variable, "longname")
+      colnames(ob.slope$lower) <- attr(a$Variable, "longname")
+      colnames(ob.slope$upper) <- attr(a$Variable, "longname")
+      result$slope <- ob.slope
       message("[", Sys.time(), "] Done.")
-      result.grid <- prd
       result.grid$ReliabilityCategories <- result
-      attr(result.grid$ReliabilityCategories, "observationData") <- attr(obs, "dataset")
+      attr(result.grid$ReliabilityCategories, "observations") <- attr(obs, "dataset")
+      result.grid$Variable$varName <- result.grid$Variable$varName[1]
+      result.grid$Variable$level <- NA
+      attr(result.grid$Variable, "units") <- attr(result.grid$Variable, "units")[1]
+      attr(result.grid$Variable, "use_dictionary") <- attr(result.grid$Variable, "use_dictionary")[1]
+      attr(result.grid$Variable, "description") <- attr(result.grid$Variable, "description")[1]
+      attr(result.grid$Variable, "daily_agg_cellfun") <- attr(result.grid$Variable, "daily_agg_cellfun")[1]
+      attr(result.grid$Variable, "monthly_agg_cellfun") <- attr(result.grid$Variable, "monthly_agg_cellfun")[1]
+      attr(result.grid$Variable, "verification_time") <- attr(result.grid$Variable, "verification_time")[1]
+      attr(result.grid$Variable, "annual_agg_cellfun") <- attr(result.grid$Variable, "annual_agg_cellfun")[1]
+      attr(result.grid$Variable, "longname") <- NULL
+      
       return(result.grid)
 }
 
 
 #End
-
 
 
 #' @title Generate object needed by function reliability
@@ -274,24 +320,20 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
       if (!(dim(obs)[1] == dim(prd)[2] & dim(obs)[2] == dim(prd)[3])) {
             stop("Observations and predictions are not congruent in size")
       }
-      
       nyear <- dim(obs)[1]
       nmemb <- dim(prd)[1]
-      
       O <- obs2bin(obs, nbins)
       P <- prd2prob(prd, nbins)
-      
       ## calculo puntos diagrama fiabilidad
       aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, nbinsprob) 
       nbins <- aux$nbins
       nyear <- aux$nyear
       npoint <- aux$npoint
       n <- aux$n
-      
       prdprob <- vector("list", nbins)
       obsfreq <- vector("list", nbins)
       prdfreq <- vector("list", nbins)
-      slope <- rep(NA, 1, nbins)
+      slope <- rep(NA, nbins)
       # intercept <- rep(NA, 1, nbins)
       for (ibins in 1:nbins) {
             prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
@@ -315,9 +357,8 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
       ## bootstrapping
       slope_boot <- matrix(NA, nboot, nbins)
       # intercept_boot <- matrix(NA, nboot, nbins)
-      message("[", Sys.time(), "] Computing bootstrapping...")
+      message("...[", Sys.time(), "] Computing bootstrapping...")
       for (iboot in 1:nboot){
-            print(iboot)
             #             if (abs(iboot/50 - round(iboot/50)) < eps()) {
             #                   print(sprintf("... computing bootstrapping %d ...", iboot))
             #             }
@@ -357,7 +398,7 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
                   }
             }  
       }
-      message("[", Sys.time(), "] Done.")
+      message("...[", Sys.time(), "] Done.")
       # # intervalos de confianza para la pendiente de la reliability line
       # slope_lower <- matrix(NA, length(sigboot), nbins)
       # slope_upper <- matrix(NA, length(sigboot), nbins)
@@ -411,7 +452,7 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
 obs2bin <- function(obs, nbins){
       bin <- array(0, c(nbins, dim(obs)[1], dim(obs)[2]))
       cat <- array(NA, c(dim(obs)[1], dim(obs)[2]))
-      
+      v.err <- rep(NA, dim(obs)[2])
       for (inod in 1:dim(obs)[2]) {
             tryCatch({
                   ## categorias obs     
@@ -425,11 +466,13 @@ obs2bin <- function(obs, nbins){
                         cat[indcat, inod] <- ibins
                   }
             }, error = function(ex) {
-                  message("Imposible calcular categorias en el punto de grid %d", inod)
+                  v.err[inod] <- 1
             })
       }
+      if(any(!is.na(v.err))){
+            message("Imposible to calculate categories for the ", (sum(v.err, na.rm = T)/length(v.err))*100, " percent of the grid boxes in obs.")
+      }
       rm(auxobscat)
-      
       bincat <- list()
       bincat$bin <- bin
       bincat$cat <- cat  
@@ -462,7 +505,7 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
       
       prob <- array(NA, c(nbins, dim(prd)[2], dim(prd)[3]))
       cat <- array(NA, c(dim(prd)[1], dim(prd)[2], dim(prd)[3]))
-      
+      v.err <- rep(NA, dim(prd)[3])
       for (inod in 1:dim(prd)[3]) {
             ## categorias prd
             ## calculo los terciles de la prediccion a nivel de modelo (concateno todos los miembros)      
@@ -498,12 +541,15 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
                   cat[, , inod] <- tmp2
                   rm(tmp2)
             }, error = function(ex) {
-                  message("Problemas en el punto de grid, imposible calcular categorias. Eliminando punto del analisis.", inod)
+                  v.err[inod] <- 1
                   nmemb<-dim(prd)[2]
                   ntime<-dim(prd)[1]
-                  cat[, , inod] <- matrix(NA,nmemb,ntime)
+                  cat[, , inod] <- matrix(NA, nmemb, ntime)
             })
-      }  
+      }
+      if(any(!is.na(v.err))){
+            message("Imposible to calculate categories in the ", (sum(v.err, na.rm = T)/length(v.err))*100, " percent of the grid boxes in prd. Removed for the analysis.")
+      }
       rm(auxprd)
       probcat <- list()
       probcat$prob <- prob

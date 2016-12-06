@@ -148,3 +148,14 @@ NULL
 #' }
 NULL
 
+#' @title AR5 regions from the IPCC 5th Assessment Report.
+#' @description SpatialPolygons object of the geographical regions used in the IPCC 5th Assessment Report.
+#' @format A SpatialPolygons object
+#' @description For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
+#' @source Shapefile imported with function \code{\link[rgdal]{readOGR}} (\url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html})
+#' @name AR5regions
+#' @examples \dontrun{
+#' data(AR5regions)
+#' plot(AR5regions)
+#' }
+NULL
