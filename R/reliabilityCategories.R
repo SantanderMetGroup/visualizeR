@@ -88,7 +88,7 @@ reliabilityCategories <- function(obs,
       coords <- as.data.frame(cbind(coordinates[,2], coordinates[,1]))
       spoints <- SpatialPoints(coords)
       suppressMessages(
-            obs.fin <- transformeR:climatology(obs)
+            obs.fin <- transformeR::climatology(obs)
       )
       ob.full <- array3Dto2Dmat(obs$Data)
       ob.clim <- array(dim = c(nbins, dim(ob.full)[-1]))
@@ -188,10 +188,10 @@ reliabilityCategories <- function(obs,
             attr(cats$Variable, "longname") <- paste("category ", i)
             l.obs.fin[[i]] <- cats
       }
-      a <- makeMultiGrid(l.obs.fin)
+      mg <- makeMultiGrid(l.obs.fin)
       if (diagrams) {
             if(length(regs) > 1){
-                  pc <- transformeR::plotClimatology(a,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
+                  pc <- transformeR::plotClimatology(mg,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
                                         col.regions = c("red", "orange", "gold", "yellow", "cyan", "green"),
                                         colorkey = list(labels = list( 
                                               cex = 1,
@@ -252,15 +252,15 @@ reliabilityCategories <- function(obs,
                   
             }
       }
-      result.grid <- a
+      result.grid <- mg
       attr(result.grid$Data, "dimensions") <- c("cat", "var", "member", "time", "lat", "lon")
       attr(result.grid$Data, "climatology:fun") <- NULL
       result <- list()
-      colnames(ob.catname) <- attr(a$Variable, "longname")
+      colnames(ob.catname) <- attr(mg$Variable, "longname")
       result$catname <- ob.catname
-      colnames(ob.slope$sl) <- attr(a$Variable, "longname")
-      colnames(ob.slope$lower) <- attr(a$Variable, "longname")
-      colnames(ob.slope$upper) <- attr(a$Variable, "longname")
+      colnames(ob.slope$sl) <- attr(mg$Variable, "longname")
+      colnames(ob.slope$lower) <- attr(mg$Variable, "longname")
+      colnames(ob.slope$upper) <- attr(mg$Variable, "longname")
       result$slope <- ob.slope
       message("[", Sys.time(), "] Done.")
       result.grid$ReliabilityCategories <- result
