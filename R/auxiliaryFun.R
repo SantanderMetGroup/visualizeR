@@ -399,7 +399,7 @@ seasMean <- function(obj) {
 #' @title Get quantiles from a S4 object
 #' @description Get quantiles from a S4 object with the dimensions c("var", "member", "time", "y", "x")
 #' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
-#' @param k order of the quantile/s (e.g. c(1/3, 2/3) for terciles)
+#' @param k order of the quantile/s (e.g. c(1/3, 2/3) for terciles). Terciles are computed by default.
 #' @return A S4 object with quantiles. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
@@ -408,7 +408,8 @@ seasMean <- function(obj) {
 MrQuantile <- function(obj, k=NULL){
   if (isS4(obj)==TRUE){
     if (is.null(k)){
-      stop('Introduce the order of the quantile (e.g. c(1/3, 2/3) for terciles)')
+      k <- c(1/3, 2/3)  
+      warning('Terciles are computed')
     }
     obj.Data <- getData(obj)
     obj.dimNames <- attr(obj.Data, "dimensions")
@@ -423,8 +424,11 @@ MrQuantile <- function(obj, k=NULL){
       arr <- array(NA, c(length(k)*n.var, n.mem, 1, n.y, n.x))
       count <- seq(1,length(k)*n.var,length(k))
       newvar <- character(length = 0)
-      mar <- setdiff(1:length(dim(obj.Data[1,,,,])), which(dim(obj.Data[1,,,,])==dim(obj.Data)[getDimIndex(obj, "time")]))  
-#      mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time") - 1)
+      if (dim(obj.Data)[getDimIndex(obj, "member")]==1){
+        mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time")-2)
+      } else{
+        mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time")-1)
+      }
       for (ivar in 1:n.var){ 
         if (is.null(dim(obj.Data[1,,,,]))){
           arr[count[ivar]:(count[ivar]+length(k)-1),,,,] <- quantile(obj.Data[ivar,,,,], probs = k, na.rm = TRUE)

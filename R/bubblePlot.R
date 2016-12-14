@@ -17,7 +17,6 @@
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
 #' @param piechart Logical flag indicating if pie charts should be plot. Default is FALSE.
-#' @param only.at List with the LonLatCoords of those points selected from the whole grid. 
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
 #'  reversed (e.g for precipitation). Default is FALSE.
@@ -25,7 +24,7 @@
 #' @param pch.obs.constant pch value to highlight those whose score cannot be computed due to constant obs 
 #'  conditions (e.g. always dry). Default is NULL.
 #' @param pch.data.nan pch value to highlight those whose score cannot be computed due to time series with all NA values in 
-#'  the observations and/or models. 
+#'  the observations and/or models. If score=F, highlight those grids with all forecasts NaN. 
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
@@ -69,18 +68,16 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, only.at=NULL, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
       yy <- unique(getYearsAsINDEX(mm.obj))
       # Interpolate observations to the hindcast grid
       obs <- interpGrid(obs, new.coordinates = getGrid(mm.obj), method = "nearest")
-      if (!is.null(year.target)){
-        if (!year.target %in% yy) {
-          stop("Target year outside temporal data range")
-        }
-      }
       if (is.null(forecast)){
         if (is.null(year.target)){
           year.target <- last(yy)
+        }
+        if (!year.target %in% yy) {
+          stop("Target year outside temporal data range")
         }
         yy.forecast <- year.target
         forecast <- subsetGrid(mm.obj, years=yy.forecast)
@@ -110,14 +107,10 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       if (detrend){
         mm.obj <- detrend.forecast(mm.obj)
         obs <- detrend.forecast(obs)
-      }      
-      #iyear <- which(yy == year.target) ######### QUITAR?????
+      } 
       # Computation of seasonal mean
       sm.mm.obj <- seasMean(mm.obj)
       sm.obs <- seasMean(obs)
-      # Detect gridpoints with time series with all NA values 
-      obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-      mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
       # Computation exceedance probabilities
       probs.mm.obj <- QuantileProbs(sm.mm.obj)
       probs.obs <- QuantileProbs(sm.obs)
@@ -126,6 +119,10 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         sm.forecast <- seasMean(forecast)
         probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
       }
+      # Detect gridpoints with time series with all NA values 
+      obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
+      mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
+      forecast.na <- as.vector(apply(getData(sm.forecast)[1,,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
       # Tercile for the maximum probability
       prob <- getData(probs.mm.obj)
       prob.forecast <- getData(probs.forecast)
@@ -143,11 +140,8 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       idxmat.max.prob <- cbind(c(as.numeric(t.max.forecast)), 1:prod(dim(t.max.forecast))) # ... as index matrix for the target year????
       # Probability of the most likely tercile
       max.prob.forecast <- apply(prob.forecast, MARGIN = margin, FUN = max)      
-      # Remove in model data the NaN cases detected for the observations. 
       ve.max.prob <- as.vector(max.prob.forecast)
       v.t.max.prob <- as.vector(t.max.forecast, mode="numeric") 
-      #v.valid <- complete.cases(as.vector(obs.t[iyear, , ]), v.max.prob)
-      #ve.max.prob <- v.max.prob[v.valid]
       gridpoints <- length(ve.max.prob)
       if (!size.as.probability){
         ve.max.prob <- rep(1, gridpoints)
@@ -160,8 +154,6 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       x.mm <- attr(getxyCoords(mm.obj),"longitude") 
       y.mm <- attr(getxyCoords(mm.obj),"latitude")  
       nn.yx <- as.matrix(expand.grid(y.mm, x.mm))
-      #yx <- as.matrix(expand.grid(y.mm, x.mm))
-      #nn.yx <- yx[v.valid, ]  # remove NaN               
       # Define colors
       df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
       df$color <- "black"
@@ -174,9 +166,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       df$color[df$t.max.prob == 1] <- t.colors[1]      
       # Compute ROCSS for all terciles
       if (score) { 
-        # Remove year.target to the score calculation
-        #i.yy <- !yy == year.target
-        rocss <- array(dim=dim(prob)[-2:-3]) # remove year and member dimensions       
+        rocss <- array(dim=dim(prob)[-2:-3]) # remove member and year dimensions       
         for (i.tercile in 1:3){
           rocss[i.tercile, , ] <- apply(
             array(c(obs.t==i.tercile, prob[i.tercile, 1, , ,]), dim=c(dim(obs.t),2)),
@@ -190,8 +180,6 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           rocss <- unshape(rocss)
           v.score <- rocss[idxmat.max.prob]
           rocss <- deunshape(rocss)
-          #dim(max.rocss) <- dim(rocss)[-1]
-          #v.score <- c(max.rocss)
           pos.val <- v.score >= 0
           neg.val <- v.score < 0
         }
@@ -220,21 +208,14 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           rocss <- unshape(rocss)
           colors <- array(dim=dim(rocss))
           t.colors[2] <- gray(0.2)
-          for (i.tercile in 1:3) {colors[i.tercile,] <- alpha(t.colors[i.tercile],255*rocss[i.tercile,])}          
-          #score.valid <- v.valid
+          for (i.tercile in 1:3) {colors[i.tercile,] <- alpha(t.colors[i.tercile],255*rocss[i.tercile,])}  
+          v.valid <- which(colSums(!is.nan(rocss))==3)
         } else {
           colors <- matrix(rep(t.colors, gridpoints), nrow = 3)
-          #score.valid <- v.valid
+          v.valid <- which(rowSums(v.prob)==1)
         }
-        #if (!is.null(only.at)) { ##### Comprobar que funciona en este caso
-        #  ns <- nrow(only.at$Stations$LonLatCoords)
-        #  score.valid <- rep(FALSE, length(score.valid))
-        #  for (i.station in 1:ns){
-        #    score.valid[which.min((only.at$Stations$LonLatCoords[i.station,1] - nn.yx[,2])^2 +
-        #                            (only.at$Stations$LonLatCoords[i.station,2] - nn.yx[,1])^2)] <- TRUE
-        #  }
-        #}
-        for (i.loc in 1:gridpoints){
+        # Plot the piechart only for those grid points with no NaN probabilities
+        for (i.loc in v.valid){
           add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=colors[,i.loc],
                   radius=radius, init.angle=90, clockwise = F, border="lightgray", labels=NA
           )  
@@ -242,21 +223,23 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         if (score){
           # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)       
           if (!is.null(pch.obs.constant)){
-            #if (!is.null(only.at)) {score.valid <- rep(TRUE, gridpoints)} ##### Comprobar que funciona en este caso
-            #valid.points <- intersect(which(t.obs.constant),which(score.valid))
             valid.points <- which(t.obs.constant)
-            for (i.loc in valid.points){   
-              add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=NA,
-                      radius=radius, init.angle=90, clockwise = F, border="black", labels=NA)            
+            for (i.loc in valid.points){  
+              points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.obs.constant, xlab="", ylab="")
             }
           }
           # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
             valid.points <- which((obs.na + mm.obj.na)>0)
             for (i.loc in valid.points){   
-              add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=NA,
-                      radius=radius, init.angle=90, clockwise = F, border="black", labels=NA)            
+              points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.data.nan, xlab="", ylab="")
             }
+          }
+        } else{
+          # Highlight those grids with all forecasts NaN. 
+          if (!is.null(pch.data.nan)){
+            na.points <- which(forecast.na)
+            points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=radius/2, col="white", pch=pch.data.nan, xlab="", ylab="")
           }
         }
       } else { # Plot with bubbles
@@ -276,7 +259,14 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
             points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=1, col="black", pch=pch.data.nan, xlab="", ylab="")
           }
         } else {
-          points(nn.yx[ , 2], nn.yx[ , 1], cex=symb.size, col=df$color, pch=16, xlab="", ylab="")
+          # Plot bubbles only for those grid points with not all NaN values
+          v.valid <- which(!forecast.na)
+          points(nn.yx[v.valid, 2], nn.yx[v.valid, 1], cex=symb.size, col=df$color[v.valid], pch=16, xlab="", ylab="")
+          # Highlight those grids with all NaN values.
+          if (!is.null(pch.data.nan)){
+            na.points <- which(forecast.na)
+            points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=symb.size, col="black", pch=pch.data.nan, xlab="", ylab="")
+          }
         }        
       } 
       # Add borders
@@ -312,4 +302,3 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       }
 }
 # End
-      
