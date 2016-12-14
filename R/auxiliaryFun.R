@@ -424,7 +424,7 @@ MrQuantile <- function(obj, k=NULL){
       arr <- array(NA, c(length(k)*n.var, n.mem, 1, n.y, n.x))
       count <- seq(1,length(k)*n.var,length(k))
       newvar <- character(length = 0)
-      if (dim(obj.Data)[getDimIndex(obj, "member")]==1){
+      if (n.mem==1){
         mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time")-2)
       } else{
         mar <- setdiff(1:length(dim(obj.Data[1,,,,])), getDimIndex(obj, "time")-1)
