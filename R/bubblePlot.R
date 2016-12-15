@@ -94,6 +94,10 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       }
       stopifnot(checkData(mm.obj, obs))
       if (!is.null(forecast)){
+        if (length(getYearsAsINDEX(forecast))==1){
+          newdim <- c(length(forecast$Members),1,length(forecast$xyCoords$y),length(forecast$xyCoords$x))
+          dim(forecast$Data) <- newdim 
+        }      
         yy.forecast <- unique(getYearsAsINDEX(forecast))
         if (length(yy.forecast)>1) {
           stop("Select just one year for forecast")
