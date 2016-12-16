@@ -4,8 +4,8 @@
 \alias{reliabilityCategories}
 \title{Reliability categories of a probabilistic prd.}
 \usage{
-reliabilityCategories(obs, prd, regions = NULL, nbins = 3, nbinsprob = 10,
-  nboot = 100, sigboot = 0.05, diagrams = TRUE)
+reliabilityCategories(obs, prd, regions = NULL, nbins = 3, labels = NULL,
+  nbinsprob = 10, nboot = 100, sigboot = 0.05, diagrams = TRUE)
 }
 \arguments{
 \item{obs}{Grid of observations}
@@ -15,7 +15,10 @@ reliabilityCategories(obs, prd, regions = NULL, nbins = 3, nbinsprob = 10,
 \item{regions}{SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 the relaiability is calculated. Default is NULL (See details).}
 
-\item{nbins}{(optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3}
+\item{nbins}{Number of categories considered (e.g. 3 for terciles). By default nbins = 3}
+
+\item{labels}{Character of the names to be given at the categories defined in \code{nbins}
+(e.g. c("lower", "middle", "upper")). if NULL (default) numbered categories are returned.}
 
 \item{nbinsprob}{(optional): number of probability bins considered. By default nbinsprob = 10}
 

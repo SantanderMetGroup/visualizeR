@@ -7,7 +7,9 @@
 #' @param prd Grid of forecast data
 #' @param regions SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 #' the relaiability is calculated. Default is NULL (See details).
-#' @param nbins (optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3
+#' @param nbins Number of categories considered (e.g. 3 for terciles). By default nbins = 3
+#' @param labels Character of the names to be given at the categories defined in \code{nbins} 
+#' (e.g. c("lower", "middle", "upper")). if NULL (default) numbered categories are returned.
 #' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
 #' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.05
@@ -58,6 +60,7 @@ reliabilityCategories <- function(obs,
                                   prd,
                                   regions = NULL,
                                   nbins = 3,
+                                  labels = NULL,
                                   nbinsprob = 10,
                                   nboot = 100,
                                   sigboot = 0.05, 
@@ -65,6 +68,14 @@ reliabilityCategories <- function(obs,
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
+      if(is.null(labels)) labels <- paste("Category", 1:nbins)
+      red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
+      orange <- rgb(1, 0.65, 0.3, 1, names = "orange", maxColorValue = 1)
+      yellow <- rgb(1, 1, 0, 1, names = "yellow", maxColorValue = 1)
+      darkyellow <- rgb(0.8, 0.8, 0, 1, names = "dark_yellow", maxColorValue = 1)
+      cyan <- rgb(0, 1, 1, 1, names = "cyan", maxColorValue = 1)
+      green <- rgb(0, 1, 0, 1, names = "green", maxColorValue = 1)
+      
       regs <- regions
       if(is.null(regs)){
             bbox <- getGrid(obs) 
@@ -146,29 +157,29 @@ reliabilityCategories <- function(obs,
                   if (!is.na(slope[ibins])) {
                         if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
                               cat[ibins] <- 5 
-                              catcol[ibins] <- "green" 
+                              catcol[ibins] <- green
                               catname[ibins] <- "perfect"
                         } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
                                          (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
                               cat[ibins] <- 4  
-                              catcol[ibins] <- "cyan"
+                              catcol[ibins] <- cyan
                               catname[ibins] <- "still useful"
                               ## OJO: nueva categoria! 
                         } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
                               cat[ibins] <- 3.5  
-                              catcol[ibins] <- "yellow" 
+                              catcol[ibins] <- darkyellow 
                               catname[ibins] <- "marginally useful*"
                         } else if (slope[ibins] > 0 & slope_lower > 0) {
                               cat[ibins] <- 3  
-                              catcol[ibins] <- "gold" 
+                              catcol[ibins] <- yellow 
                               catname[ibins] <- "marginally useful"
                         } else if (slope[ibins] > 0 & slope_lower < 0) {
                               cat[ibins] <- 2  
-                              catcol[ibins] <- "orange"
+                              catcol[ibins] <- orange
                               catname[ibins] <- "not useful"
                         } else if (slope[ibins] < 0) {
                               cat[ibins] <- 1  
-                              catcol[ibins] <- "red" 
+                              catcol[ibins] <- red 
                               catname[ibins] <- "dangerous"
                         } 
                   }
@@ -185,14 +196,15 @@ reliabilityCategories <- function(obs,
             suppressMessages(
                   cats <- transformeR::climatology(obs.fin)
             )
-            attr(cats$Variable, "longname") <- paste("category ", i)
+            attr(cats$Variable, "longname") <- labels[i]
             l.obs.fin[[i]] <- cats
       }
       mg <- makeMultiGrid(l.obs.fin)
       if (diagrams) {
             if(length(regs) > 1){
                   pc <- transformeR::plotClimatology(mg,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
-                                        col.regions = c("red", "orange", "gold", "yellow", "cyan", "green"),
+                                        col.regions = c(red, orange, yellow, darkyellow, cyan, green),
+                                        layout = c(1, nbins),
                                         colorkey = list(labels = list( 
                                               cex = 1,
                                               at = c(1, 2, 2.75, 3.25, 4, 5), 
@@ -214,7 +226,7 @@ reliabilityCategories <- function(obs,
                         plot(b, a, col = "black", lty = 3, typ = "l",
                              xlim = c(0,1), ylim = c(0,1),
                              xlab = "prd prob.", ylab = "obs. freq.",
-                             main = paste("Category ", i), 
+                             main = labels[i], 
                              sub = list(catname[i], cex = 1.2),
                              font.sub=4)
                         abline(b, a, col = "black", lty = 3)
