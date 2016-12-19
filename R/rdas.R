@@ -159,3 +159,14 @@ NULL
 #' plot(AR5regions)
 #' }
 NULL
+
+#' @title PRUDENCE regions.
+#' @description SpatialPolygons object of the geographical regions used in the PRUDENCE project.
+#' @format A SpatialPolygons object
+#' @description For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
+#' @name PRUDENCEregions
+#' @examples \dontrun{
+#' data(PRUDENCEregions)
+#' plot(PRUDENCEregions)
+#' }
+NULL
