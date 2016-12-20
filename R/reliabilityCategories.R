@@ -208,8 +208,8 @@ reliabilityCategories <- function(obs,
                                         colorkey = list(labels = list( 
                                               cex = 1,
                                               at = c(1, 2, 2.75, 3.25, 4, 5), 
-                                              labels = c("dangerous", "not usefull","marginally usefull",
-                                                         "marginally useful*","still usefull","perfect"))))
+                                              labels = c("dangerously unuseful", "not useful","marginally useful",
+                                                         "marginally useful*","still useful","perfect"))))
                   
                   print(pc)
             }else{
