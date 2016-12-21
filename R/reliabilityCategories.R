@@ -52,7 +52,7 @@
 # @import verification
 # @import plot3D
 #' @importFrom transformeR getGrid redim getDim
-#' @importFrom sp SpatialPoints SpatialPolygons Polygons over
+#' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
 #' @importFrom graphics plot.new abline polygon text grid title
 #' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
 
