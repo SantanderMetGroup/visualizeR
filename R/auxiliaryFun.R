@@ -144,6 +144,21 @@ unshape <- function(x, MAR=c(1)){
   return(x)
 }
 
+# Check xyCoords from two datasets
+checkCoords <- function (data1, data2){
+  v<-FALSE
+  if (is.null(data1) | is.null(data2)) v <-TRUE
+  if (length(getCoordinates(data1)$x)==length(getCoordinates(data2)$x)){
+    if (all(getCoordinates(data1)$x==getCoordinates(data2)$x)) v<-TRUE
+  }
+  if (length(getCoordinates(data1)$y)==length(getCoordinates(data2)$y)){
+    if (all(getCoordinates(data1)$y==getCoordinates(data2)$y)) v<-TRUE
+  }
+  return(v)
+}
+
+
+
 #yearmean <- function(dsRobj, yrOfSeasonEnd = TRUE){
 #  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
 #  lon.dim <- grep("lon", dsRobj.dimNames)
@@ -500,25 +515,25 @@ QuantileProbs <- function(obj, obj2=NULL, nbins=3){
             if (n.mem==1){
               probs[count[ivar],1,,iy,ix] <- obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix]
               for (ibins in 1:(nbins-2)){
-                probs[count[ivar]+ibins,1,,iy,ix] <- obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar]+ibins,,,iy,ix]
+                probs[count[ivar]+ibins,1,,iy,ix] <- obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<=quantiles.Data[countq[ivar]+ibins,,,iy,ix]
               }
-              probs[count[ivar]+nbins-1,1,,iy,ix] <- obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix] 
+              probs[count[ivar]+nbins-1,1,,iy,ix] <- obj.Data[ivar,,,iy,ix]>quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix] 
               probs <- probs*1
             } else { 
               if (n.dates==1){
                 n.mem.nn <- sum(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
                 probs[count[ivar],1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], na.rm=T)/n.mem.nn
                 for (ibins in 1:(nbins-2)){
-                  probs[count[ivar]+ibins,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar]+ibins,,,iy,ix], na.rm=T)/n.mem.nn
+                  probs[count[ivar]+ibins,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<=quantiles.Data[countq[ivar]+ibins,,,iy,ix], na.rm=T)/n.mem.nn
                 }
-                probs[count[ivar]+nbins-1,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], na.rm=T)/n.mem.nn
+                probs[count[ivar]+nbins-1,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], na.rm=T)/n.mem.nn
               } else {
                 n.mem.nn <- colSums(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
                 probs[count[ivar],1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
                 for (ibins in 1:(nbins-2)){
-                  probs[count[ivar]+ibins,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar]+ibins,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
+                  probs[count[ivar]+ibins,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<=quantiles.Data[countq[ivar]+ibins,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
                 }
-                probs[count[ivar]+nbins-1,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
+                probs[count[ivar]+nbins-1,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
               }
             }        
           }

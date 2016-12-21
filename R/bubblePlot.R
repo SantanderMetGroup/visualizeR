@@ -16,6 +16,7 @@
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
+#' @param bubble.size Number for the bubble size. bubble.size=4 by default.
 #' @param piechart Logical flag indicating if pie charts should be plot. Default is FALSE.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
@@ -68,10 +69,19 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=4, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
       yy <- unique(getYearsAsINDEX(mm.obj))
-      # Interpolate observations to the hindcast grid
-      obs <- interpGrid(obs, new.coordinates = getGrid(mm.obj), method = "nearest")
+      # Check grid from the data. 
+      if (!checkCoords(mm.obj, obs)){
+        message("WARNING: Data with no common grid")
+        # Interpolate observations to the hindcast grid
+        obs <- interpGrid(obs, new.coordinates = getGrid(mm.obj), method = "nearest")
+      }
+      if (!checkCoords(mm.obj, forecast)){
+        message("WARNING: Data with no common grid")
+        # Interpolate forecast to the hindcast grid
+        forecast <- interpGrid(forecast, new.coordinates = getGrid(mm.obj), method = "nearest")
+      }
       if (is.null(forecast)){
         if (is.null(year.target)){
           year.target <- last(yy)
@@ -80,9 +90,9 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           stop("Target year outside temporal data range")
         }
         yy.forecast <- year.target
-        forecast <- subsetGrid(mm.obj, years=yy.forecast)
-        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast])
-        obs <- subsetGrid(obs, years=yy[yy!=yy.forecast])
+        forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
+        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
+        obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
         yy <- yy[yy!=yy.forecast]
       }      
       # Check input datasets
@@ -94,10 +104,6 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       }
       stopifnot(checkData(mm.obj, obs))
       if (!is.null(forecast)){
-        if (length(getYearsAsINDEX(forecast))==1){
-          newdim <- c(length(forecast$Members),1,length(forecast$xyCoords$y),length(forecast$xyCoords$x))
-          dim(forecast$Data) <- newdim 
-        }      
         yy.forecast <- unique(getYearsAsINDEX(forecast))
         if (length(yy.forecast)>1) {
           stop("Select just one year for forecast")
@@ -198,10 +204,10 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       if (!is.null(subtitle)){
         mtext(subtitle, side=3, line=0.5, at=min(x.mm), adj=0, cex=0.8)
       }
-      symb.size <- (df$max.prob-0.33) * 4
-      symb.size.lab1 <- (1-0.33) * 4
-      symb.size.lab075 <- (0.75-0.33) * 4
-      symb.size.lab050 <- (0.5-0.33) * 4
+      symb.size <- (df$max.prob-0.33) * bubble.size
+      symb.size.lab1 <- (1-0.33) * bubble.size
+      symb.size.lab075 <- (0.75-0.33) * bubble.size
+      symb.size.lab050 <- (0.5-0.33) * bubble.size
       if (piechart){   # Plot with pies
         pch.neg.score <- NULL
         size.as.probability <- F
@@ -280,16 +286,23 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
       plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
       # Add legend
+      # Transparency color for 0.5 score
+      legend.color.transparency <- c(alpha(t.colors[1], 255*0.5), alpha(t.colors[2], 255*0.5), alpha(t.colors[3], 255*0.5))
       if (size.as.probability) {
         if (score & !is.null(pch.neg.score)){
-          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)", "Negative score")
+          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%) Transparency: ROCSS=0.5", "Negative score")
           xcoords <- c(0, 0.55, 0.95, 1.35)
           secondvector <- (1:length(legtext))-1
           textwidths <- xcoords/secondvector 
           textwidths[1] <- 0
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(legend.color.transparency, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
         } else{
-          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")
+          if (score){
+            t.colors <- legend.color.transparency
+            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%) Transparency: ROCSS=0.5")
+          } else{
+            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")     
+          }
           xcoords <- c(0, 0.55, 0.95)
           secondvector <- (1:length(legtext))-1
           textwidths <- xcoords/secondvector 
@@ -299,9 +312,15 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         }
       } else {
         if (score & !is.null(pch.neg.score)){
-          legend('bottomleft', c("Below", "Normal", "Above", "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.8, horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")        
+          legend('bottomleft', c("Below", "Normal", "Above (Transparency: ROCSS=0.5)", "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(legend.color.transparency, "black"), cex=0.8, horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")        
         } else{
-          legend('bottomleft', c("Below", "Normal", "Above"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")        
+          if (score){
+            t.colors <- legend.color.transparency
+            legtext <- c("Below", "Normal", "Above (Transparency: ROCSS=0.5)")
+          } else{
+            legtext <- c("Below", "Normal", "Above")     
+          }
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col = c(t.colors), cex=0.8, horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")        
         }  
       }
 }
