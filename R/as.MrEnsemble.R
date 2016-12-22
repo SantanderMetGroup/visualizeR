@@ -31,7 +31,7 @@ as.MrEnsemble <- function(obj.s3){
   attr(xyCoords, "longitude") <- lons
   attr(xyCoords, "latitude") <- lats
   dimNames <- attr(obj.s3$Data, "dimensions")
-  newdim <- c(length(obj.s3$Variable$varName),length(obj.s3$Members),dim(obj.s3$Data)[grep("time", dimNames)],dim(obj.s3$Data)[grep("lat", dimNames)],dim(obj.s3$Data)[grep("lon", dimNames)])
+  newdim <- c(length(obj.s3$Variable$varName),length(obj.s3$Members),dim(obj.s3$Data)[grep("time", dimNames)],length(lats),length(lons))
   newdata <- obj.s3$Data
   attr(newdata, "dimensions") <- c("var","member","time","y","x")
   dim(newdata) <- newdim
