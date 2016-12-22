@@ -28,7 +28,7 @@ as.MrStation <- function(obj.s3){
   attr(xyCoords, "projection") <- "stations"
   attr(xyCoords, "longitude") <- lons
   attr(xyCoords, "latitude") <- lats
-  newdim <- c(length(obj.s3$Variable$varName),1,dim(obj.s3$Data)[1],1,dim(obj.s3$Data)[2])
+  newdim <- c(length(obj.s3$Variable$varName),1,dim(obj.s3$Data)[1],1,length(lons))
   newdata <- obj.s3$Data
   attr(newdata, "dimensions") <- c("var","member","time","y","x")
   dim(newdata) <- newdim
