@@ -233,6 +233,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
       mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
       title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start, mons.end, yy.forecast)
+      opar <- par(no.readonly=TRUE)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
       mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)
@@ -361,5 +362,6 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col=c(t.colors), cex=0.7, horiz=T, bty="n", xjust=0)        
         }  
       }
+      par(opar)
 }
 # End

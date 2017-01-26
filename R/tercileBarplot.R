@@ -138,6 +138,7 @@ tercileBarplot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detre
     else {return("darkgrey")}
   }
   # Bars for the selected year  
+  opar <- par(no.readonly=TRUE)
   par(oma = c(4, 0, 2, 0))
   barplot(getData(probs.forecast)[,,,,], names.arg=c("Below", "Normal", "Above"), col="lightgrey", ylab="Probability of the tercile", ylim=c(0,1))
   abline(h=0.33, col="darkgrey", lwd=4)
@@ -159,5 +160,6 @@ tercileBarplot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detre
   brks <- c(-1,0,threshold,1)
   cbar <- c("red", "darkgrey", "blue")
   image.plot(add = TRUE, legend.only = TRUE, breaks = brks, lab.breaks=brks, col = cbar, zlim=c(-1,1), horizontal=T) 
+  par(opar)
 }
 # End
