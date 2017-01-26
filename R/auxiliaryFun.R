@@ -87,21 +87,6 @@ checkCoords <- function (data1, data2){
   return(v)
 }
 
-# Set lon lat resolution for a new grid
-#' @keywords internal
-setGrid <- function(grid, resolution){
-  if (length(resolution)==1){
-    resX <- resolution
-    resY <- resolution
-  } else{
-    resX <- resolution[1]
-    resY <- resolution[2]
-  }
-  attr(grid,"resX") <- resX
-  attr(grid,"resY") <- resY
-  return(grid)
-}
-
 #' @keywords internal
 getDimIndex <- function(obj, dim) {
   obj.dimNames <- attr(getData(obj), "dimensions")
