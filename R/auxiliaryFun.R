@@ -9,7 +9,6 @@ alpha <- function(col, alpha){
 # Detrend: performs detrending of data
 #' @keywords internal
 #' @importFrom stats lm coef
-
 detrend <- function(x,tt,y=NULL,tty=NULL) { #############aniadir otro flag para que calcule los residuos de forecast
   #tt <- as.POSIXct(tt)
   tt <- as.numeric(as.Date(tt))
@@ -32,85 +31,29 @@ detrend <- function(x,tt,y=NULL,tty=NULL) { #############aniadir otro flag para 
   }
 } 
 
-# From Chus
-#detrend <- function(dsRobj){
-#  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
-#  lon.dim <- grep("lon", dsRobj.dimNames)
-#  lat.dim <- grep("lat", dsRobj.dimNames)
-#  member.dim <- grep("member", dsRobj.dimNames)
-#  time.dim <- grep("time", dsRobj.dimNames)
-#  n.mem <- dim(dsRobj$Data)[member.dim]
-#  rval <- dsRobj
-#  times <- as.POSIXlt(dsRobj$Dates$start)
-#  margin <- c(lat.dim, lon.dim, member.dim)
-#  detrended <- function(x){
-#    if (sum(!is.na(x))==0)
-#      return (rep(NA, length(x)))
-#    else
-#      return(resid(lm(y~t,data.frame(y=x, t=times))))
-#  }
-#  rval$Data <- apply(dsRobj$Data, MARGIN = margin, FUN = detrended)
-#  # Recover the original dimension order
-#  newdims <- c("time", dsRobj.dimNames[margin])
-#  rval$Data <- aperm(rval$Data, match(dsRobj.dimNames, newdims))
-#  attr(rval$Data, "dimensions") <- dsRobj.dimNames
-#  rval$Dates$start <- tapply(dsRobj$Dates$start, INDEX=yrs, FUN=min)
-#  rval$Dates$end <- tapply(dsRobj$Dates$end, INDEX=yrs, FUN=max)
-#  attr(rval$Dates, "season") <- getSeason(dsRobj)
-#  return(rval)
-#}
 
+#' @keywords internal
 deunshape <- function(x){
   dim(x) <- attr(x,"shape")
   attr(x,"shape") <- NULL
   return(x)
 }
 
-#fldsubsample <- function(dsRobj, one.out.of = 2){
-#  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
-#  lon.dim <- grep("lon", dsRobj.dimNames)
-#  lat.dim <- grep("lat", dsRobj.dimNames)
-#  nx <- length(dsRobj$xyCoords$x)
-#  ny <- length(dsRobj$xyCoords$y)
-#  filter.x <- seq(1,nx,by=one.out.of)
-#  filter.y <- seq(1,ny,by=one.out.of)
-#  rval <- dsRobj
-#  rval$xyCoords$x <- dsRobj$xyCoords$x[filter.x]
-#  rval$xyCoords$y <- dsRobj$xyCoords$y[filter.y]
-#  attr(rval$xyCoords, "resX") <- attr(dsRobj$xyCoords, "resX")*one.out.of
-#  attr(rval$xyCoords, "resY") <- attr(dsRobj$xyCoords, "resY")*one.out.of
-#  rval$Data <- extract(dsRobj$Data,
-#                       indices=list(filter.x,filter.y),
-#                       dims=c(lon.dim, lat.dim)
-#  )
-#  attr(rval$Data, "dimensions") <- attr(dsRobj$Data, "dimensions")
-#  return(rval)
-#}
+#' @keywords internal
+unshape <- function(x, MAR=c(1)){
+  attr(x, "shape") <- dim(x)
+  ndim <- length(dim(x))
+  dim(x) <- c(dim(x)[MAR],prod(dim(x)[-MAR]))
+  return(x)
+}
 
+
+#' @keywords internal
 last <- function(x){
    return(x[length(x)])
 }
 
-#summary.dsRgrid <- function(x){
-#  cat(sprintf("Variable: %s\n", x$Variable$varName))
-#  cat("Shape: ", dim(x$Data), "(", attr(x$Data, "dimensions"), ")\n")
-#  nx <- length(x$xyCoords$x)
-#  ny <- length(x$xyCoords$y)
-#  nt <- length(x$Dates$start)
-#  cat(sprintf("X range: %6.2f to %6.2f (%d values)\n", min(x$xyCoords$x), max(x$xyCoords$x),nx))
-#  cat(sprintf("Y range: %6.2f to %6.2f (%d values)\n", min(x$xyCoords$y), max(x$xyCoords$y), ny))
-#  available.months <- sort(unique(as.integer(substr(x$Dates$start, 6,7))))
-#  if (identical(available.months, 1:12)) {
-#    available.months <- "All year"
-#  } else {
-#    available.months <- sprintf("Season: %s", paste(available.months, collapse=' '))
-#  }
-#  cat(sprintf("time range: %s to %s (%d values, %s)\n", x$Dates$start[1], x$Dates$end[nt], nt, available.months))
-#  if ("member" %in% attr(x$Data, "dimensions"))
-#    member.dim <- grep("member", attr(x$Data, "dimensions"))
-#  cat(sprintf("Members: %d\n", dim(x$Data)[member.dim]))
-#}
-
+#' @keywords internal
 tercileBrewerColorRamp <- function(ncolors){
   ncolors <- ncolors-2
   tcols <- tercileColor()
@@ -123,28 +66,15 @@ tercileBrewerColorRamp <- function(ncolors){
   return(rval)
 }
 
+#' @keywords internal
 tercileColor <- function(){
   #c("red", "yellow", "blue")
   c("Blues", "Greys", "Reds")
 }
 
-#tercileColorRamp <- function(ncolors){
-#  alphas <- seq(0,255,len=ncolors)
-#  tcols <- tercileColor()
-#  t.low <- alpha(tcols[1],alphas)
-#  t.mid <- alpha(tcols[2],alphas)
-#  t.hi <- alpha(tcols[3],alphas)
-#  return(data.frame(t.low,t.mid,t.hi))
-#}
-
-unshape <- function(x, MAR=c(1)){
-  attr(x, "shape") <- dim(x)
-  ndim <- length(dim(x))
-  dim(x) <- c(dim(x)[MAR],prod(dim(x)[-MAR]))
-  return(x)
-}
 
 # Check xyCoords from two datasets
+#' @keywords internal
 checkCoords <- function (data1, data2){
   v<-FALSE
   if (is.null(data1) | is.null(data2)) v <-TRUE
@@ -157,33 +87,109 @@ checkCoords <- function (data1, data2){
   return(v)
 }
 
+# Set lon lat resolution for a new grid
+#' @keywords internal
+setGrid <- function(grid, resolution){
+  if (length(resolution)==1){
+    resX <- resolution
+    resY <- resolution
+  } else{
+    resX <- resolution[1]
+    resY <- resolution[2]
+  }
+  attr(grid,"resX") <- resX
+  attr(grid,"resY") <- resY
+  return(grid)
+}
 
+#' @keywords internal
+getDimIndex <- function(obj, dim) {
+  obj.dimNames <- attr(getData(obj), "dimensions")
+  return(grep(dim, obj.dimNames))
+}
 
-#yearmean <- function(dsRobj, yrOfSeasonEnd = TRUE){
-#  dsRobj.dimNames <- attr(dsRobj$Data, "dimensions")
-#  lon.dim <- grep("lon", dsRobj.dimNames)
-#  lat.dim <- grep("lat", dsRobj.dimNames)
-#  member.dim <- grep("member", dsRobj.dimNames)
-#  time.dim <- grep("time", dsRobj.dimNames)
-#  n.mem <- dim(dsRobj$Data)[member.dim]
-#  if (yrOfSeasonEnd) {
-#    yrs <- getYearsAsINDEX(dsRobj)
-#  } else {
-#    yrs <- as.integer(substr(dsRobj$Dates$start, 0,4))
-#  }
-#  rval <- dsRobj
-#  margin <- c(lat.dim, lon.dim, member.dim)
-#  rval$Data <- apply(dsRobj$Data, MARGIN = margin,
-#    FUN = function(x) {tapply(x, INDEX = yrs, FUN = mean, na.rm = TRUE)}
-#  )
-#  # Recover the original dimension order
-#  newdims <- c("time", dsRobj.dimNames[margin])
-#  rval$Data <- aperm(rval$Data, match(dsRobj.dimNames, newdims))
-#  attr(rval$Data, "dimensions") <- dsRobj.dimNames
-#  rval$Dates$start <- tapply(dsRobj$Dates$start, INDEX=yrs, FUN=min)
-#  rval$Dates$end <- tapply(dsRobj$Dates$end, INDEX=yrs, FUN=max)
-#  return(rval)
-#}
+#' @keywords internal
+getCountIndex <- function(obj, dim) {
+  obj.Data <- getData(obj)
+  return(dim(obj.Data)[getDimIndex(obj, dim)])
+}
+
+# Check the data format and dates before performing plots
+#' @keywords internal
+checkData <- function(mm.obj, obs) {
+  vec <- c()
+  if(isS4(mm.obj)==TRUE){
+    if (!class(mm.obj)[1]=="MrEnsemble") {
+       vec <- c(vec,FALSE)
+       message("The input data for hindcast is not a multimember field ")
+    }
+    if (length(getVarName(mm.obj))>1) {
+      vec <- c(vec,FALSE)
+      message("Multifields are not a valid input")
+    }
+    if (!missing(obs)){
+      if(isS4(obs)==TRUE){
+        if (class(obs)[1]=="MrEnsemble") {
+          vec <- c(vec,FALSE)
+          message("The verifying observations can't be a multimember")
+        }
+        if (length(getVarName(obs))>1) {
+          vec <- c(vec,FALSE)
+          message("Multifields are not a valid input for observations")
+        }
+        # Temporal matching check (obs-pred)
+        obs.dates <- as.POSIXlt(getDates(obs)$start)
+        mm.dates <- as.POSIXlt(getDates(mm.obj)$start) 
+        # For monthly values
+        if (diff.Date(mm.dates$yday)[1]>27 & diff.Date(obs.dates$yday)[1]>27){
+          if (!identical(obs.dates$mon, mm.dates$mon) || !identical(obs.dates$year, mm.dates$year)) {
+            vec <- c(vec,FALSE)
+            message("Hindcast and verifying observations are not coincident in time")
+          }  
+        } else{
+            if (!identical(unique(obs.dates$yday), unique(mm.dates$yday)) || !identical(unique(obs.dates$year), unique(mm.dates$year))) {
+              vec <- c(vec,FALSE)  
+              message("Hindcast and verifying observations are not coincident in time")
+            }  
+        }
+      } else{
+          stop("The obs data is not S4 object")
+      }  
+    } 
+    if (is.null(vec)){
+      vec <- TRUE
+    }   
+    return(vec)   
+  } else{
+      stop("The forecast is not S4 object")    
+  } 
+}
+
+# Modified from transformeR to work with S4 class data
+#' @keywords internal
+getYearsAsINDEX.S4 <- function(obj) {
+  season <- getSeason.S4(obj)
+  aux.dates <- as.POSIXlt(getDates(obj)$start)
+  yrs <- aux.dates$year + 1900
+  if (!identical(season, sort(season))) {
+    yy <- unique(yrs)[-1]
+    aux <- match(aux.dates$mon + 1, season)
+    brks <- c(1, which(diff(aux) < 0) + 1, length(aux) + 1)
+    l <- lapply(1:(length(brks) - 1), function(x) {
+        a <- yrs[brks[x] : (brks[x + 1] - 1)]
+        return(rep(yy[x], length(a)))
+    })
+    yrs  <- do.call("c", l)
+  }
+  return(yrs)
+}
+
+# Modified from transformeR to work with S4 class data
+#' @keywords internal
+getSeason.S4 <- function(obj) {
+  aux <- as.POSIXlt(getDates(obj)$start)$mon + 1      
+  return(unique(aux))
+}
 
 #' @title Compute the ROC Area Skill Score
 #' @description Computes the skill score for the area under the ROC curve compared to an 
@@ -194,7 +200,6 @@ checkCoords <- function (data1, data2){
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @note Adapted from the roc.area function from the verification library. 
 #' @export
-
 rocss.fun <- function (obs, pred) {
   id <- is.finite(obs) & is.finite(pred)
   obs <- obs[id]
@@ -208,29 +213,21 @@ rocss.fun <- function (obs, pred) {
 
 
 #' @title Convert a dataset to a S4 class. 
-#' 
 #' @description Convert a data set to a S4 class. The data set must have the elements Variable, 
 #'  Dates, Data, xyCoords. Depending of the kind of data it must also have the elements Members 
 #'  and InitializationDates (for gridded data) or MetaData (for station data). This function is 
 #'  prepared to convert the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage). 
-#' 
 #' @param obj A list the with the elements Variable, Dates, Data, xyCoords and Members 
 #'  and InitializationDates (for gridded data) or MetaData (for station data)
-#
 #' @import methods
-#' 
 #' @details  
-#'  The visualization functions are programmed to work with S4 class. This function converts  
+#'  Most of the visualization functions are programmed to work with S4 class. This function converts  
 #'  datasets into S4 to use those functions. 
-#'  
 #' @note For gridded data sets with just one ensemble member use as.MrGrid function.
 #'  For station data use as.MrStation function.
-#'  
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez 
-#' 
 #' @family VisualizeR
-
 convertIntoS4 <- function(obj) {   
   if(class(obj)=="list"){
     if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
@@ -258,71 +255,6 @@ convertIntoS4 <- function(obj) {
   }
 }
 
-###################################
-# Functions for S4 objects
-###################################
-
-getDimIndex <- function(obj, dim) {
-  obj.dimNames <- attr(getData(obj), "dimensions")
-  return(grep(dim, obj.dimNames))
-}
-
-getCountIndex <- function(obj, dim) {
-  obj.Data <- getData(obj)
-  return(dim(obj.Data)[getDimIndex(obj, dim)])
-}
-
-# Check the data format and dates before performing plots
-checkData <- function(mm.obj, obs) {
-  vec <- c()
-  if(isS4(mm.obj)==TRUE){
-    if (!class(mm.obj)[1]=="MrEnsemble") {
-      vec <- c(vec,FALSE)
-      message("The input data for hindcast is not a multimember field ")
-    }
-    if (length(getVarName(mm.obj))>1) {
-      vec <- c(vec,FALSE)
-      message("Multifields are not a valid input")
-    }
-    if (!missing(obs)){
-      if(isS4(obs)==TRUE){
-        if (class(obs)[1]=="MrEnsemble") {
-          vec <- c(vec,FALSE)
-          message("The verifying observations can't be a multimember")
-        }
-        if (length(getVarName(obs))>1) {
-          vec <- c(vec,FALSE)
-          message("Multifields are not a valid input for observations")
-        }
-        # Temporal matching check (obs-pred)
-        obs.dates <- as.POSIXlt(getDates(obs)$start)
-        mm.dates <- as.POSIXlt(getDates(mm.obj)$start) 
-        # For monthly values
-        if (diff.Date(mm.dates$yday)[1]>27 & diff.Date(obs.dates$yday)[1]>27){
-          if (!identical(obs.dates$mon, mm.dates$mon) || !identical(obs.dates$year, mm.dates$year)) {
-            vec <- c(vec,FALSE)
-            message("Hindcast and verifying observations are not coincident in time")
-          }  
-        } else{
-          if (!identical(unique(obs.dates$yday), unique(mm.dates$yday)) || !identical(unique(obs.dates$year), unique(mm.dates$year))) {
-            vec <- c(vec,FALSE)  
-            message("Hindcast and verifying observations are not coincident in time")
-          }  
-        }
-      } else{
-        stop("The obs data is not S4 object")
-      }  
-    } 
-    if (is.null(vec)){
-      vec <- TRUE
-    }   
-    return(vec)   
-  } else{
-    stop("The forecast is not S4 object")    
-  } 
-}
-
-
 
 #' @title Get the spatial mean from a S4 object
 #' @description Get the spatial mean from a S4 object with the dimensions c("var", "member", "time", "y", "x")
@@ -330,7 +262,6 @@ checkData <- function(mm.obj, obs) {
 #' @return A S4 object with spatial mean. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-
 spatialMean <- function(obj) {
   if (isS4(obj)==TRUE){
     obj.Data <- getData(obj)
@@ -371,7 +302,6 @@ spatialMean <- function(obj) {
 #' @return A S4 object with the seasonal mean. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-
 seasMean <- function(obj) {
   if (isS4(obj)==TRUE){
     obj.Data <- getData(obj)
@@ -396,8 +326,11 @@ seasMean <- function(obj) {
       } else {
         dates.end.index <- c(dates.start.index[2:length(dates.start.index)]-1,length(yrs))
       }
+      if (is.null(attr(obj.Dates, "season"))){
+        attr(obj.Dates, "season") <- unique(as.numeric(format(as.POSIXlt(obj.Dates$start),"%m")))    
+      }
       obj.Dates$start <- getDates(obj)$start[dates.start.index]
-      obj.Dates$end <- getDates(obj)$end[dates.end.index] 
+      obj.Dates$end <- getDates(obj)$end[dates.end.index]
       slot(obj, "Data") <- arr
       slot(obj, "Dates") <- obj.Dates
       slot(obj, "Transformation") <- c(getTransformation(obj), "seasMean")
@@ -419,7 +352,6 @@ seasMean <- function(obj) {
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
 #' @importFrom stats quantile
-
 MrQuantile <- function(obj, k=NULL){
   if (isS4(obj)==TRUE){
     if (is.null(k)){
@@ -482,7 +414,6 @@ MrQuantile <- function(obj, k=NULL){
 #' @return A S4 object with the exceedance probabilities. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @export
-
 QuantileProbs <- function(obj, obj2=NULL, nbins=3){
   if (isS4(obj)==TRUE){
     obj.Data <- getData(obj)
@@ -521,14 +452,14 @@ QuantileProbs <- function(obj, obj2=NULL, nbins=3){
               probs <- probs*1
             } else { 
               if (n.dates==1){
-                n.mem.nn <- sum(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
+                n.mem.nn <- sum(!is.na(obj.Data[ivar,,,iy,ix])) # Members with no NaN
                 probs[count[ivar],1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], na.rm=T)/n.mem.nn
                 for (ibins in 1:(nbins-2)){
                   probs[count[ivar]+ibins,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<=quantiles.Data[countq[ivar]+ibins,,,iy,ix], na.rm=T)/n.mem.nn
                 }
                 probs[count[ivar]+nbins-1,1,,iy,ix] <- sum(obj.Data[ivar,,,iy,ix]>quantiles.Data[countq[ivar]+length(k)-1,,,iy,ix], na.rm=T)/n.mem.nn
               } else {
-                n.mem.nn <- colSums(!is.nan(obj.Data[ivar,,,iy,ix])) # Members with no NaN
+                n.mem.nn <- colSums(!is.na(obj.Data[ivar,,,iy,ix])) # Members with no NaN
                 probs[count[ivar],1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]<quantiles.Data[countq[ivar],,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
                 for (ibins in 1:(nbins-2)){
                   probs[count[ivar]+ibins,1,,iy,ix] <- apply(obj.Data[ivar,,,iy,ix]>=quantiles.Data[countq[ivar]+ibins-1,,,iy,ix] & obj.Data[ivar,,,iy,ix]<=quantiles.Data[countq[ivar]+ibins,,,iy,ix], 2, sum, na.rm=T)/n.mem.nn
@@ -564,7 +495,6 @@ QuantileProbs <- function(obj, obj2=NULL, nbins=3){
 #' @return A S4 object with the data detrended. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and J. Bedia
 #' @export
-
 detrend.forecast <- function(obj){
   if (isS4(obj)==FALSE){
     obj <- convertIntoS4(obj)
@@ -594,33 +524,3 @@ detrend.forecast <- function(obj){
     stop("Invalid input data array. Dimensions should be 'var', 'member', 'time', 'y', 'x'")
   } 
 }    
-
-
-
-
-
-
-
-# Modified from downscaleR to work with S4 class !!!!
-getYearsAsINDEX.S4 <- function(obj) {
-  season <- getSeason.S4(obj)
-  aux.dates <- as.POSIXlt(getDates(obj)$start)
-  yrs <- aux.dates$year + 1900
-  if (!identical(season, sort(season))) {
-    yy <- unique(yrs)[-1]
-    aux <- match(aux.dates$mon + 1, season)
-    brks <- c(1, which(diff(aux) < 0) + 1, length(aux) + 1)
-    l <- lapply(1:(length(brks) - 1), function(x) {
-      a <- yrs[brks[x] : (brks[x + 1] - 1)]
-      return(rep(yy[x], length(a)))
-    })
-    yrs  <- do.call("c", l)
-  }
-  return(yrs)
-}
-
-# Modified from downscaleR to work with S4 class !!!!
-getSeason.S4 <- function(obj) {
-  aux <- as.POSIXlt(getDates(obj)$start)$mon + 1      
-  return(unique(aux))
-}

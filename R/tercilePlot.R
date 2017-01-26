@@ -1,20 +1,35 @@
+##     tercilePlot Tercile plot for visualization of forecast skill of ensemble predictions.
+##
+##     Copyright (C) 2016 Santander Meteorology Group (http://www.meteo.unican.es)
+##
+##     This program is free software: you can redistribute it and/or modify
+##     it under the terms of the GNU General Public License as published by
+##     the Free Software Foundation, either version 3 of the License, or
+##     (at your option) any later version.
+## 
+##     This program is distributed in the hope that it will be useful,
+##     but WITHOUT ANY WARRANTY; without even the implied warranty of
+##     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##     GNU General Public License for more details.
+## 
+##     You should have received a copy of the GNU General Public License
+##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #' @title Tercile plot for visualization of forecast skill of ensemble predictions.
 #' 
 #' @description Tercile plot for the visualization of forecast skill of ensemble predictions.
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with hindcast, either a field or a multi-member 
-#' station object as a result of downscaling of a forecast using station data. See details.
+#' @param mm.obj A multi-member list with the hindcast for verification. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
-#' @param forecast A multi-member list with forecasts, either a field or a multi-member 
-#' station object as a result of downscaling of a forecast using station data. Default is NULL. See details. 
+#' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
-#' @param subtitle String to include a subtitle below the title. Default is NULL.
+#' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray getYearsAsINDEX subsetGrid
@@ -27,10 +42,10 @@
 #' 
 #' @details 
 #'  
-#' For each member, the daily hindcasts are averaged to obtain seasonal values. For
+#' First daily data are averaged to obtain a single seasonal value. For
 #' rectangular spatial domains (i.e., for fields), the spatial average is first computed (with a warning) to obtain a
 #' unique series for the whole domain. The corresponding terciles for each ensemble member are then computed
-#' for the analysis period. Thus, each particular member and season, are categorized into three categories (above, 
+#' for the hindcast period. Thus, each particular member and season, are categorized into three categories (above, 
 #' between or below), according to their respective climatological terciles. Then, a probabilistic forecast is computed 
 #' year by year by considering the number of members falling within each category. This probability is represented by the
 #' colorbar. For instance, probabilities below 1/3 are very low, indicating that a minority of the members 
@@ -74,10 +89,11 @@ tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend 
         }
       }
       if (is.null(forecast) & !is.null(year.target)){
-        forecast <- subsetGrid(mm.obj, years=year.target)
-        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=year.target])
-        obs <- subsetGrid(obs, years=yy[yy!=year.target])
-        yy <- yy[yy!=year.target]
+        yy.forecast <- year.target
+        forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
+        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
+        obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
+        yy <- yy[yy!=yy.forecast]
       }
       # Check input datasets
       if (isS4(mm.obj)==FALSE){
@@ -165,12 +181,12 @@ tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend 
           #image.plot(add = TRUE, legend.only = TRUE, breaks = brks, col = cbar, smallplot = c(0.96,0.99,0.2,0.8), zlim=c(0,1), legend.lab="Probability of the tercile")            
           image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.25,0.28), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
       }
-      mons.start <- unique(months(as.POSIXlt(getDates(obs)$start), abbreviate = T))
-      mons.end <- unique(months(as.POSIXlt(getDates(obs)$end), abbreviate = T))
-      title <- sprintf("%s, %s to %s", attr(getVariable(mm.obj), "longname"), mons.start[1], last(mons.end))
-      mtext(title, side=3, line=-4, adj=0, cex=1.2, font=2)
+      mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
+      mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
+      title <- sprintf("%s, %s to %s", attr(getVariable(mm.obj), "longname"), mons.start, mons.end)
+      mtext(title, side=3, line=-3, adj=0, cex=1.2, font=2)
       if (!is.null(subtitle)){
-        mtext(subtitle, side=3, line=-3, adj=0, cex=0.8)
+        mtext(subtitle, side=3, line=-4, adj=0, cex=0.7)
       }
       par(opar)
 }
