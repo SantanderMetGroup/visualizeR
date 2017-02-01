@@ -30,7 +30,7 @@
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
 #' @importFrom fields image.plot
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray subsetGrid
 #' @importFrom graphics barplot
 #'   
 #' @export

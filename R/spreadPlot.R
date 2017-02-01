@@ -33,7 +33,7 @@
 #' @param pch Single character or an integer code for one of the set of R graphics symbols. Cross is the default symbol. 
 #'  Only consider if add.points is TRUE. 
 #' 
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray subsetGrid
 #' @importFrom stats filter
 #' @importFrom graphics lines
 #' @import sm
