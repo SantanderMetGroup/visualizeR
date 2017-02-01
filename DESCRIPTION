@@ -18,8 +18,8 @@ Suggests:
     loadeR.ECOMS,
     loadeR
 Type: Package
-Title: R Package with visualization tools for forecast verification
-Version: 0.1-0
+Title: Visualizing and Communicating Uncertainty in Seasonal Climate Prediction
+Version: 0.1-1
 Date: 2016-02-01
 Authors@R: as.person(c(
     "Maria Dolores Frias <friasmd@unican.es> [ctb, cre]",

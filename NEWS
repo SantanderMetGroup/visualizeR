@@ -1,6 +1,5 @@
 visualizeR
 ==========
 
-* New built-in datasets: DJF global mean temperature from NCEP/NCAR reanalysis, NCEP-CFSv2 hindcast and CFSv2 Operative seasonal forecasts for DJF 2016 and 2017.
-* New function for reliability diagram, implementing the approach in Weisheimer and Palmer 2014 (DOI: 10.1098/rsif.2013.1162) 
+* Added package vignette
 * Other minor bug fixes and enhancements
