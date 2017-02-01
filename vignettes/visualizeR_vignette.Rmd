@@ -1,0 +1,165 @@
+---
+title: 'visualizeR: Visualizing and Communicating Uncertainty in Seasonal Climate
+  Prediction'
+author: "Santander MetGroup"
+date: "February 01, 2017"
+output:
+  pdf_document:
+    highlight: pygments
+    number_sections: yes
+    toc: yes
+  html_document:
+    highlight: pygments
+    number_sections: yes
+    theme: readable
+    toc: yes
+documentclass: article
+abstract: In this document we present the code that reproduces the analyses presented
+  in the paper. For the sake of brevity and accesibility, we only use the UDG public
+  datasets, whose access is granted automatically to anyone registering in the UDG
+  Thus, we illustate the analyses using the CFSv2 seasonal hindcast (CFSv2, Saha et
+  al 2013), the NCEP/NCAR reanalysis1 (NCEP, Kalnay et al 1996) and the gridded observations
+  from the EOBSv14 dataset (EOBS, Klein Tank et al 2002). Furthermore, post-processed
+  datasets are available for direct loading to facilitate the reproducibility of figures.
+  via the THREDDS administration Panel ([TAP](http://www.meteo.unican.es/udg-tap/home)).
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      fig.align = "center",
+                      tidy = TRUE,
+                      cache = FALSE)
+```
+
+
+# Introduction
+
+Unlike deterministic weather forecasts (e.g. _"tomorrow it will rain 15 mm in Madrid"_), probabilistic seasonal forecasts provide, a few months in advance, information on how seasonally averaged weather is likely to evolve (e.g. _"there is an 80\% chance that the next season will be wetter than usual in central Spain"_). Seasonal forecasting is a problem of probabilistic nature. Ensemble forecasting is used to sample different realizations (members) produced from slightly different initial conditions. The resulting ensemble allows estimating the likelihood of different events/indices related to the seasonal average weather (e.g. _"being wetter than usual"_). Despite their huge potential value for many sectors, there are still a number of problems which limit the practical application of these type of predictions, being the probabilistic communication of uncertainty of central importance. 
+
+`visualizeR` is an R package implementing a set of advanced tools for probabilistic forecast visualization and validation. It allows visualizing the predictions together with the corresponding validation results in a form suitable to communicate the underlying uncertainties, both from the prediction itself and from the skill of the model. Its aim is to translate the probabilistic seasonal predictions in comprehensible, actionable information for end-usres in of various fields of application. 
+
+
+
+# Data load and collocation
+
+```{r}
+library(visualizeR)
+library(transformeR)
+```
+
+
+First of all, the datasets required to produce the example visualizations are loaded. These datasets are included in `visualizeR`, so they can be automatically loaded. The datasets are:
+
+ 1. The reference historical observations of global mean temperature. The historical records come from the NCEP-NCAR reanalysis.
+ 2. The re-forecast data (or historical _hindcast_), corresponding to the predictions of the model done in the past, over a period of several decades (winters from 1983 to 2010, in this case)
+ 3. The operative predictions issued by the model on november 2015 for winter 2016.
+
+```{r}
+# Load reanalysis
+data(tas.ncep)
+# Load hindcast
+data(tas.cfs)
+# Load operative predictions
+data(tas.cfs.operative.2016)
+```
+
+## Adjusting the temporal extent of hindcast and reanalysis 
+
+It is necessary to adjust the length of the hindcast and the reanalysis data, given that the reanlaysis has a much more extended period. To this aim, we first extract the years encompassed by the hindcast:
+
+
+```{r}
+(years <- unique(getYearsAsINDEX(tas.cfs)))
+```
+
+Next, the reanalysis period is "trimmed" to match the hindcast length:
+
+```{r}
+obs <- subsetGrid(tas.ncep, years = years)
+```
+
+Finally, for clarity, the hindcast and the operative predictions dataset are renamed as `hindcast` and `forecast` respectively:
+
+```{r}
+hindcast <- tas.cfs
+forecast <- tas.cfs.operative.2016
+```
+
+
+## Adjusting the spatial resolution of hindcast, reanalysis and predictions
+
+The function `interpGrid` in package `transformeR` allows to change from one grid to another. In this case, we are regridding the model data (hindcast and operative predictions) to match the reanalysis grid:
+
+```{r}
+# grid definition
+newgrid <- list(x = c(getGrid(hindcast)$x, 5), y = c(getGrid(hindcast)$y, 5))
+hindcast <- interpGrid(hindcast, new.coordinates = newgrid, method = "bilinear", bilin.method = "fields")
+forecast <- interpGrid(forecast, new.coordinates = newgrid, method = "bilinear", bilin.method = "fields")
+``` 
+
+# Visualization of the Global verification
+
+In order to have a spatial overview of the skill of the predictions globally, bubble plots are particularly effective. Bubble plots combine in a single map several aspects of the quality of the forecasting systems by means of three graphical features: bubble color, bubble size and level of transparency. These aspects can be combined in different ways in order to provide different levels of information. In the following examples different options are of forecast quality visualization are illustrated.
+
+```{r,message=FALSE,warning=FALSE}
+# This is a subtitle that will be added to each plot
+subtitle <- sprintf("Reference data: NCEP Reanalysis;  Hindcast: CFSv2 (%d members); %d-%d",
+                    getShape(hindcast, dimension = "member"),
+                    getYearsAsINDEX(hindcast)[1],
+                    tail(getYearsAsINDEX(hindcast),1))
+```
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(mm.obj = hindcast,
+           obs = obs,
+           forecast = forecast,
+           size.as.probability = FALSE,
+           bubble.size = 1.5,
+           score = FALSE,
+           subtitle = subtitle)
+```
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast, obs, forecast=forecast, size.as.probability=T, bubble.size=1.5, score=F, subtitle=subtitle)
+```
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast, obs, forecast=forecast, size.as.probability=T, bubble.size=1.5, score=T, subtitle=subtitle)
+```
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast, obs, forecast=forecast, size.as.probability=T, bubble.size=1.5, score=T, score.range=c(0.5,1), subtitle=subtitle)
+```
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast, obs, forecast=forecast, piechart=T, score=T, subtitle=subtitle)
+```
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast, obs, forecast=forecast, piechart=T, score=T, score.range=c(0.5,1), subtitle=subtitle)
+```
+
+<!--
+# El Nino 3.4 (5S-5N and 170-120W)
+#
+crop.nino <- function(x) subsetGrid(x, lonLim=c(-170, -120), latLim=c(-5, 5))
+hindcast.nino <- crop.nino(hindcast)
+obs.nino <- crop.nino(obs)
+forecast.nino <- crop.nino(forecast)
+tercilePlot(hindcast.nino, obs.nino, forecast.nino, subtitle=subtitle)
+
+
+#
+# Europe (30-74N and -20-42)
+#
+crop.eu <- function(x) subsetGrid(x, lonLim=c(-20,42), latLim=c(30,74))
+hindcast.eu <- crop.eu(hindcast)
+obs.eu <- crop.eu(obs)
+forecast.eu <- crop.eu(forecast)
+tercilePlot(hindcast.eu, obs.eu, forecast=forecast.eu, subtitle=subtitle)
+bubblePlot(hindcast.eu, obs.eu, forecast=forecast.eu, size.as.probability=T, bubble.size=1.5, score=T, subtitle=subtitle)
+bubblePlot(hindcast.eu, obs.eu, forecast=forecast.eu, piechart=T, score=T, subtitle=subtitle)
+tercileBarplot(hindcast.eu, obs.eu, forecast=forecast.eu, score.threshold= 0.3, subtitle=subtitle) 
+
+```
+
