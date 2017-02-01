@@ -3,19 +3,21 @@
 \name{AR5regions}
 \alias{AR5regions}
 \title{AR5 regions from the IPCC 5th Assessment Report.}
-\format{A SpatialPolygons object}
+\format{A \code{\link[sp]{SpatialPolygons-class}} object}
 \source{
 Shapefile imported with function \code{\link[rgdal]{readOGR}} (\url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html})
 }
 \description{
-SpatialPolygons object of the geographical regions used in the IPCC 5th Assessment Report.
+Spatial Polygons of the geographical regions used in the IPCC 5th Assessment Report.
 
 For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
 }
 \examples{
 \dontrun{
 data(AR5regions)
-plot(AR5regions)
+sp::plot(AR5regions, border = "red", axes = TRUE)
+transformeR:::draw.world.lines()
+title("AR5 World regions")
 }
 }
 

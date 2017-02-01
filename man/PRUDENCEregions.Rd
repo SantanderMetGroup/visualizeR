@@ -3,16 +3,18 @@
 \name{PRUDENCEregions}
 \alias{PRUDENCEregions}
 \title{PRUDENCE regions.}
-\format{A SpatialPolygons object}
+\format{A \code{\link[sp]{SpatialPolygons-class}} object}
 \description{
-SpatialPolygons object of the geographical regions used in the PRUDENCE project.
+Spatial Polygons of the geographical regions used in the PRUDENCE project.
 
 For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
 }
 \examples{
 \dontrun{
 data(PRUDENCEregions)
-plot(PRUDENCEregions)
+sp::plot(PRUDENCEregions, border = "red", axes = TRUE)
+transformeR:::draw.world.lines()
+title("PRUDENCE European regions")
 }
 }
 

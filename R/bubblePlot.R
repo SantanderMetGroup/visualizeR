@@ -48,7 +48,7 @@
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid
 #' @importFrom abind abind
 #' @importFrom grDevices gray
 #' @importFrom graphics par plot mtext points legend

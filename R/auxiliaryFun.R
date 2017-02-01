@@ -75,6 +75,8 @@ tercileColor <- function(){
 
 # Check xyCoords from two datasets
 #' @keywords internal
+#' @importFrom transformeR getCoordinates
+#' 
 checkCoords <- function (data1, data2){
   v<-FALSE
   if (is.null(data1) | is.null(data2)) v <-TRUE
