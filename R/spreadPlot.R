@@ -21,7 +21,7 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with the hindcast for verification. Daily values. See details.
+#' @param hindcast A multi-member list with the hindcast for verification. Daily values. See details.
 #' @param forecast A multi-member list with the forecasts. Daily values. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
@@ -60,11 +60,11 @@
 #' 
 #' @family VisualizeR
 
-spreadPlot <- function(mm.obj, forecast=NULL, year.target = NULL, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
+spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
      # Check data temporal scale. Daily or subdaily required.
-     check.daily(mm.obj)
-     mm.dates <-as.POSIXlt(mm.obj$Dates$start)
-     yy <- unique(getYearsAsINDEX(mm.obj))  
+     check.daily(hindcast)
+     mm.dates <-as.POSIXlt(hindcast$Dates$start)
+     yy <- unique(getYearsAsINDEX(hindcast))  
      if (is.null(forecast)){
        if (is.null(year.target)){
          year.target <- last(yy)
@@ -73,16 +73,16 @@ spreadPlot <- function(mm.obj, forecast=NULL, year.target = NULL, detrend = FALS
          stop("Target year outside temporal data range")
         }
        yy.forecast <- year.target
-       forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
-       mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
-       mm.dates <-as.POSIXlt(mm.obj$Dates$start)
+       forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
+       hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
+       mm.dates <-as.POSIXlt(hindcast$Dates$start)
        yy <- yy[yy!=yy.forecast]
      }      
      # Check input datasets
-     if (isS4(mm.obj)==FALSE){
-       mm.obj <- convertIntoS4(mm.obj)
+     if (isS4(hindcast)==FALSE){
+       hindcast <- convertIntoS4(hindcast)
      }
-     stopifnot(checkData(mm.obj))
+     stopifnot(checkData(hindcast))
      if (!is.null(forecast)){
        check.daily(forecast)
        yy.forecast <- unique(getYearsAsINDEX(forecast))
@@ -94,14 +94,14 @@ spreadPlot <- function(mm.obj, forecast=NULL, year.target = NULL, detrend = FALS
      }
      # Detrend
      if (detrend){
-       mm.obj <- detrend.forecast(mm.obj)
+       hindcast <- detrend.forecast(hindcast)
      }
      # Spatial mean if necessary
-     sp.mm.obj <- spatialMean(mm.obj)
+     sp.hindcast <- spatialMean(hindcast)
      sp.forecast <- spatialMean(forecast)
      # Plot the climatology shadow 
      ma <- function(x, n=31){filter(x, rep(1/n, n), sides=2)} # Time filter (moving average)
-     arr <- getData(sp.mm.obj)[1,,,1,1]
+     arr <- getData(sp.hindcast)[1,,,1,1]
      arr.forecast <- getData(sp.forecast)[1,,,1,1]
      mm.ma <- t(apply(arr, MARGIN=1, FUN=ma)) 
      days <- sprintf("%02d%02d", mm.dates$mon+1, mm.dates$mday)
@@ -113,7 +113,7 @@ spreadPlot <- function(mm.obj, forecast=NULL, year.target = NULL, detrend = FALS
      season.days <- 1:length(unique(days))    
      par(bg="white", mar=c(4,4,1,1))
      ylim <- range(c(as.vector(mm.ma),as.vector(arr.forecast)), na.rm=T)
-     plot(season.days, ens.quant[3,], ylim = ylim, ty = 'n', ylab = paste(attr(getVariable(mm.obj), "longname"),"- Daily Mean"), xlab = sprintf("time\n(shade: %d to %d, symbols: %d)", yy[1], last(yy), yy.forecast), xaxt="n")
+     plot(season.days, ens.quant[3,], ylim = ylim, ty = 'n', ylab = paste(attr(getVariable(hindcast), "longname"),"- Daily Mean"), xlab = sprintf("time\n(shade: %d to %d, symbols: %d)", yy[1], last(yy), yy.forecast), xaxt="n")
      polygon(x = c(season.days, rev(season.days)), y = c(ens.quant[1, ], rev(ens.quant[5, ])), border = "transparent", col = rgb(0.2,0.2,0.2,.2))
      polygon(x = c(season.days, rev(season.days)), y = c(ens.quant[2, ], rev(ens.quant[4, ])), border = "transparent", col = rgb(0.3,0.3,0.3,.3))
      lines(season.days, ens.quant[3,], lwd=2)      

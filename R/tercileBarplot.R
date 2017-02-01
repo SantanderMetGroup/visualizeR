@@ -21,7 +21,7 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #'  
-#' @param mm.obj A multi-member list with the hindcast for verification. See details.
+#' @param hindcast A multi-member list with the hindcast for verification. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
@@ -69,8 +69,8 @@
 #'  Atmospheri Science, Wiley, NY
 #'
 
-tercileBarplot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend = FALSE, score.threshold=NULL, subtitle = NULL) {
-  yy <- unique(getYearsAsINDEX(mm.obj))
+tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, score.threshold=NULL, subtitle = NULL) {
+  yy <- unique(getYearsAsINDEX(hindcast))
   if (is.null(forecast)){
     if (is.null(year.target)){
       year.target <- last(yy)
@@ -79,19 +79,19 @@ tercileBarplot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detre
       stop("Target year outside temporal data range")
     }
     yy.forecast <- year.target
-    forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
-    mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
+    forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
+    hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
     obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
     yy <- yy[yy!=yy.forecast]
   }      
   # Check input datasets
-  if (isS4(mm.obj)==FALSE){
-    mm.obj <- convertIntoS4(mm.obj)
+  if (isS4(hindcast)==FALSE){
+    hindcast <- convertIntoS4(hindcast)
   }
   if (isS4(obs)==FALSE){
     obs <- convertIntoS4(obs)
   }
-  stopifnot(checkData(mm.obj, obs))
+  stopifnot(checkData(hindcast, obs))
   if (!is.null(forecast)){
     yy.forecast <- unique(getYearsAsINDEX(forecast))
     if (length(yy.forecast)>1) {
@@ -104,22 +104,22 @@ tercileBarplot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detre
   }
   # Detrend
   if (detrend){
-    mm.obj <- detrend.forecast(mm.obj)
+    hindcast <- detrend.forecast(hindcast)
     obs <- detrend.forecast(obs)
   }
   # Spatial mean of forecast and Benchmark if necessary
-  sp.mm.obj <- spatialMean(mm.obj)
+  sp.hindcast <- spatialMean(hindcast)
   sp.obs <- spatialMean(obs)
   sp.forecast <- spatialMean(forecast)
   # Computation of seasonal mean
-  sm.mm.obj <- seasMean(sp.mm.obj)
+  sm.hindcast <- seasMean(sp.hindcast)
   sm.obs <- seasMean(sp.obs)
   sm.forecast <- seasMean(sp.forecast)
   # Computation of terciles and exceedance probabilities
-  probs.mm.obj <- QuantileProbs(sm.mm.obj)
+  probs.hindcast <- QuantileProbs(sm.hindcast)
   probs.obs <- QuantileProbs(sm.obs)
-  probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
-  cofinogram.data <- t(getData(probs.mm.obj)[,,,,])
+  probs.forecast <- QuantileProbs(sm.forecast, sm.hindcast)
+  cofinogram.data <- t(getData(probs.hindcast)[,,,,])
   obs.terciles <- t(getData(probs.obs)[,,,,])
   obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
   # Compute ROCSS
@@ -145,7 +145,7 @@ tercileBarplot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detre
   # Add title
   mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
   mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
-  title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start, mons.end, yy.forecast)
+  title <- sprintf("%s, %s to %s, %d", attr(getVariable(hindcast), "longname"), mons.start, mons.end, yy.forecast)
   mtext(title, side=3, line=2, adj=0, cex=1.2, font=2)
   if (!is.null(subtitle)){
     mtext(subtitle, side=3, line=1, adj=0, cex=0.7)
