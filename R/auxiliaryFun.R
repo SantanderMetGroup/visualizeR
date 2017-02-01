@@ -152,6 +152,18 @@ checkData <- function(mm.obj, obs) {
   } 
 }
 
+# Check for daily data
+#' @keywords internal
+check.daily <- function(obj) {
+  obj.dates <-as.POSIXlt(obj$Dates$start)
+  if (diff.Date(obj.dates$mday)[1]==0){
+    # Annual data or Monthly data
+    if (diff.Date(obj.dates$year)[1]==1 | diff.Date(obj.dates$mon)[2]==1){
+      stop("Data are not at daily time scale")
+    } 
+  }
+}
+
 # Modified from transformeR to work with S4 class data
 #' @keywords internal
 getYearsAsINDEX.S4 <- function(obj) {

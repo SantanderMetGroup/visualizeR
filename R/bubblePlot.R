@@ -23,7 +23,7 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with the hindcast for verification. See details.
+#' @param hindcast A multi-member list with the hindcast for verification. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
@@ -48,7 +48,7 @@
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid subsetGrid
 #' @importFrom abind abind
 #' @importFrom grDevices gray
 #' @importFrom graphics par plot mtext points legend
@@ -89,21 +89,21 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=4, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
-      yy <- unique(getYearsAsINDEX(mm.obj))
+bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=4, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+      yy <- unique(getYearsAsINDEX(hindcast))
       if (is.null(score.range)){
         score.range <- c(0,1)
       }
       # Check grid from the data. 
-      if (!checkCoords(mm.obj, obs)){
+      if (!checkCoords(hindcast, obs)){
         message("WARNING: Data with no common grid. Interpolating observations to hindcast grid")
         # Interpolate observations to the hindcast grid
-        obs <- interpGrid(obs, new.coordinates = getGrid(mm.obj), method = "nearest")
+        obs <- interpGrid(obs, new.coordinates = getGrid(hindcast), method = "nearest")
       }
-      if (!checkCoords(mm.obj, forecast)){
+      if (!checkCoords(hindcast, forecast)){
         message("WARNING: Data with no common grid. Interpolating forecasts to hindcast grid")
         # Interpolate forecast to the hindcast grid
-        forecast <- interpGrid(forecast, new.coordinates = getGrid(mm.obj), method = "nearest")
+        forecast <- interpGrid(forecast, new.coordinates = getGrid(hindcast), method = "nearest")
       }
       if (is.null(forecast)){
         if (is.null(year.target)){
@@ -113,19 +113,19 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           stop("Target year outside temporal data range")
         }
         yy.forecast <- year.target
-        forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
-        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
+        forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
+        hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
         obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
         yy <- yy[yy!=yy.forecast]
       }      
       # Check input datasets
-      if (isS4(mm.obj)==FALSE){
-        mm.obj <- convertIntoS4(mm.obj)
+      if (isS4(hindcast)==FALSE){
+        hindcast <- convertIntoS4(hindcast)
       }
       if (isS4(obs)==FALSE){
         obs <- convertIntoS4(obs)
       }
-      stopifnot(checkData(mm.obj, obs))
+      stopifnot(checkData(hindcast, obs))
       if (!is.null(forecast)){
         yy.forecast <- unique(getYearsAsINDEX(forecast))
         if (length(yy.forecast)>1) {
@@ -138,25 +138,25 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       }
       # Detrend
       if (detrend){
-        mm.obj <- detrend.forecast(mm.obj)
+        hindcast <- detrend.forecast(hindcast)
         obs <- detrend.forecast(obs)
       } 
       # Computation of seasonal mean
-      sm.mm.obj <- seasMean(mm.obj)
+      sm.hindcast <- seasMean(hindcast)
       sm.obs <- seasMean(obs)
       sm.forecast <- seasMean(forecast)
       # Computation exceedance probabilities
-      probs.mm.obj <- QuantileProbs(sm.mm.obj)
+      probs.hindcast <- QuantileProbs(sm.hindcast)
       probs.obs <- QuantileProbs(sm.obs)
-      probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
+      probs.forecast <- QuantileProbs(sm.forecast, sm.hindcast)
       # Detect gridpoints with time series with all NA values 
       obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-      mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
+      hindcast.na <- as.vector(apply(getData(sm.hindcast)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
       forecast.na <- as.vector(apply(getData(sm.forecast)[1,,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
       # Tercile for the maximum probability
-      prob <- getData(probs.mm.obj)
+      prob <- getData(probs.hindcast)
       prob.forecast <- getData(probs.forecast)
-      margin <- c(getDimIndex(probs.mm.obj,"member"), getDimIndex(probs.mm.obj,"time"), getDimIndex(probs.mm.obj,"y"), getDimIndex(probs.mm.obj,"x"))
+      margin <- c(getDimIndex(probs.hindcast,"member"), getDimIndex(probs.hindcast,"time"), getDimIndex(probs.hindcast,"y"), getDimIndex(probs.hindcast,"x"))
       t.max <- function(t.probs, margin.dim){
         # Mask for cases with no all probs equal to NAN. This avoid errors in ROCSS computation.  
         mask.nallnan <- apply(t.probs, MARGIN = margin.dim, FUN = function(x) {sum(!is.na(x))}) 
@@ -181,8 +181,8 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         v.prob[,i] <- as.vector(prob.forecast[i,1,1,,])
       }
       # Select the corresponding lon and lat
-      x.mm <- attr(getxyCoords(mm.obj),"longitude") 
-      y.mm <- attr(getxyCoords(mm.obj),"latitude")  
+      x.mm <- attr(getxyCoords(hindcast),"longitude") 
+      y.mm <- attr(getxyCoords(hindcast),"latitude")  
       nn.yx <- as.matrix(expand.grid(y.mm, x.mm))
       # Define colors
       df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
@@ -232,7 +232,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       # Starting with the plot
       mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
       mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start, mons.end, yy.forecast)
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(hindcast), "longname"), mons.start, mons.end, yy.forecast)
       opar <- par(no.readonly=TRUE)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
@@ -277,7 +277,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           }
           # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
-            valid.points <- which((obs.na + mm.obj.na)>0)
+            valid.points <- which((obs.na + hindcast.na)>0)
             for (i.loc in valid.points){   
               points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.data.nan, xlab="", ylab="")
             }
@@ -303,7 +303,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           }          
           # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
-            na.points <- (obs.na + mm.obj.na)>0
+            na.points <- (obs.na + hindcast.na)>0
             points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=cex.val, col="black", pch=pch.data.nan, xlab="", ylab="")
           }
         } else {
