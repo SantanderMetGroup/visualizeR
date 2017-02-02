@@ -45,13 +45,13 @@
 #' A SpartialPolygons* object is easily obtained by reading a shapefile with function 
 #' \code{\link[rgdal]{readOGR}}.
 #' 
-#' @return Grid of reliability categories with an additional data dimension for categories (defined by parameter nbins)
-#' and an additional slot ($ReliabilityCategories) containing the following elements:
+#' @return Grid of reliability categories with an additional data dimension for categories
+#' and an additional slot (\code{$ReliabilityCategories}) containing the following elements:
 #' catname: reliability categories.
 #' slope: \code{$slope} slope of the reliability line; \code{$lower} lower bound confidence for slope (according to "sigboot"); 
 #' \code{$upper} upper bound confidence for slope (according to "sigboot").
 #' 
-#' If \code{return.diagrams} is set to TRUE, a list of two objects is returned, the grid object (\code{$grid}) and a trellis class object (\code{$plot}). 
+#' If \code{return.diagrams} is TRUE, a list of two objects is returned, the grid object (\code{$grid}) and a trellis class object (\code{$plot}). 
 #' 
 #' @examples \dontrun{
 #' data("tas.cfs")
