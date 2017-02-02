@@ -31,6 +31,7 @@
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
 #' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.05
 #' @param diagrams Logical (default = TRUE). Plotting results.  
+#' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
 # @param ylim Required if diagrams = TRUE. Limits for maps
@@ -44,11 +45,13 @@
 #' A SpartialPolygons* object is easily obtained by reading a shapefile with function 
 #' \code{\link[rgdal]{readOGR}}.
 #' 
-#' @return Grid of reliability categories with an additional data dimension for categories 
+#' @return Grid of reliability categories with an additional data dimension for categories (defined by parameter nbins)
 #' and an additional slot ($ReliabilityCategories) containing the following elements:
 #' catname: reliability categories.
 #' slope: \code{$slope} slope of the reliability line; \code{$lower} lower bound confidence for slope (according to "sigboot"); 
 #' \code{$upper} upper bound confidence for slope (according to "sigboot").
+#' 
+#' If \code{return.diagrams} is set to TRUE, a list of two objects is returned, the grid object (\code{$grid}) and a trellis class object (\code{$plot}). 
 #' 
 #' @examples \dontrun{
 #' data("tas.cfs")
@@ -81,7 +84,8 @@ reliabilityCategories <- function(obs,
                                   nbinsprob = 10,
                                   nboot = 100,
                                   sigboot = 0.05, 
-                                  diagrams = TRUE){ 
+                                  diagrams = TRUE,
+                                  return.diagrams = FALSE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
@@ -132,79 +136,81 @@ reliabilityCategories <- function(obs,
       for(l in 1:length(regs)){
             o <- over(spoints, regs[l,])
             w <- which(!is.na(o))
-            ob <- ob.full[, w]
-            se <- array(dim = c(nmem, ntime, length(w)))
-            for(i in 1:nmem){
-                  prdarray <- prd$Data[i,,,]
-                  attr(prdarray, "dimensions") <-  attr(prd$Data, "dimensions")[-memind]
-                  se[i,,] <- array3Dto2Dmat(prdarray)[, w]
-            }
-            #remove empty pixels
-            naind.obs <- which(is.na(ob[1,]))
-            naind.prd <- which(is.na(se[1,1,]))
-            naind <- unique(c(naind.obs, naind.prd))
-            if(length(naind) != 0){
-                  obna <- ob[,-naind]
-                  sena <- se[,,-naind]
-            }else{
-                  obna <- ob
-                  sena <- se
-            }
-            message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
-            sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
-            
-            n <- sl$n
-            nyear <- sl$nyear
-            npoint <- sl$npoint
-            slope <- sl$slope
-            slope_boot <- sl$slope_boot
-            prdprob <- sl$prdprob
-            obsfreq <- sl$obsfreq
-            prdfreq <- sl$prdfreq
-            
-            cat <- rep(NA, nbins)
-            catcol <- rep(NA, nbins)
-            catname <- rep("", nbins)
-            
-            for (ibins in 1:nbins) {
-                  aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot), na.rm = T)
-                  slope_lower <- aux[[1]]
-                  slope_upper <- aux[[2]]
-                  rm(aux)
-                  if (!is.na(slope[ibins])) {
-                        if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
-                              cat[ibins] <- 5 
-                              catcol[ibins] <- green
-                              catname[ibins] <- "perfect"
-                        } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
-                                         (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
-                              cat[ibins] <- 4  
-                              catcol[ibins] <- cyan
-                              catname[ibins] <- "still useful"
-                              ## OJO: nueva categoria! 
-                        } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
-                              cat[ibins] <- 3.5  
-                              catcol[ibins] <- darkyellow 
-                              catname[ibins] <- "marginally useful*"
-                        } else if (slope[ibins] > 0 & slope_lower > 0) {
-                              cat[ibins] <- 3  
-                              catcol[ibins] <- yellow 
-                              catname[ibins] <- "marginally useful"
-                        } else if (slope[ibins] > 0 & slope_lower < 0) {
-                              cat[ibins] <- 2  
-                              catcol[ibins] <- orange
-                              catname[ibins] <- "not useful"
-                        } else if (slope[ibins] < 0) {
-                              cat[ibins] <- 1  
-                              catcol[ibins] <- red 
-                              catname[ibins] <- "dangerous"
-                        } 
+            if(length(w)>0){
+                  ob <- ob.full[, w]
+                  se <- array(dim = c(nmem, ntime, length(w)))
+                  for(i in 1:nmem){
+                        prdarray <- prd$Data[i,,,]
+                        attr(prdarray, "dimensions") <-  attr(prd$Data, "dimensions")[-memind]
+                        se[i,,] <- array3Dto2Dmat(prdarray)[, w]
                   }
-                  ob.clim[ibins, w] <- cat[ibins]
-                  ob.slope$lower[l , ibins] <- slope_lower
-                  ob.slope$upper[l , ibins] <- slope_upper
-                  ob.slope$sl[l ,] <- slope
-                  ob.catname[l ,] <- catname
+                  #remove empty pixels
+                  naind.obs <- which(is.na(ob[1,]))
+                  naind.prd <- which(is.na(se[1,1,]))
+                  naind <- unique(c(naind.obs, naind.prd))
+                  if(length(naind) != 0){
+                        obna <- ob[,-naind]
+                        sena <- se[,,-naind]
+                  }else{
+                        obna <- ob
+                        sena <- se
+                  }
+                  message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
+                  sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
+                  
+                  n <- sl$n
+                  nyear <- sl$nyear
+                  npoint <- sl$npoint
+                  slope <- sl$slope
+                  slope_boot <- sl$slope_boot
+                  prdprob <- sl$prdprob
+                  obsfreq <- sl$obsfreq
+                  prdfreq <- sl$prdfreq
+                  
+                  cat <- rep(NA, nbins)
+                  catcol <- rep(NA, nbins)
+                  catname <- rep("", nbins)
+                  
+                  for (ibins in 1:nbins) {
+                        aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot), na.rm = T)
+                        slope_lower <- aux[[1]]
+                        slope_upper <- aux[[2]]
+                        rm(aux)
+                        if (!is.na(slope[ibins])) {
+                              if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
+                                    cat[ibins] <- 5 
+                                    catcol[ibins] <- green
+                                    catname[ibins] <- "perfect"
+                              } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
+                                         (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
+                                    cat[ibins] <- 4  
+                                    catcol[ibins] <- cyan
+                                    catname[ibins] <- "still useful"
+                                    ## OJO: nueva categoria! 
+                              } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
+                                    cat[ibins] <- 3.5  
+                                    catcol[ibins] <- darkyellow 
+                                    catname[ibins] <- "marginally useful*"
+                              } else if (slope[ibins] > 0 & slope_lower > 0) {
+                                    cat[ibins] <- 3  
+                                    catcol[ibins] <- yellow 
+                                    catname[ibins] <- "marginally useful"
+                              } else if (slope[ibins] > 0 & slope_lower < 0) {
+                                    cat[ibins] <- 2  
+                                    catcol[ibins] <- orange
+                                    catname[ibins] <- "not useful"
+                              } else if (slope[ibins] < 0) {
+                                    cat[ibins] <- 1  
+                                    catcol[ibins] <- red 
+                                    catname[ibins] <- "dangerous"
+                              } 
+                        }
+                        ob.clim[ibins, w] <- cat[ibins]
+                        ob.slope$lower[l , ibins] <- slope_lower
+                        ob.slope$upper[l , ibins] <- slope_upper
+                        ob.slope$sl[l ,] <- slope
+                        ob.catname[l ,] <- catname
+                  }
             }
       }
       l.obs.fin <- list()
@@ -220,13 +226,13 @@ reliabilityCategories <- function(obs,
       if (diagrams) {
             if(length(regs) > 1){
                   pc <- transformeR::plotClimatology(mg,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
-                                        col.regions = c(red, orange, yellow, darkyellow, cyan, green),
-                                        layout = c(1, nbins),
-                                        colorkey = list(labels = list( 
-                                              cex = 1,
-                                              at = c(1, 2, 2.75, 3.25, 4, 5), 
-                                              labels = c("dangerously unuseful", "not useful","marginally useful",
-                                                         "marginally useful*","still useful","perfect"))))
+                                                     col.regions = c(red, orange, yellow, darkyellow, cyan, green),
+                                                     layout = c(1, nbins),
+                                                     colorkey = list(labels = list( 
+                                                           cex = 1,
+                                                           at = c(1, 2, 2.75, 3.25, 4, 5), 
+                                                           labels = c("dangerously unuseful", "not useful","marginally useful",
+                                                                      "marginally useful*","still useful","perfect"))))
                   
                   print(pc)
             }else{
@@ -304,8 +310,11 @@ reliabilityCategories <- function(obs,
       attr(result.grid$Variable, "verification_time") <- attr(result.grid$Variable, "verification_time")[1]
       attr(result.grid$Variable, "annual_agg_cellfun") <- attr(result.grid$Variable, "annual_agg_cellfun")[1]
       attr(result.grid$Variable, "longname") <- NULL
-      
-      return(result.grid)
+      if(return.diagrams & diagrams){
+            return(list("grid" = result.grid, "plot" = pc))
+      }else{
+            return(result.grid)
+      }
 }
 
 
