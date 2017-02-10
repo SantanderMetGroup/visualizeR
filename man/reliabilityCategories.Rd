@@ -6,7 +6,7 @@
 \usage{
 reliabilityCategories(obs, prd, regions = NULL, nbins = 3, labels = NULL,
   nbinsprob = 10, nboot = 100, sigboot = 0.05, diagrams = TRUE,
-  return.diagrams = FALSE)
+  cex1 = 0.7, return.diagrams = FALSE)
 }
 \arguments{
 \item{obs}{Grid of observations}
@@ -28,6 +28,9 @@ the relaiability is calculated. Default is NULL (See details).}
 \item{sigboot}{Optional. Confidence interval for the reliability line. By default sigboot = 0.05}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
+
+\item{cex1}{numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point
+when n = 1.  The sizes for points corresponding to n > 1 are reescaled accordingly.}
 
 \item{return.diagrams}{Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.}
 }

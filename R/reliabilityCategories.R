@@ -31,6 +31,8 @@
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
 #' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.05
 #' @param diagrams Logical (default = TRUE). Plotting results.  
+#' @param cex1 numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
+#' when n = 1.  The sizes for points corresponding to n > 1 are reescaled accordingly.
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
@@ -85,6 +87,7 @@ reliabilityCategories <- function(obs,
                                   nboot = 100,
                                   sigboot = 0.05, 
                                   diagrams = TRUE,
+                                  cex1 = 0.7,
                                   return.diagrams = FALSE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
@@ -190,7 +193,7 @@ reliabilityCategories <- function(obs,
                               } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
                                     cat[ibins] <- 3.5  
                                     catcol[ibins] <- darkyellow 
-                                    catname[ibins] <- "marginally useful*"
+                                    catname[ibins] <- "marginally useful +"
                               } else if (slope[ibins] > 0 & slope_lower > 0) {
                                     cat[ibins] <- 3  
                                     catcol[ibins] <- yellow 
@@ -202,7 +205,7 @@ reliabilityCategories <- function(obs,
                               } else if (slope[ibins] < 0) {
                                     cat[ibins] <- 1  
                                     catcol[ibins] <- red 
-                                    catname[ibins] <- "dangerous"
+                                    catname[ibins] <- "dangerously useless"
                               } 
                         }
                         ob.clim[ibins, w] <- cat[ibins]
@@ -231,12 +234,12 @@ reliabilityCategories <- function(obs,
                                                      colorkey = list(labels = list( 
                                                            cex = 1,
                                                            at = c(1, 2, 2.75, 3.25, 4, 5), 
-                                                           labels = c("dangerously unuseful", "not useful","marginally useful",
-                                                                      "marginally useful*","still useful","perfect"))))
+                                                           labels = c("dangerously useless", "not useful","marginally useful",
+                                                                      "marginally useful +","still useful","perfect"))))
                   
                   print(pc)
             }else{
-                  par(mfrow = c(1, nbins), pty="s", oma=c(0,0,2,0), mgp=c(2,1,0)) 
+                  par(mfrow = c(1, nbins), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
                   for(i in 1:nbins){
                         ## reliability diagram
                         x1 <- 1/nbins
@@ -277,10 +280,10 @@ reliabilityCategories <- function(obs,
                         abline((1-slope[i])/nbins, slope[i], col = "black", lwd = 2)
                         
                         ## puntos del reliability diagram (escalados por el peso)
-                        points(0.1, .8, pch = 19, cex = 1)
+                        points(0.1, .8, pch = 19, cex = cex1)
                         text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
                         points(prdprob[[i]], obsfreq[[i]], pch = 19, 
-                               cex = ((((prdfreq[[i]]*nyear*npoint)-1)*(10-1)) / ((nyear*npoint)-1)) + 1)
+                               cex = ((((prdfreq[[i]]*nyear*npoint)-cex1)*(cex1*10-cex1)) / ((nyear*npoint)-cex1)) + cex1)
                         grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
                   }
                   title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
