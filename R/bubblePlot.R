@@ -32,7 +32,7 @@
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
-#' @param bubble.size Number for the bubble size. bubble.size=4 by default.
+#' @param bubble.size Number for the bubble or pie size. bubble.size=1 by default.
 #' @param score.range Two dim vector to rescale the transparency of the bubbles (e.g c(0.5, 0.8) values
 #'  lower than 0.5 are transparent while values up to 0.8 have maximum transparency). Default is NULL that is transparency 
 #'  ranges from 0 to 1. 
@@ -89,7 +89,7 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=4, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=1, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
       yy <- unique(getYearsAsINDEX(hindcast))
       if (is.null(score.range)){
         score.range <- c(0,1)
@@ -211,6 +211,7 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
         colors <- array(dim=dim(rocss))
         min.score.range <- score.range[1]
         max.score.range <- score.range[2]
+        # y=a+bx line to compute the transparency ([color=0, min.score.range], [color=255, max.score.range]).
         a <- -(255*min.score.range)/(max.score.range-min.score.range)
         b <- 255/(max.score.range-min.score.range)
         for (i.tercile in 1:3){
@@ -247,9 +248,10 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
       if (piechart){   # Plot with pies
         pch.neg.score <- NULL
         size.as.probability <- F
-        dx <- diff(x.mm[1:2])
-        dy <- diff(y.mm[1:2])
-        radius <- min(dx,dy)/2*0.8
+        #dx <- diff(x.mm[1:2])
+        #dy <- diff(y.mm[1:2])
+        #radius <- min(dx,dy)/2*0.8
+        radius <- bubble.size
         if (score){
           v.valid <- c(1:gridpoints)
           # Remove gridpoints with ROCSS or forecast data all NaN
@@ -326,19 +328,20 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
       # Add legend
       # Transparency color for mean of the score.range
       mean.score.range <- mean(score.range)
-      legend.color.transparency <- c(alpha(t.colors[1], 255*mean.score.range), alpha(t.colors[2], 255*mean.score.range), alpha(t.colors[3], 255*mean.score.range))
+      #legend.color.transparency <- c(alpha(t.colors[1], 255*mean.score.range), alpha(t.colors[2], 255*mean.score.range), alpha(t.colors[3], 255*mean.score.range))
+      #legend.color.transparency <- c(t.colors)
       if (size.as.probability) {
         if (score & !is.null(pch.neg.score)){
-          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%) Transparency: ROCSS=%3.2f", mean.score.range), "Negative score")
+          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score")
           xcoords <- c(0, 0.55, 0.95, 1.35)
           secondvector <- (1:length(legtext))-1
           textwidths <- xcoords/secondvector 
           textwidths[1] <- 0
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(legend.color.transparency, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
         } else{
           if (score){
-            t.colors <- legend.color.transparency
-            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%) Transparency: ROCSS=%3.2f", mean.score.range))
+            #t.colors <- legend.color.transparency
+            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
           } else{
             legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")     
           }
@@ -351,11 +354,11 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
         }
       } else {
         if (score & !is.null(pch.neg.score)){
-          legend('bottomleft', c("Below", "Normal", sprintf("Above (Transparency: ROCSS=%3.2f)", mean.score.range), "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(legend.color.transparency, "black"), cex=0.7, horiz=T, bty="n", xjust=0)        
+          legend('bottomleft', c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, horiz=T, bty="n", xjust=0)        
         } else{
           if (score){
-            t.colors <- legend.color.transparency
-            legtext <- c("Below", "Normal", sprintf("Above (Transparency: ROCSS=%3.2f)", mean.score.range))
+            #t.colors <- legend.color.transparency
+            legtext <- c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
           } else{
             legtext <- c("Below", "Normal", "Above")     
           }

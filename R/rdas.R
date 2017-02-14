@@ -1,5 +1,5 @@
 #' @title NCEP/NCAR reanalysis DJF mean temperature for the entire globe
-#' @description NCEP/NCAR reanalysis DJF mean temperature for the entire globe (1949-2010). Data are annually aggregated.
+#' @description NCEP/NCAR reanalysis of December to February (DJF) mean temperature for the entire globe (1983-2010). Data are annually aggregated.
 #' @format A grid
 #' @source Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 #' @name tas.ncep
@@ -11,13 +11,13 @@ NULL
 
 
 #' @title NCEP CFSv2 hindcast of DJF mean temperature for the entire globe.
-#' @description NCEP CFSv2 hindcast of DJF mean temperature for the entire globe (1983-2010). Data are annually aggregated.
+#' @description NCEP CFSv2 hindcast of December to February (DJF) mean temperature for the entire globe (1983-2010). Data are annually aggregated.
 #' Ensemble of 24 members, corresponding to the lead month 1 predictions (November initializations)
 #' @format A grid
 #' @description For further detail on ensemble member definition, see \url{http://www.meteo.unican.es/ecoms-udg/dataserver/datasets/CFSv2}
 #' @source Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 #' @name tas.cfs
-#' @references Saha, S. et al. 2013. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
+#' @references Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 #' @examples \dontrun{
 #' data(tas.cfs)
 #' require(transformeR)
@@ -34,7 +34,7 @@ NULL
 #' @description For further detail on ensemble member definition, see \url{http://www.meteo.unican.es/ecoms-udg/dataserver/datasets/CFSv2}
 #' @source Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 #' @name tas.cfs.operative.2016
-#' @references Saha, S. et al. 2013. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
+#' @references Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 #' @examples \dontrun{
 #' data(tas.cfs.operative.2016)
 #' require(transformeR)
@@ -50,7 +50,7 @@ NULL
 #' @description For further detail on ensemble member definition, see \url{http://www.meteo.unican.es/ecoms-udg/dataserver/datasets/CFSv2}
 #' @source Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 #' @name tas.cfs.operative.2017
-#' @references Saha, S. et al. 2013. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
+#' @references Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 #' @examples \dontrun{
 #' data(tas.cfs.operative.2017)
 #' require(transformeR)
