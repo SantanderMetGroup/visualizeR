@@ -263,11 +263,10 @@ reliabilityCategories <- function(obs,
                   
                   
                   # Customized Lattice Example
-                  library(lattice)
-                  xyplot(y~x|w, scales=list(x = list(at = seq(0,1,1/nbinsprob),
-                                                     labels = seq(0,1,1/nbinsprob)),
-                                            y = list(at = seq(0,1,1/nbinsprob),
-                                                     labels = seq(0,1,1/nbinsprob)),
+                  xyp <- xyplot(y~x|w, scales=list(x = list(at = seq(0,1,round(1/nbinsprob, digits = 2)),
+                                                     labels = seq(0,1,round(1/nbinsprob, digits = 2))),
+                                            y = list(at = seq(0,1,round(1/nbinsprob, digits = 2)),
+                                                     labels = seq(0,1,round(1/nbinsprob, digits = 2))),
                                             
                                             cex=.8, col="black"),
                          panel=function(x, y, w, z, ...) {
@@ -285,11 +284,11 @@ reliabilityCategories <- function(obs,
                                panel.abline(h = 1/nbins, v = 1/nbins, col = "black", lty = 3)
                                for(i in 1:nbins){
                                      if(packet.number() == i){
-                                           panel.polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
+                                           panel.polygon(c(0, 1/nbins, 0, 0), c(b_lower[,i], 1/nbins, b_upper[,i], b_lower[,i]),
                                                          border = NA, col = catcol[i])
-                                           panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
+                                           panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/nbins),
                                                          border = NA, col = catcol[i])
-                                           panel.text(0.3, 0.75, catname[i])
+                                           panel.text(0.35, 0.75, catname[i])
                                            
                                            panel.xyplot(x, y, pch = 16, col = "black", 
                                                         cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
@@ -307,11 +306,10 @@ reliabilityCategories <- function(obs,
                          xlab = "", ylab= "Observed frequency",
                          main= sprintf("n = %d years x %d points", nyear, npoint))
                   
-                  # update(la, par.settings = list(fontsize = list(text = 8, points = 1)))
+                  # update(xyp, par.settings = list(fontsize = list(text = 8, points = 10)))
                   
                   #########################################################
-                  
-                  
+                 print(xyp) 
             }
       }
       result.grid <- mg
