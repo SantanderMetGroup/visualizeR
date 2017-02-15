@@ -26,13 +26,15 @@
 #' the relaiability is calculated. Default is NULL (See details).
 #' @param nbins Number of categories considered (e.g. 3 for terciles). By default nbins = 3
 #' @param labels Character of the names to be given at the categories defined in \code{nbins} 
-#' (e.g. c("lower", "middle", "upper")). if NULL (default) numbered categories are returned.
+#' (e.g. c("lower", "middle", "upper")). If NULL (default) numbered categories are returned 
+#' (Category 1 corresponds to the lowest values).
 #' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
-#' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.05
+#' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.1 (two sided)
 #' @param diagrams Logical (default = TRUE). Plotting results.  
-#' @param cex1 numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
+#' @param cex0 numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
 #' when n = 1.  The sizes for points corresponding to n > 1 are reescaled accordingly.
+#' @param layout integer (default = c(1, nbins)). Sets the layout of panels (cols,rows)
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
@@ -76,6 +78,7 @@
 #' @importFrom transformeR getGrid redim getDim
 #' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
 #' @importFrom graphics plot.new abline polygon text grid title
+#' @import lattice
 #' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
 
 reliabilityCategories <- function(obs,
@@ -85,9 +88,10 @@ reliabilityCategories <- function(obs,
                                   labels = NULL,
                                   nbinsprob = 10,
                                   nboot = 100,
-                                  sigboot = 0.05, 
+                                  sigboot = 0.1, 
                                   diagrams = TRUE,
-                                  cex1 = 0.7,
+                                  cex0 = 0.7,
+                                  layout = c(1,nbins),
                                   return.diagrams = FALSE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
@@ -159,7 +163,7 @@ reliabilityCategories <- function(obs,
                         sena <- se
                   }
                   message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
-                  sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot)
+                  sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot)
                   
                   n <- sl$n
                   nyear <- sl$nyear
@@ -175,7 +179,7 @@ reliabilityCategories <- function(obs,
                   catname <- rep("", nbins)
                   
                   for (ibins in 1:nbins) {
-                        aux <- quantile(slope_boot[, ibins], c(sigboot, 1-sigboot), na.rm = T)
+                        aux <- quantile(slope_boot[, ibins], c(sigboot/2, 1-sigboot/2), na.rm = T)
                         slope_lower <- aux[[1]]
                         slope_upper <- aux[[2]]
                         rm(aux)
@@ -230,7 +234,7 @@ reliabilityCategories <- function(obs,
             if(length(regs) > 1){
                   pc <- transformeR::plotClimatology(mg,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
                                                      col.regions = c(red, orange, yellow, darkyellow, cyan, green),
-                                                     layout = c(1, nbins),
+                                                     layout = layout,
                                                      colorkey = list(labels = list( 
                                                            cex = 1,
                                                            at = c(1, 2, 2.75, 3.25, 4, 5), 
@@ -239,54 +243,74 @@ reliabilityCategories <- function(obs,
                   
                   print(pc)
             }else{
-                  par(mfrow = c(1, nbins), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
-                  for(i in 1:nbins){
-                        ## reliability diagram
-                        x1 <- 1/nbins
-                        y1 <- 1/nbins
-                        x2 <- 1
-                        y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
-                        a <- (y2-y1)/(x2-x1)
-                        b <- y1-((x1*(y2-y1))/(x2-y1))
-                        
-                        plot(b, a, col = "black", lty = 3, typ = "l",
-                             xlim = c(0,1), ylim = c(0,1),
-                             xlab = "prd prob.", ylab = "obs. freq.",
-                             main = labels[i], 
-                             sub = list(catname[i], cex = 1.2),
-                             font.sub=4)
-                        abline(b, a, col = "black", lty = 3)
-                        polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
-                                border = NA, col = "lightgray")
-                        polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
-                                border = NA, col = "lightgray")
-                        abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
-                        abline(h = 1/nbins, col = "black", lty = 3)
-                        abline(v = 1/nbins, col = "black", lty = 3)  
-                        
-                        ## intervalo de confianza para la pendiente
-                        ## lower bound
-                        a_lower <- ob.slope$lower[ , i] #<- #slope_lower 
-                        b_lower <- (1-ob.slope$lower[ , i])/nbins
-                        ## upper bound
-                        a_upper <- ob.slope$upper[ , i]
-                        b_upper <- (1-ob.slope$upper[ , i])/nbins
-                        polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
-                                border = NA, col = catcol[i])
-                        polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
-                                border = NA, col = catcol[i])
-                        abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
-                        abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
-                        abline((1-slope[i])/nbins, slope[i], col = "black", lwd = 2)
-                        
-                        ## puntos del reliability diagram (escalados por el peso)
-                        points(0.1, .8, pch = 19, cex = cex1)
-                        text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
-                        points(prdprob[[i]], obsfreq[[i]], pch = 19, 
-                               cex = ((((prdfreq[[i]]*nyear*npoint)-cex1)*(cex1*10-cex1)) / ((nyear*npoint)-cex1)) + cex1)
-                        grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
-                  }
-                  title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
+                  x1 <- 1/nbins
+                  y1 <- 1/nbins
+                  x2 <- 1
+                  y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
+                  a <- (y2-y1)/(x2-x1)
+                  b <- y1-((x1*(y2-y1))/(x2-y1))
+                  
+                  y <- unlist(obsfreq)
+                  x <- unlist(prdprob)
+                  z <- rep(1:nbins, each = nbinsprob)
+                  w <- rep(labels, each = nbinsprob)
+                  
+                  a_lower <- ob.slope$lower #slope_lower 
+                  b_lower <-(1-ob.slope$lower)/nbins
+                  ## upper bound
+                  a_upper <- ob.slope$upper
+                  b_upper <- (1-ob.slope$upper)/nbins
+                  
+                  
+                  # Customized Lattice Example
+                  library(lattice)
+                  xyplot(y~x|w, scales=list(x = list(at = seq(0,1,1/nbinsprob),
+                                                     labels = seq(0,1,1/nbinsprob)),
+                                            y = list(at = seq(0,1,1/nbinsprob),
+                                                     labels = seq(0,1,1/nbinsprob)),
+                                            
+                                            cex=.8, col="black"),
+                         panel=function(x, y, w, z, ...) {
+                               # panel.locfit(...)
+                               
+                               panel.grid(h = -1, v = -1)
+                               panel.polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
+                                             border = NA, col = "lightgray")
+                               panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
+                                             border = NA, col = "lightgray")
+                               panel.abline(coef = c(b, a), panel.number(prefix = labels[1]))
+                               panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
+                               panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
+                               panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
+                               panel.abline(h = 1/nbins, v = 1/nbins, col = "black", lty = 3)
+                               for(i in 1:nbins){
+                                     if(packet.number() == i){
+                                           panel.polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
+                                                         border = NA, col = catcol[i])
+                                           panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
+                                                         border = NA, col = catcol[i])
+                                           panel.text(0.3, 0.75, catname[i])
+                                           
+                                           panel.xyplot(x, y, pch = 16, col = "black", 
+                                                        cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                                     }
+                               }
+                               if(packet.number() == 1){
+                                     panel.xyplot(0.75,0.2, pch = 16, col = "black", cex = cex0)
+                                     panel.text(0.85, 0.2, "n = 1")
+                               }
+                               
+                               
+                         },
+                         
+                         layout = layout,
+                         xlab = "", ylab= "Observed frequency",
+                         main= sprintf("n = %d years x %d points", nyear, npoint))
+                  
+                  # update(la, par.settings = list(fontsize = list(text = 8, points = 1)))
+                  
+                  #########################################################
+                  
                   
             }
       }
@@ -357,7 +381,7 @@ reliabilityCategories <- function(obs,
 
 
 
-calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot, sigboot = sigboot) {
+calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot) {
       if (!(dim(obs)[1] == dim(prd)[2] & dim(obs)[2] == dim(prd)[3])) {
             stop("Observations and predictions are not congruent in size")
       }

@@ -5,8 +5,8 @@
 \title{Reliability categories of a probabilistic prd.}
 \usage{
 reliabilityCategories(obs, prd, regions = NULL, nbins = 3, labels = NULL,
-  nbinsprob = 10, nboot = 100, sigboot = 0.05, diagrams = TRUE,
-  cex1 = 0.7, return.diagrams = FALSE)
+  nbinsprob = 10, nboot = 100, sigboot = 0.1, diagrams = TRUE,
+  cex0 = 0.7, layout = c(1, nbins), return.diagrams = FALSE)
 }
 \arguments{
 \item{obs}{Grid of observations}
@@ -19,18 +19,21 @@ the relaiability is calculated. Default is NULL (See details).}
 \item{nbins}{Number of categories considered (e.g. 3 for terciles). By default nbins = 3}
 
 \item{labels}{Character of the names to be given at the categories defined in \code{nbins}
-(e.g. c("lower", "middle", "upper")). if NULL (default) numbered categories are returned.}
+(e.g. c("lower", "middle", "upper")). If NULL (default) numbered categories are returned
+(Category 1 corresponds to the lowest values).}
 
 \item{nbinsprob}{(optional): number of probability bins considered. By default nbinsprob = 10}
 
 \item{nboot}{number of samples considered for bootstrapping. By default nboot = 100}
 
-\item{sigboot}{Optional. Confidence interval for the reliability line. By default sigboot = 0.05}
+\item{sigboot}{Optional. Confidence interval for the reliability line. By default sigboot = 0.1 (two sided)}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
 
-\item{cex1}{numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point
+\item{cex0}{numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point
 when n = 1.  The sizes for points corresponding to n > 1 are reescaled accordingly.}
+
+\item{layout}{integer (default = c(1, nbins)). Sets the layout of panels (cols,rows)}
 
 \item{return.diagrams}{Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.}
 }

@@ -13,7 +13,8 @@ Imports:
     vioplot,
     RCurl,
     verification,
-    sp
+    sp,
+    lattice
 Suggests:
     loadeR.ECOMS,
     loadeR

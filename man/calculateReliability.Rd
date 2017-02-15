@@ -5,7 +5,7 @@
 \title{Generate object needed by function reliability}
 \usage{
 calculateReliability(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
-  nboot = nboot, sigboot = sigboot)
+  nboot = nboot)
 }
 \arguments{
 \item{obs}{m*n matrix of observations (m = years, n = locations)}

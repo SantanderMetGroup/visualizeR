@@ -6,7 +6,7 @@
 \usage{
 bubblePlot(hindcast, obs, forecast = NULL, year.target = NULL,
   detrend = FALSE, score = TRUE, size.as.probability = TRUE,
-  bubble.size = 4, score.range = NULL, piechart = FALSE,
+  bubble.size = 1, score.range = NULL, piechart = FALSE,
   subtitle = NULL, color.reverse = FALSE, pch.neg.score = NULL,
   pch.obs.constant = NULL, pch.data.nan = NULL)
 }
@@ -27,7 +27,7 @@ details. Default is TRUE}
 \item{size.as.probability}{Logical indicating if the tercile probabilities (magnitude proportional to bubble radius)
 are drawn in the plot. See details. Default is TRUE.}
 
-\item{bubble.size}{Number for the bubble size. bubble.size=4 by default.}
+\item{bubble.size}{Number for the bubble or pie size. bubble.size=1 by default.}
 
 \item{score.range}{Two dim vector to rescale the transparency of the bubbles (e.g c(0.5, 0.8) values
 lower than 0.5 are transparent while values up to 0.8 have maximum transparency). Default is NULL that is transparency
