@@ -6,7 +6,8 @@
 \usage{
 reliabilityCategories(obs, prd, regions = NULL, nbins = 3, labels = NULL,
   nbinsprob = 10, nboot = 100, sigboot = 0.1, diagrams = TRUE,
-  cex0 = 0.7, layout = c(1, nbins), return.diagrams = FALSE)
+  cex0 = 0.5, cex.scale = 10, layout = c(1, nbins),
+  return.diagrams = FALSE)
 }
 \arguments{
 \item{obs}{Grid of observations}
@@ -30,8 +31,11 @@ the relaiability is calculated. Default is NULL (See details).}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
 
-\item{cex0}{numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point
-when n = 1.  The sizes for points corresponding to n > 1 are reescaled accordingly.}
+\item{cex0}{numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point
+for the minimum n frequency (n = 1) (see parameter \code{nbinsprob}.  The sizes for points that correspond to n > 1
+are reescaled according to parameter \code{cex.scale}.}
+
+\item{cex.scale}{numeric (default is 10). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0})}
 
 \item{layout}{integer (default = c(1, nbins)). Sets the layout of panels (cols,rows)}
 
