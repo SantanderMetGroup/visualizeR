@@ -177,14 +177,14 @@ tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detren
           #par(oma = c(7, 0, 2, 2.7))
           image.plot(add = TRUE, horizontal = T, smallplot = c(00.20,0.85,0.16,0.21), legend.only = TRUE, breaks = brks, col = t.color[,1], zlim=c(0,1), legend.lab="Probability of the tercile")          
       } else{          
-          #par(oma = c(5, 0, 2, 3.2))
+          par(oma = c(3, 0, 1, 3.2))
           #image.plot(add = TRUE, legend.only = TRUE, breaks = brks, col = cbar, smallplot = c(0.96,0.99,0.2,0.8), zlim=c(0,1), legend.lab="Probability of the tercile")            
-          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.25,0.28), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
+          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.25,0.28), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile", legend.cex=0.8, axis.args=c(cex.axis=0.8))            
       }
       mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
       mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
       title <- sprintf("%s, %s to %s", attr(getVariable(hindcast), "longname"), mons.start, mons.end)
-      mtext(title, side=3, line=-3, adj=0, cex=1.2, font=2)
+      mtext(title, side=3, line=-3, adj=0, cex=0.9, font=2)
       if (!is.null(subtitle)){
         mtext(subtitle, side=3, line=-4, adj=0, cex=0.7)
       }
