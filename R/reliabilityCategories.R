@@ -36,7 +36,7 @@
 #' for the minimum n frequency (n = 1) (see parameter \code{nbinsprob}.  The sizes for points that correspond to n > 1 
 #' are reescaled according to parameter \code{cex.scale}.
 #' @param cex.scale numeric (default is 10). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0}) 
-#' @param layout integer (default = c(1, nbins)). Sets the layout of panels (cols,rows)
+#' @param layout integer (default = c(1, nbins)). Sets the layout of panels (rows,cols)
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
@@ -99,6 +99,7 @@ reliabilityCategories <- function(obs,
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
+      layout <- rev(layout)
       if(is.null(labels)) labels <- paste("Category", 1:nbins)
       red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
       orange <- rgb(1, 0.65, 0.3, 1, names = "orange", maxColorValue = 1)

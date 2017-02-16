@@ -37,7 +37,7 @@ are reescaled according to parameter \code{cex.scale}.}
 
 \item{cex.scale}{numeric (default is 10). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0})}
 
-\item{layout}{integer (default = c(1, nbins)). Sets the layout of panels (cols,rows)}
+\item{layout}{integer (default = c(1, nbins)). Sets the layout of panels (rows,cols)}
 
 \item{return.diagrams}{Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.}
 }
