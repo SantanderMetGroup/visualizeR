@@ -62,15 +62,19 @@
 #' @examples \dontrun{
 #' data("tas.cfs")
 #' data("tas.ncep")
-#' data("AR5regions")
+#' data("PRUDENCEregions")
 #' require(transformeR)
-#' tas.cfs2 <- interpGrid(tas.cfs, getGrid(tas.ncep))
-#' tas.ncep2 <- subsetGrid(tas.ncep, years = 1983:2009)
-#' tas.cfs2 <- subsetGrid(tas.cfs2, years = 1983:2009)
-#' rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2, 
-#'                            nboot = 100, regions = AR5regions)
-#' rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2, 
-#'                            nboot = 100)
+#' #select spatio-temporal domain
+#' tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-10, 35), latLim = c(35,70), years = 1983:2009)
+#' tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-10, 35), latLim = c(35,70), years = 1983:2009)
+#' #interpolate
+#' tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
+#' #calculate reliability
+#' rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int, 
+#'                                  nbinsprob = 5, nboot = 10, 
+#'                                  regions = PRUDENCEregions)
+#' rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int, 
+#'                              nbinsprob = 5, nboot = 10)
 #' }
 #' 
 #' @export
@@ -82,6 +86,9 @@
 #' @importFrom graphics plot.new abline polygon text grid title
 #' @import lattice
 #' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
+
+
+
 
 reliabilityCategories <- function(obs,
                                   prd,
