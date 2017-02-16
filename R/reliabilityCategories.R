@@ -32,8 +32,10 @@
 #' @param nboot number of samples considered for bootstrapping. By default nboot = 100
 #' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.1 (two sided)
 #' @param diagrams Logical (default = TRUE). Plotting results.  
-#' @param cex0 numeric (default is 0.7). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
-#' when n = 1.  The sizes for points corresponding to n > 1 are reescaled accordingly.
+#' @param cex0 numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
+#' for the minimum n frequency (n = 1) (see parameter \code{nbinsprob}.  The sizes for points that correspond to n > 1 
+#' are reescaled according to parameter \code{cex.scale}.
+#' @param cex.scale numeric (default is 10). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0}) 
 #' @param layout integer (default = c(1, nbins)). Sets the layout of panels (cols,rows)
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
@@ -90,7 +92,8 @@ reliabilityCategories <- function(obs,
                                   nboot = 100,
                                   sigboot = 0.1, 
                                   diagrams = TRUE,
-                                  cex0 = 0.7,
+                                  cex0 = 0.5,
+                                  cex.scale = 10,
                                   layout = c(1,nbins),
                                   return.diagrams = FALSE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
@@ -288,10 +291,13 @@ reliabilityCategories <- function(obs,
                                                          border = NA, col = catcol[i])
                                            panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/nbins),
                                                          border = NA, col = catcol[i])
+                                           panel.abline(b_lower[,i], a_lower[,i], col = "gray40", lty = 2, lwd = 1)
+                                           panel.abline(b_upper[,i], a_upper[,i], col = "gray40", lty = 2, lwd = 1)
+                                           panel.abline((1-slope[i])/nbins, slope[i], col = "gray40", lwd = 2)
                                            panel.text(0.35, 0.75, catname[i])
                                            
                                            panel.xyplot(x, y, pch = 16, col = "black", 
-                                                        cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                                                       cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0)
                                      }
                                }
                                if(packet.number() == 1){
@@ -303,13 +309,64 @@ reliabilityCategories <- function(obs,
                          },
                          
                          layout = layout,
-                         xlab = "", ylab= "Observed frequency",
-                         main= sprintf("n = %d years x %d points", nyear, npoint))
-                  
+                         xlab = "Predicted frequency", ylab= "Observed frequency",
+                         main= list(cex = 1, font = 1, label = sprintf("n = %d years x %d points", nyear, npoint)))
+                  print(xyp)
                   # update(xyp, par.settings = list(fontsize = list(text = 8, points = 10)))
                   
                   #########################################################
-                 print(xyp) 
+                  
+                  
+                  # par(mfrow = c(1, nbins), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
+                  # for(i in 1:nbins){
+                  #       ## reliability diagram
+                  #       x1 <- 1/nbins
+                  #       y1 <- 1/nbins
+                  #       x2 <- 1
+                  #       y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
+                  #       a <- (y2-y1)/(x2-x1)
+                  #       b <- y1-((x1*(y2-y1))/(x2-y1))
+                  #       
+                  #       plot(b, a, col = "black", lty = 3, typ = "l",
+                  #            xlim = c(0,1), ylim = c(0,1),
+                  #            xlab = "prd prob.", ylab = "obs. freq.",
+                  #            main = labels[i], 
+                  #            sub = list(catname[i], cex = 1.2),
+                  #            font.sub=4)
+                  #       abline(b, a, col = "black", lty = 3)
+                  #       polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
+                  #               border = NA, col = "lightgray")
+                  #       polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
+                  #               border = NA, col = "lightgray")
+                  #       abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
+                  #       abline(h = 1/nbins, col = "black", lty = 3)
+                  #       abline(v = 1/nbins, col = "black", lty = 3)  
+                  #       
+                  #       ## intervalo de confianza para la pendiente
+                  #       ## lower bound
+                  #       a_lower <- ob.slope$lower[ , i] #<- #slope_lower 
+                  #       b_lower <- (1-ob.slope$lower[ , i])/nbins
+                  #       ## upper bound
+                  #       a_upper <- ob.slope$upper[ , i]
+                  #       b_upper <- (1-ob.slope$upper[ , i])/nbins
+                  #       polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
+                  #               border = NA, col = catcol[i])
+                  #       polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
+                  #               border = NA, col = catcol[i])
+                  #       abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
+                  #       abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
+                  #       abline((1-slope[i])/nbins, slope[i], col = "black", lwd = 2)
+                  #       
+                  #       ## puntos del reliability diagram (escalados por el peso)
+                  #       points(0.1, .8, pch = 19, cex = cex0)
+                  #       text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
+                  #       points(prdprob[[i]], obsfreq[[i]], pch = 19, 
+                  #       cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                  #             grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
+                  # }
+                  # title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
+                  ############################################################
+                  
             }
       }
       result.grid <- mg
