@@ -317,7 +317,7 @@ reliabilityCategories <- function(obs,
                          },
                          
                          layout = layout,
-                         xlab = "Predicted frequency", ylab= "Observed frequency",
+                         xlab = "Predicted probability", ylab= "Observed frequency",
                          main= list(cex = 1, font = 1, label = sprintf("n = %d years x %d points", nyear, npoint)))
                   print(xyp)
                   # update(xyp, par.settings = list(fontsize = list(text = 8, points = 10)))
