@@ -6,7 +6,7 @@
 \usage{
 reliabilityCategories(obs, prd, regions = NULL, nbins = 3, labels = NULL,
   nbinsprob = 10, nboot = 100, sigboot = 0.1, diagrams = TRUE,
-  cex0 = 0.5, cex.scale = 10, layout = c(1, nbins),
+  cex0 = 0.5, cex.scale = 20, layout = c(1, nbins),
   return.diagrams = FALSE)
 }
 \arguments{
@@ -35,7 +35,7 @@ the relaiability is calculated. Default is NULL (See details).}
 for the minimum n frequency (n = 1) (see parameter \code{nbinsprob}.  The sizes for points that correspond to n > 1
 are reescaled according to parameter \code{cex.scale}.}
 
-\item{cex.scale}{numeric (default is 10). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0})}
+\item{cex.scale}{numeric (default is 20). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0})}
 
 \item{layout}{integer (default = c(1, nbins)). Sets the layout of panels (rows,cols)}
 
