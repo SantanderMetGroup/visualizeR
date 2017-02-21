@@ -33,9 +33,10 @@
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
 #' @param bubble.size Number for the bubble or pie size. bubble.size=1 by default.
-#' @param score.range Two dim vector to rescale the transparency of the bubbles (e.g c(0.5, 0.8) values
-#'  lower than 0.5 are transparent while values up to 0.8 have maximum transparency). Default is NULL that is transparency 
-#'  ranges from 0 to 1. 
+#' @param score.range A vector of length two used to rescale the transparency of the bubbles.
+#'  For instance, a \code{score.range = c(0.5, 0.8)} will turn ROCSS values below 0.5 completely transparent,
+#'   while values of 0.8 or will have minimum transparency (i.e., opaque). 
+#'   The default to \code{NULL}, that will set a transparency range between 0 and 1. 
 #' @param piechart Logical flag indicating if pie charts should be plot instead of bubbles. Default is FALSE.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
