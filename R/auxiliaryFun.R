@@ -77,14 +77,14 @@ tercileColor <- function(){
 #' @keywords internal
 #' @importFrom transformeR getCoordinates
 #' 
-checkCoords <- function (data1, data2){
-  v<-FALSE
-  if (is.null(data1) | is.null(data2)) v <-TRUE
-  if (length(getCoordinates(data1)$x)==length(getCoordinates(data2)$x)){
-    if (all(getCoordinates(data1)$x==getCoordinates(data2)$x)) v<-TRUE
+checkCoords <- function(data1, data2) {
+  v <- FALSE
+  if (is.null(data1) | is.null(data2)) v <- TRUE
+  if (length(getCoordinates(data1)$x) == length(getCoordinates(data2)$x)) {
+    if (isTRUE(all.equal(getCoordinates(data1)$x, getCoordinates(data2)$x, tolerance = 1e-03))) v <- TRUE
   }
-  if (length(getCoordinates(data1)$y)==length(getCoordinates(data2)$y)){
-    if (all(getCoordinates(data1)$y==getCoordinates(data2)$y)) v<-TRUE
+  if (length(getCoordinates(data1)$y) == length(getCoordinates(data2)$y)) {
+    if (isTRUE(all.equal(getCoordinates(data1)$y, getCoordinates(data2)$y, tolerance = 1e-03))) v <- TRUE
   }
   return(v)
 }
