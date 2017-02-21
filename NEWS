@@ -1,5 +1,6 @@
 visualizeR
 ==========
 
-* Added package vignette
+* Enhanced reliability diagrams, importing funcitonalities from lattice
+* New package vignette
 * Other minor bug fixes and enhancements
