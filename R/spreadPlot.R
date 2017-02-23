@@ -100,7 +100,8 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
      sp.hindcast <- spatialMean(hindcast)
      sp.forecast <- spatialMean(forecast)
      # Plot the climatology shadow 
-     ma <- function(x, n=31){filter(x, rep(1/n, n), sides=2)} # Time filter (moving average)
+     ma.time <- 31
+     ma <- function(x, n=ma.time){filter(x, rep(1/n, n), sides=2)} # Time filter (moving average)
      arr <- getData(sp.hindcast)[1,,,1,1]
      arr.forecast <- getData(sp.forecast)[1,,,1,1]
      mm.ma <- t(apply(arr, MARGIN=1, FUN=ma)) 
@@ -110,10 +111,16 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
      ens.quant <- t(do.call("rbind",
                             lapply(unique(days), FUN=function(x){quantile(c(mm.ma[,days==x]), probs=c(0.0,1/3,0.5,2/3,1.0), na.rm=T)})
      ))
-     season.days <- 1:length(unique(days))    
+     # Remove first and last 15 days since in the moving average the series is not continous in time (just a season). 
+     n.trunc <- floor(ma.time/2)
+     valid.range <- (n.trunc+1):(dim(ens.quant)[2]-n.trunc-1)
+     ens.quant <- ens.quant[, valid.range]
+     season.days <- (1:length(unique(days)))[valid.range]
+     # Starting with the plot
      par(bg="white", mar=c(4,4,1,1))
      ylim <- range(c(as.vector(mm.ma),as.vector(arr.forecast)), na.rm=T)
-     plot(season.days, ens.quant[3,], ylim = ylim, ty = 'n', ylab = paste(attr(getVariable(hindcast), "longname"),"- Daily Mean"), xlab = sprintf("time\n(shade: %d to %d, symbols: %d)", yy[1], last(yy), yy.forecast), xaxt="n")
+     xlim <- range(1:length(unique(days)))
+     plot(season.days, ens.quant[3,], xlim = xlim, ylim = ylim, ty = 'n', ylab = paste(attr(getVariable(hindcast), "longname"),"- Daily Mean"), xlab = sprintf("time\n(shade: %d to %d, symbols: %d)", yy[1], last(yy), yy.forecast), xaxt="n")
      polygon(x = c(season.days, rev(season.days)), y = c(ens.quant[1, ], rev(ens.quant[5, ])), border = "transparent", col = rgb(0.2,0.2,0.2,.2))
      polygon(x = c(season.days, rev(season.days)), y = c(ens.quant[2, ], rev(ens.quant[4, ])), border = "transparent", col = rgb(0.3,0.3,0.3,.3))
      lines(season.days, ens.quant[3,], lwd=2)      
@@ -121,7 +128,7 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
      month.index <- factor(months(mm.dates.forecast), levels=unique(months(mm.dates)))
      nmembers <- length(getMembers(forecast))
      mm.monmeans <- do.call("rbind", lapply(c(1:nmembers), function(x) tapply(arr.forecast[x,], INDEX = month.index, FUN = mean, na.rm = TRUE)))
-     pos.cen <- grep("..15", levels(days)) + 0.5
+     pos.cen <- grep("..15", levels(days))
      pos.ini <- grep("..01", levels(days)) 
      if (violin) {
        boxplot=FALSE # Uncompatible options
