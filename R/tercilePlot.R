@@ -25,7 +25,7 @@
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
@@ -112,8 +112,11 @@ tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detren
       }
       # Detrend
       if (detrend){
-        hindcast <- detrend.forecast(hindcast)
-        obs <- detrend.forecast(obs)
+        hindcast <- detrend.data(hindcast)
+        obs <- detrend.data(obs)
+        if (!is.null(forecast)){
+          forecast <- detrend.data(hindcast, forecast)
+        }
       }
       # Spatial mean of forecast and Benchmark if necessary
       sp.hindcast <- spatialMean(hindcast)

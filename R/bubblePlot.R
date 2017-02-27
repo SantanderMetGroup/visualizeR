@@ -27,7 +27,7 @@
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
@@ -139,8 +139,9 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
       }
       # Detrend
       if (detrend){
-        hindcast <- detrend.forecast(hindcast)
-        obs <- detrend.forecast(obs)
+        hindcast <- detrend.data(hindcast)
+        obs <- detrend.data(obs)
+        forecast <- detrend.data(hindcast, forecast)
       } 
       # Computation of seasonal mean
       sm.hindcast <- seasMean(hindcast)

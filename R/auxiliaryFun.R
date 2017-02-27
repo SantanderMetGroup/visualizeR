@@ -9,7 +9,7 @@ alpha <- function(col, alpha){
 # Detrend: performs detrending of data
 #' @keywords internal
 #' @importFrom stats lm coef
-detrend <- function(x,tt,y=NULL,tty=NULL) { #############aniadir otro flag para que calcule los residuos de forecast
+detrend <- function(x, tt, y=NULL, tty=NULL) {
   #tt <- as.POSIXct(tt)
   tt <- as.numeric(as.Date(tt))
   if (all(is.na(x))) {
@@ -26,7 +26,10 @@ detrend <- function(x,tt,y=NULL,tty=NULL) { #############aniadir otro flag para 
     tty <- as.numeric(as.Date(tty))
     yd <- y-(coef(mod)[1]+tty*coef(mod)[2])
     return(yd)
-  } else{
+  } else if (!is.null(y) & !is.null(tty) & all(is.na(x))){
+    yd <- rep(NA, length(y))    
+    return(yd)
+  } else {
     return(xd)
   }
 } 
@@ -494,7 +497,7 @@ QuantileProbs <- function(obj, obj2=NULL, nbins=3){
 #' @return A S4 object with the data detrended. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and J. Bedia
 #' @export
-detrend.forecast <- function(obj){
+detrend.data <- function(obj, obj2=NULL){
   if (isS4(obj)==FALSE){
     obj <- convertIntoS4(obj)
   }
@@ -502,23 +505,53 @@ detrend.forecast <- function(obj){
   obj.dimNames <- attr(obj.Data, "dimensions")
   if (identical(obj.dimNames, c("var", "member", "time", "y", "x"))) {
     obj.Dates <- getDates(obj)
-    obj.Variable <- getVariable(obj)
     obj.xyCoords <- getxyCoords(obj)
     n.var <- getCountIndex(obj,"var")
-    n.mem <- getCountIndex(obj,"member")    
-    for (ivar in 1:n.var){  
-      aux.list <- lapply(1:n.mem, function(x) {
-        arr <- array(obj.Data[ivar,x,,,], dim(obj.Data)[-1:-2])
-        attr(arr, "dimensions") <- c("time", "lat", "lon")
-        mat <- array3Dto2Dmat(arr)
-        aux <- apply(mat, 2, detrend, tt=obj.Dates$start)
-        mat2Dto3Darray(aux, obj.xyCoords$x, obj.xyCoords$y)
-      })
-      obj.Data[ivar,,,,] <- unname(do.call("abind", c(aux.list, along = -1)))
+    n.mem <- getCountIndex(obj,"member")
+    if (!is.null(obj2)){
+      if (isS4(obj2)==FALSE){
+        obj2 <- convertIntoS4(obj2)
+      }
+      obj2.Data <- getData(obj2)
+      obj2.dimNames <- attr(obj2.Data, "dimensions")
+      if (identical(obj2.dimNames, c("var", "member", "time", "y", "x"))) {
+        obj2.Dates <- getDates(obj2)
+        obj2.xyCoords <- getxyCoords(obj2)
+        n2.var <- getCountIndex(obj2,"var")
+        n2.mem <- getCountIndex(obj2,"member")
+        if (n.mem!=n2.mem){
+          stop("The two datasets have different number of members")      
+        }
+        for (ivar in 1:n2.var){  
+          for (imember in 1:n2.mem){
+            for (ilat in 1:length(obj2.xyCoords$y)){
+              for (ilon in 1:length(obj2.xyCoords$x)){
+                obj2.Data[ivar, imember, , ilat, ilon] <- detrend(x=obj.Data[ivar,imember,,ilat,ilon], tt=obj.Dates$start, y=obj2.Data[ivar,imember,,ilat,ilon], tty=obj2.Dates$start)
+              }      
+            }
+          }
+        }
+        slot(obj2, "Data") <- obj2.Data
+        slot(obj2, "Transformation") <- c(getTransformation(obj2), "detrend")
+        return(obj2)
+      } else {
+        stop("Invalid input data array. Dimensions should be 'var', 'member', 'time', 'y', 'x'")    
+      }
+    } else{
+      for (ivar in 1:n.var){  
+        aux.list <- lapply(1:n.mem, function(x) {
+          arr <- array(obj.Data[ivar,x,,,], dim(obj.Data)[-c(getDimIndex(obj, "var"),getDimIndex(obj, "member"))])
+          attr(arr, "dimensions") <- c("time", "lat", "lon")
+          mat <- array3Dto2Dmat(arr)
+          aux <- apply(mat, 2, detrend, tt=obj.Dates$start)
+          mat2Dto3Darray(aux, obj.xyCoords$x, obj.xyCoords$y)
+        })
+        obj.Data[ivar,,,,] <- unname(do.call("abind", c(aux.list, along = -1)))
+      }
+      slot(obj, "Data") <- obj.Data
+      slot(obj, "Transformation") <- c(getTransformation(obj), "detrend")
+      return(obj)    
     }
-    slot(obj, "Data") <- obj.Data
-    slot(obj, "Transformation") <- c(getTransformation(obj), "detrend")
-    return(obj)
   } else {
     stop("Invalid input data array. Dimensions should be 'var', 'member', 'time', 'y', 'x'")
   } 

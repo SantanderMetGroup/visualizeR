@@ -24,7 +24,7 @@
 #' @param hindcast A multi-member list with the hindcast for verification. Daily values. See details.
 #' @param forecast A multi-member list with the forecasts. Daily values. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param boxplot Logical flag indicating whether a boxplot should be added to the graph. Default is TRUE.
 #' @param violin  Logical flag indicating whether a violin plot should be added to the graph instead of the boxplot. 
 #'  Default is FALSE.
@@ -94,7 +94,8 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
      }
      # Detrend
      if (detrend){
-       hindcast <- detrend.forecast(hindcast)
+       hindcast <- detrend.data(hindcast)
+       forecast <- detrend.data(hindcast, forecast)
      }
      # Spatial mean if necessary
      sp.hindcast <- spatialMean(hindcast)

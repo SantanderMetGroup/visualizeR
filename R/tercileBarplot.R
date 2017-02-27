@@ -25,7 +25,7 @@
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param score.threshold Threshold to remark high positive score values in the figure.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
@@ -104,8 +104,9 @@ tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, det
   }
   # Detrend
   if (detrend){
-    hindcast <- detrend.forecast(hindcast)
-    obs <- detrend.forecast(obs)
+    hindcast <- detrend.data(hindcast)
+    obs <- detrend.data(obs)
+    forecast <- detrend.data(hindcast, forecast)
   }
   # Spatial mean of forecast and Benchmark if necessary
   sp.hindcast <- spatialMean(hindcast)
