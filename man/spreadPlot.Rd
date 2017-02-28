@@ -14,7 +14,7 @@ spreadPlot(hindcast, forecast = NULL, year.target = NULL, detrend = FALSE,
 
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is FALSE.}
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{boxplot}{Logical flag indicating whether a boxplot should be added to the graph. Default is TRUE.}
 

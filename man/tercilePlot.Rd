@@ -17,7 +17,7 @@ tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
 
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is FALSE.}
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{color.pal}{Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 

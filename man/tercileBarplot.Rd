@@ -16,7 +16,7 @@ tercileBarplot(hindcast, obs, forecast = NULL, year.target = NULL,
 
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is FALSE.}
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{score.threshold}{Threshold to remark high positive score values in the figure.}
 

@@ -3,7 +3,7 @@
 export(MrQuantile)
 export(QuantileProbs)
 export(bubblePlot)
-export(detrend.forecast)
+export(detrend.data)
 export(reliabilityCategories)
 export(rocss.fun)
 export(seasMean)
