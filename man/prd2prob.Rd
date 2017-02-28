@@ -4,19 +4,19 @@
 \alias{prd2prob}
 \title{internal function prob2bin}
 \usage{
-prd2prob(prd, n.categories, prd4cats = NULL)
+prd2prob(prd, n.quantiles, prd4cats = NULL)
 }
 \arguments{
 \item{prd}{3D-array of predictions, dimensions = (member, time, npoints)}
 
-\item{n.categories}{Number of categories (3 for terciles)}
+\item{n.quantiles}{Number of categories (3 for terciles)}
 
 \item{prd4cats}{Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)}
 
 \item{dimensions}{(member, time, npoints)}
 }
 \value{
-prdprob: 3D-array of probabilistic predictions, dimensions = (n.categories, time, npoints)
+prdprob: 3D-array of probabilistic predictions, dimensions = (n.quantiles, time, npoints)
 }
 \description{
 This function provides the object needed by "calculateReliability_v2.R"

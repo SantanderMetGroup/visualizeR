@@ -4,7 +4,7 @@
 \alias{calculateReliability}
 \title{Generate object needed by function reliability}
 \usage{
-calculateReliability(obs, prd, n.categories = n.categories, n.bins = n.bins,
+calculateReliability(obs, prd, n.quantiles = n.quantiles, n.bins = n.bins,
   n.boot = n.boot)
 }
 \arguments{
@@ -12,7 +12,7 @@ calculateReliability(obs, prd, n.categories = n.categories, n.bins = n.bins,
 
 \item{prd}{m*n*l matrix of predictions (m = members, n = years, l = locations)}
 
-\item{n.categories}{(optional): number of categories considered (e.g. 3 for terciles). By default n.categories = 3}
+\item{n.quantiles}{(optional): number of categories considered (e.g. 3 for terciles). By default n.quantiles = 3}
 
 \item{n.bins}{(optional): number of probability bins considered. By default n.bins = 10}
 
@@ -20,15 +20,15 @@ calculateReliability(obs, prd, n.categories = n.categories, n.bins = n.bins,
 }
 \value{
 List with the following elements:
-n.categories = n.categories
+n.quantiles = n.quantiles
 nyear = number of years
 npoint = number of locations
 n = nyear*npoint
-prdprob = probability bins (center), per category (e.g. per tercile)
-obsfreq = observed frequency, per category (e.g. per tercile)
-prdfreq = predicted frequency, per category (e.g. per tercile)
-slope = slope of the reliability line, per category (e.g. per tercile)
-slope_boot = n.boot*n.categories matrix, with all the boostrapped values for the slope of the reliability line
+prdprob = probability bins (center), per quantile (e.g. per tercile)
+obsfreq = observed frequency, per quantile (e.g. per tercile)
+prdfreq = predicted frequency, per quantile (e.g. per tercile)
+slope = slope of the reliability line, per quantile (e.g. per tercile)
+slope_boot = n.boot*n.quantiles matrix, with all the boostrapped values for the slope of the reliability line
 }
 \description{
 This function provides the object needed by "calculateReliability_v2.R"

@@ -2,12 +2,12 @@
 % Please edit documentation in R/reliabilityCategories.R
 \name{reliabilityCategories}
 \alias{reliabilityCategories}
-\title{Reliability categories of a probabilistic prd.}
+\title{Reliability categories of a probabilistic forecast.}
 \usage{
-reliabilityCategories(obs, prd, regions = NULL, n.categories = 3,
+reliabilityCategories(obs, prd, regions = NULL, n.quantiles = 3,
   labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.9,
   diagrams = TRUE, cex0 = 0.5, cex.scale = 20, layout = c(1,
-  n.categories), backdrop.theme = "countries", return.diagrams = FALSE)
+  n.quantiles), backdrop.theme = "countries", return.diagrams = FALSE)
 }
 \arguments{
 \item{obs}{Grid of observations}
@@ -17,11 +17,11 @@ reliabilityCategories(obs, prd, regions = NULL, n.categories = 3,
 \item{regions}{SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 the relaiability is calculated. Default is NULL (See details).}
 
-\item{n.categories}{Number of categories considered (e.g. 3 for terciles). By default n.categories = 3}
+\item{n.quantiles}{Number of quantiles considered. Default is 3 (terciles)}
 
-\item{labels}{Character of the names to be given at the categories defined in \code{n.categories}
-(e.g. c("lower", "middle", "upper")). If NULL (default) numbered categories are returned
-(Category 1 corresponds to the lowest values).}
+\item{labels}{Character of the names to be given at the quantiles defined in \code{n.quantiles}
+(e.g. c("lower", "middle", "upper")). If NULL (default) numbered quantiles are returned
+(Quantile 1 corresponds to the lowest values).}
 
 \item{n.bins}{(optional): number of probability bins considered. By default n.bins = 10}
 
@@ -37,7 +37,7 @@ are reescaled according to parameter \code{cex.scale}.}
 
 \item{cex.scale}{numeric (default is 20). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0})}
 
-\item{layout}{integer (default = c(1, n.categories)). Sets the layout of panels (rows,cols)}
+\item{layout}{integer (default = c(1, n.quantiles)). Sets the layout of panels (rows,cols)}
 
 \item{backdrop.theme}{Reference geographical lines to be added to the plot. Default is "countries"
 (See \code{\link[transformeR]{plotClimatology}} for options).}
@@ -61,7 +61,7 @@ reliability diagrams and the related reliability categories, according to Weishe
 If parameter regions is NULL (default) the whole region in \code{obs} and \code{prd} is considered
 for computing reliability. A subregion will be considered If the corresponding SpatialPolygons* object
 is provided. In these cases, if parameter \code{diagrams = TRUE}, reliability diagrams are plotted for
-each specified category. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed
+each specified quantile. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed
 separately for each region and reliability maps are plotted instead.
 
 A SpartialPolygons* object is easily obtained by reading a shapefile with function

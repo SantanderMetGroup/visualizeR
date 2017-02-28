@@ -4,16 +4,16 @@
 \alias{obs2bin}
 \title{internal function obs2bin}
 \usage{
-obs2bin(obs, n.categories)
+obs2bin(obs, n.quantiles)
 }
 \arguments{
 \item{obs}{2D-matrix of observations, dimensions = (time, npoints)}
 
-\item{n.categories}{number of categories (3 for terciles)}
+\item{n.quantiles}{number of categories (3 for terciles)}
 }
 \value{
 bincat: list with two elements:
-bin: 3D-array of binary (0/1) observations, dimensions = (n.categories, time, npoints)
+bin: 3D-array of binary (0/1) observations, dimensions = (n.quantiles, time, npoints)
 cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 }
 \description{
