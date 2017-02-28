@@ -14,12 +14,14 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,
+knitr::opts_chunk$set(echo = TRUE,
                  message = FALSE,
+                 warning = FALSE,
                  fig.align = "center",
                  tidy = TRUE,
                  cache = FALSE,
-                 fig.width = 9)
+                 fig.width = 9,
+                 fig.height = 5)
 ```
 
 
@@ -163,7 +165,7 @@ bubblePlot(hindcast,
 
 # Temporal Visualization of the verification
 
-This type of visualization is envisaged to privcode a temporal overview of forecast skill. For this reason, its use is meaningful only at single-point locations or relatively small regions with an homogeneous forecast skill. 
+This type of visualization is envisaged to provide a temporal overview of forecast skill. For this reason, its use is meaningful only at single-point locations or relatively small regions with an homogeneous forecast skill. 
 
 Tercile pots are computed considering seasonally averaged time series (i.e., interannual series). For rectangular spatial domains (i.e., for fields), the spatial average is first computed to obtain a unique series for the whole domain. The corresponding terciles for each ensemble member are then computed for the hindcast period. Thus, each particular member and season, are categorized into three categories (above, between or below), according to their respective climatological terciles. Then, a probabilistic forecast is computed year by year by considering the number of members falling within each category. This probability is represented by the colorbar. For instance, probabilities below 1/3 are very low, indicating that a minority of the members falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the white circles. If the forecast object is not `NULL`, then the probabilities for this season are also ploted next to the hindcast results.
 
@@ -173,7 +175,7 @@ In this example, we illustrate its usage considering the _Nino 3.4_ region, a re
 
 ```{r}
 # El Nino 3.4 
-crop.nino <- function(x) subsetGrid(x, lonLim = c(-170, -120), latLim=c(-5, 5))
+crop.nino <- function(x) subsetGrid(x, lonLim = c(-170, -120), latLim = c(-5, 5))
 hindcast.nino <- crop.nino(hindcast)
 obs.nino <- crop.nino(obs)
 forecast.nino <- crop.nino(forecast)
