@@ -24,19 +24,21 @@
 #' @param prd Grid of forecast data
 #' @param regions SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 #' the relaiability is calculated. Default is NULL (See details).
-#' @param nbins Number of categories considered (e.g. 3 for terciles). By default nbins = 3
-#' @param labels Character of the names to be given at the categories defined in \code{nbins} 
+#' @param n.categories Number of categories considered (e.g. 3 for terciles). By default n.categories = 3
+#' @param labels Character of the names to be given at the categories defined in \code{n.categories} 
 #' (e.g. c("lower", "middle", "upper")). If NULL (default) numbered categories are returned 
 #' (Category 1 corresponds to the lowest values).
-#' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
-#' @param nboot number of samples considered for bootstrapping. By default nboot = 100
-#' @param sigboot Optional. Confidence interval for the reliability line. By default sigboot = 0.1 (two sided)
+#' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
+#' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
+#' @param conf.level Confidence interval for the reliability line. By default conf.level = 0.9 (two sided)
 #' @param diagrams Logical (default = TRUE). Plotting results.  
 #' @param cex0 numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
-#' for the minimum n frequency (n = 1) (see parameter \code{nbinsprob}.  The sizes for points that correspond to n > 1 
+#' for the minimum n frequency (n = 1) (see parameter \code{n.bins}.  The sizes for points that correspond to n > 1 
 #' are reescaled according to parameter \code{cex.scale}.
 #' @param cex.scale numeric (default is 20). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0}) 
-#' @param layout integer (default = c(1, nbins)). Sets the layout of panels (rows,cols)
+#' @param layout integer (default = c(1, n.categories)). Sets the layout of panels (rows,cols)
+#' @param backdrop.theme Reference geographical lines to be added to the plot. Default is "countries" 
+#' (See \code{\link[transformeR]{plotClimatology}} for options).
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
@@ -71,10 +73,10 @@
 #' tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
 #' #calculate reliability
 #' rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int, 
-#'                                  nbinsprob = 5, nboot = 10, 
+#'                                  n.bins = 5, n.boot = 10, 
 #'                                  regions = PRUDENCEregions)
 #' rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int, 
-#'                              nbinsprob = 5, nboot = 10)
+#'                              n.bins = 5, n.boot = 10)
 #' }
 #' 
 #' @export
@@ -93,21 +95,23 @@
 reliabilityCategories <- function(obs,
                                   prd,
                                   regions = NULL,
-                                  nbins = 3,
+                                  n.categories = 3,
                                   labels = NULL,
-                                  nbinsprob = 10,
-                                  nboot = 100,
-                                  sigboot = 0.1, 
+                                  n.bins = 10,
+                                  n.boot = 100,
+                                  conf.level = 0.9, 
                                   diagrams = TRUE,
                                   cex0 = 0.5,
                                   cex.scale = 20,
-                                  layout = c(1,nbins),
+                                  layout = c(1,n.categories),
+                                  backdrop.theme = "countries",
                                   return.diagrams = FALSE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
             stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
+      sigboot <- 1-conf.level
       layout <- rev(layout)
-      if(is.null(labels)) labels <- paste("Category", 1:nbins)
+      if(is.null(labels)) labels <- paste("Category", 1:n.categories)
       red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
       orange <- rgb(1, 0.65, 0.3, 1, names = "orange", maxColorValue = 1)
       yellow <- rgb(1, 1, 0, 1, names = "yellow", maxColorValue = 1)
@@ -141,15 +145,15 @@ reliabilityCategories <- function(obs,
             obs.fin <- transformeR::climatology(obs)
       )
       ob.full <- array3Dto2Dmat(obs$Data)
-      ob.clim <- array(dim = c(nbins, dim(ob.full)[-1]))
-      lower <- array(dim = c(length(regs), (nbins)))
+      ob.clim <- array(dim = c(n.categories, dim(ob.full)[-1]))
+      lower <- array(dim = c(length(regs), (n.categories)))
       rownames(lower) <- names(regs)
-      upper <- array(dim = c(length(regs), (nbins)))
+      upper <- array(dim = c(length(regs), (n.categories)))
       rownames(upper) <- names(regs)
-      sl <- array(dim = c(length(regs), (nbins)))
+      sl <- array(dim = c(length(regs), (n.categories)))
       rownames(sl) <- names(regs)
       ob.slope <- list("sl" = sl, "lower" = lower, "upper" = upper)
-      ob.catname  <- array(dim = c(length(regs), (nbins)))
+      ob.catname  <- array(dim = c(length(regs), (n.categories)))
       rownames(ob.catname) <- names(regs)
       for(l in 1:length(regs)){
             o <- over(spoints, regs[l,])
@@ -174,7 +178,7 @@ reliabilityCategories <- function(obs,
                         sena <- se
                   }
                   message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
-                  sl <- calculateReliability(obs = obna, prd = sena, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot)
+                  sl <- calculateReliability(obs = obna, prd = sena, n.categories = n.categories, n.bins = n.bins, n.boot = n.boot)
                   
                   n <- sl$n
                   nyear <- sl$nyear
@@ -185,11 +189,11 @@ reliabilityCategories <- function(obs,
                   obsfreq <- sl$obsfreq
                   prdfreq <- sl$prdfreq
                   
-                  cat <- rep(NA, nbins)
-                  catcol <- rep(NA, nbins)
-                  catname <- rep("", nbins)
+                  cat <- rep(NA, n.categories)
+                  catcol <- rep(NA, n.categories)
+                  catname <- rep("", n.categories)
                   
-                  for (ibins in 1:nbins) {
+                  for (ibins in 1:n.categories) {
                         aux <- quantile(slope_boot[, ibins], c(sigboot/2, 1-sigboot/2), na.rm = T)
                         slope_lower <- aux[[1]]
                         slope_upper <- aux[[2]]
@@ -232,7 +236,7 @@ reliabilityCategories <- function(obs,
             }
       }
       l.obs.fin <- list()
-      for(i in 1:nbins){
+      for(i in 1:n.categories){
             obs.fin$Data <- mat2Dto3Darray(as.matrix(ob.clim[i, , drop = F]), x = obs$xyCoords$x, y = obs$xyCoords$y)
             suppressMessages(
                   cats <- transformeR::climatology(obs.fin)
@@ -243,7 +247,7 @@ reliabilityCategories <- function(obs,
       mg <- makeMultiGrid(l.obs.fin)
       if (diagrams) {
             if(length(regs) > 1){
-                  pc <- transformeR::plotClimatology(mg,  backdrop.theme = "countries", at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
+                  pc <- transformeR::plotClimatology(mg,  backdrop.theme = backdrop.theme, at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
                                                      col.regions = c(red, orange, yellow, darkyellow, cyan, green),
                                                      layout = layout,
                                                      colorkey = list(labels = list( 
@@ -254,50 +258,50 @@ reliabilityCategories <- function(obs,
                   
                   print(pc)
             }else{
-                  x1 <- 1/nbins
-                  y1 <- 1/nbins
+                  x1 <- 1/n.categories
+                  y1 <- 1/n.categories
                   x2 <- 1
-                  y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
+                  y2 <- (1/n.categories) + (0.5*(1-(1/n.categories)))
                   a <- (y2-y1)/(x2-x1)
                   b <- y1-((x1*(y2-y1))/(x2-y1))
                   
                   y <- unlist(obsfreq)
                   x <- unlist(prdprob)
-                  z <- rep(1:nbins, each = nbinsprob)
-                  # w <- rep(labels, each = nbinsprob)
+                  z <- rep(1:n.categories, each = n.bins)
+                  # w <- rep(labels, each = n.bins)
                   
                   a_lower <- ob.slope$lower #slope_lower 
-                  b_lower <-(1-ob.slope$lower)/nbins
+                  b_lower <-(1-ob.slope$lower)/n.categories
                   ## upper bound
                   a_upper <- ob.slope$upper
-                  b_upper <- (1-ob.slope$upper)/nbins
+                  b_upper <- (1-ob.slope$upper)/n.categories
                   
                   
                   # Customized Lattice Example
                    xyp <- xyplot(y~x|z, par.strip = list(lines = 1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
-                                 scales=list(x = list(at = seq(0,1,round(1/nbinsprob, digits = 2)),
-                                                     labels = seq(0,1,round(1/nbinsprob, digits = 2))),
-                                            y = list(at = seq(0,1,round(1/nbinsprob, digits = 2)),
-                                                     labels = seq(0,1,round(1/nbinsprob, digits = 2))),
+                                 scales=list(x = list(at = seq(0,1,round(1/n.bins, digits = 2)),
+                                                     labels = seq(0,1,round(1/n.bins, digits = 2))),
+                                            y = list(at = seq(0,1,round(1/n.bins, digits = 2)),
+                                                     labels = seq(0,1,round(1/n.bins, digits = 2))),
                                             
                                             cex=.8, col="black"),
                          panel=function(x, y, z, ...) {
                                # panel.locfit(...)
                                
                                panel.grid(h = -1, v = -1)
-                               panel.polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
+                               panel.polygon(c(0, 1/n.categories, 1/n.categories, 0), c(0, 0, 1/n.categories, b),
                                              border = NA, col = "lightgray")
-                               panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
+                               panel.polygon(c(1/n.categories, 1, 1, 1/n.categories), c(1/n.categories, y2, 1, 1),
                                              border = NA, col = "lightgray")
-                               for(i in 1:nbins){
+                               for(i in 1:n.categories){
                                      if(packet.number() == i){
-                                           panel.polygon(c(0, 1/nbins, 0, 0), c(b_lower[,i], 1/nbins, b_upper[,i], b_lower[,i]),
+                                           panel.polygon(c(0, 1/n.categories, 0, 0), c(b_lower[,i], 1/n.categories, b_upper[,i], b_lower[,i]),
                                                          border = NA, col = catcol[i])
-                                           panel.polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/nbins),
+                                           panel.polygon(c(1/n.categories, 1, 1, 1/n.categories), c(1/n.categories, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/n.categories),
                                                          border = NA, col = catcol[i])
                                            # panel.abline(b_lower[,i], a_lower[,i], col = "gray40", lty = 2, lwd = 1)
                                            # panel.abline(b_upper[,i], a_upper[,i], col = "gray40", lty = 2, lwd = 1)
-                                           panel.abline((1-slope[i])/nbins, slope[i], col = "black", lty = 1, lwd = 1.5)
+                                           panel.abline((1-slope[i])/n.categories, slope[i], col = "black", lty = 1, lwd = 1.5)
                                            panel.text(0.35, 0.85, catname[i])
                                            
                                            panel.xyplot(x, y, pch = 16, col = "black", 
@@ -312,7 +316,7 @@ reliabilityCategories <- function(obs,
                                      panel.text(0.8, 0.08, "n = 1")
                                }
                                panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
-                               panel.abline(h = 1/nbins, col = "black", lty = 3, lwd = 1.5)
+                               panel.abline(h = 1/n.categories, col = "black", lty = 3, lwd = 1.5)
                                panel.abline(coef = c(b, a), lty = 3, lwd = 1.5)
                                
                                
@@ -327,13 +331,13 @@ reliabilityCategories <- function(obs,
                   #########################################################
 
 # 
-#                   par(mfrow = c(1, nbins), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
-#                   for(i in 1:nbins){
+#                   par(mfrow = c(1, n.categories), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
+#                   for(i in 1:n.categories){
 #                         ## reliability diagram
-#                         x1 <- 1/nbins
-#                         y1 <- 1/nbins
+#                         x1 <- 1/n.categories
+#                         y1 <- 1/n.categories
 #                         x2 <- 1
-#                         y2 <- (1/nbins) + (0.5*(1-(1/nbins)))
+#                         y2 <- (1/n.categories) + (0.5*(1-(1/n.categories)))
 #                         a <- (y2-y1)/(x2-x1)
 #                         b <- y1-((x1*(y2-y1))/(x2-y1))
 # 
@@ -344,28 +348,28 @@ reliabilityCategories <- function(obs,
 #                              sub = list(catname[i], cex = 1.2),
 #                              font.sub=4)
 #                         abline(b, a, col = "black", lty = 3)
-#                         polygon(c(0, 1/nbins, 1/nbins, 0), c(0, 0, 1/nbins, b),
+#                         polygon(c(0, 1/n.categories, 1/n.categories, 0), c(0, 0, 1/n.categories, b),
 #                                 border = NA, col = "lightgray")
-#                         polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, y2, 1, 1),
+#                         polygon(c(1/n.categories, 1, 1, 1/n.categories), c(1/n.categories, y2, 1, 1),
 #                                 border = NA, col = "lightgray")
 #                         abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
-#                         abline(h = 1/nbins, col = "black", lty = 3)
-#                         abline(v = 1/nbins, col = "black", lty = 3)
+#                         abline(h = 1/n.categories, col = "black", lty = 3)
+#                         abline(v = 1/n.categories, col = "black", lty = 3)
 # 
 #                         ## intervalo de confianza para la pendiente
 #                         ## lower bound
 #                         a_lower <- ob.slope$lower[ , i] #<- #slope_lower
-#                         b_lower <- (1-ob.slope$lower[ , i])/nbins
+#                         b_lower <- (1-ob.slope$lower[ , i])/n.categories
 #                         ## upper bound
 #                         a_upper <- ob.slope$upper[ , i]
-#                         b_upper <- (1-ob.slope$upper[ , i])/nbins
-#                         polygon(c(0, 1/nbins, 0, 0), c(b_lower, 1/nbins, b_upper, b_lower),
+#                         b_upper <- (1-ob.slope$upper[ , i])/n.categories
+#                         polygon(c(0, 1/n.categories, 0, 0), c(b_lower, 1/n.categories, b_upper, b_lower),
 #                                 border = NA, col = catcol[i])
-#                         polygon(c(1/nbins, 1, 1, 1/nbins), c(1/nbins, a_lower+b_lower, a_upper+b_upper, 1/nbins),
+#                         polygon(c(1/n.categories, 1, 1, 1/n.categories), c(1/n.categories, a_lower+b_lower, a_upper+b_upper, 1/n.categories),
 #                                 border = NA, col = catcol[i])
 #                         abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
 #                         abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
-#                         abline((1-slope[i])/nbins, slope[i], col = "black", lwd = 2)
+#                         abline((1-slope[i])/n.categories, slope[i], col = "black", lwd = 2)
 # 
 #                         ## puntos del reliability diagram (escalados por el peso)
 #                         points(0.1, .8, pch = 19, cex = cex0)
@@ -421,13 +425,12 @@ reliabilityCategories <- function(obs,
 #' 
 #' @param obs m*n matrix of observations (m = years, n = locations)
 #' @param prd m*n*l matrix of predictions (m = members, n = years, l = locations)
-#' @param nbins (optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3
-#' @param nbinsprob (optional): number of probability bins considered. By default nbinsprob = 10
-#' @param nboot number of samples considered for bootstrapping. By default nboot = 100
-#' @param sigboot sigboot
+#' @param n.categories (optional): number of categories considered (e.g. 3 for terciles). By default n.categories = 3
+#' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
+#' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
 #'
 #' @return List with the following elements:
-#' nbins = nbins
+#' n.categories = n.categories
 #' nyear = number of years
 #' npoint = number of locations
 #' n = nyear*npoint
@@ -435,7 +438,7 @@ reliabilityCategories <- function(obs,
 #' obsfreq = observed frequency, per category (e.g. per tercile)
 #' prdfreq = predicted frequency, per category (e.g. per tercile)
 #' slope = slope of the reliability line, per category (e.g. per tercile)
-#' slope_boot = nboot*nbins matrix, with all the boostrapped values for the slope of the reliability line 
+#' slope_boot = n.boot*n.categories matrix, with all the boostrapped values for the slope of the reliability line 
 #' 
 #' @author R. Manzanas \& M.Iturbide
 #' @importFrom abind abind
@@ -447,26 +450,26 @@ reliabilityCategories <- function(obs,
 
 
 
-calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob, nboot = nboot) {
+calculateReliability <- function(obs, prd, n.categories = n.categories, n.bins = n.bins, n.boot = n.boot) {
       if (!(dim(obs)[1] == dim(prd)[2] & dim(obs)[2] == dim(prd)[3])) {
             stop("Observations and predictions are not congruent in size")
       }
       nyear <- dim(obs)[1]
       nmemb <- dim(prd)[1]
-      O <- obs2bin(obs, nbins)
-      P <- prd2prob(prd, nbins)
+      O <- obs2bin(obs, n.categories)
+      P <- prd2prob(prd, n.categories)
       ## calculo puntos diagrama fiabilidad
-      aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, nbinsprob) 
-      nbins <- aux$nbins
+      aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins) 
+      n.categories <- aux$n.categories
       nyear <- aux$nyear
       npoint <- aux$npoint
       n <- aux$n
-      prdprob <- vector("list", nbins)
-      obsfreq <- vector("list", nbins)
-      prdfreq <- vector("list", nbins)
-      slope <- rep(NA, nbins)
-      # intercept <- rep(NA, 1, nbins)
-      for (ibins in 1:nbins) {
+      prdprob <- vector("list", n.categories)
+      obsfreq <- vector("list", n.categories)
+      prdfreq <- vector("list", n.categories)
+      slope <- rep(NA, n.categories)
+      # intercept <- rep(NA, 1, n.categories)
+      for (ibins in 1:n.categories) {
             prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
             prdprob[[ibins]] <- prdprob.bin
             obsfreq.bin <- eval(parse(text = sprintf("aux$cat%d$obar.i", ibins)))
@@ -486,10 +489,10 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
       }
       
       ## bootstrapping
-      slope_boot <- matrix(NA, nboot, nbins)
-      # intercept_boot <- matrix(NA, nboot, nbins)
+      slope_boot <- matrix(NA, n.boot, n.categories)
+      # intercept_boot <- matrix(NA, n.boot, n.categories)
       message("...[", Sys.time(), "] Computing bootstrapping...")
-      for (iboot in 1:nboot){
+      for (iboot in 1:n.boot){
             #             if (abs(iboot/50 - round(iboot/50)) < eps()) {
             #                   print(sprintf("... computing bootstrapping %d ...", iboot))
             #             }
@@ -498,21 +501,21 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
             indyearperm <- sample(1:nyear, nyear, replace = TRUE)
             indnodperm <- sample(1:dim(obs)[2], dim(obs)[2], replace = TRUE)
             
-            P.prob.boot <- array(NA, c(nbins, nyear, dim(obs)[2]))
+            P.prob.boot <- array(NA, c(n.categories, nyear, dim(obs)[2]))
             Pcat.boot <- P$cat[indmembperm, indyearperm, indnodperm]
             for (inod in 1:dim(obs)[2]) {
-                  for (ibins in 1:nbins) {
+                  for (ibins in 1:n.categories) {
                         P.prob.boot[ibins, , inod] <- apply(Pcat.boot[, , inod] == ibins, 2, sum) / nmemb
                         # P.prob.boot[ibins, , inod] <- apply(P$cat[, , inod] == ibins, 2, sum) / nmemb
                   }
             }
             
-            # O <- obs2bin(obs[indyearperm, indnodperm], nbins)
-            # P <- prd2prob(prd[indmembperm, indyearperm, indnodperm], nbins)
+            # O <- obs2bin(obs[indyearperm, indnodperm], n.categories)
+            # P <- prd2prob(prd[indmembperm, indyearperm, indnodperm], n.categories)
             
-            aux <- concatenateDataRelDiagram_v2(O$bin[, indyearperm, indnodperm], P.prob.boot, nbinsprob)  
-            # aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, nbinsprob)  
-            for (ibins in 1:nbins) {   
+            aux <- concatenateDataRelDiagram_v2(O$bin[, indyearperm, indnodperm], P.prob.boot, n.bins)  
+            # aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins)  
+            for (ibins in 1:n.categories) {   
                   
                   prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
                   obsfreq.bin <- eval(parse(text = sprintf("aux$cat%d$obar.i", ibins)))
@@ -531,9 +534,9 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
       }
       message("...[", Sys.time(), "] Done.")
       # # intervalos de confianza para la pendiente de la reliability line
-      # slope_lower <- matrix(NA, length(sigboot), nbins)
-      # slope_upper <- matrix(NA, length(sigboot), nbins)
-      # for (ibins in 1:nbins) {
+      # slope_lower <- matrix(NA, length(sigboot), n.categories)
+      # slope_upper <- matrix(NA, length(sigboot), n.categories)
+      # for (ibins in 1:n.categories) {
       #   for (isigboot in 1:length(sigboot)) {
       #   aux <- quantile(slope_boot[, ibins], c(sigboot[isigboot], 1-sigboot[isigboot]))
       #   slope_lower[isigboot, ibins] <- aux[[1]]
@@ -542,7 +545,7 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
       # }
       
       result <- list()
-      result$nbins <- nbins
+      result$n.categories <- n.categories
       result$nyear <- nyear
       result$npoint <- npoint
       result$n <- n
@@ -553,7 +556,7 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
       # result$intercept <- intercept
       result$slope_boot <- slope_boot
       # result$intercept_boot <- intercept_boot
-      # result$sigboot <- sigboot
+      # result$conf.level <- conf.level
       # result$slope_lower <- slope_lower
       # result$slope_upper <- slope_upper
       
@@ -569,29 +572,29 @@ calculateReliability <- function(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param obs 2D-matrix of observations, dimensions = (time, npoints)
-#' @param nbins number of categories (3 for terciles)
+#' @param n.categories number of categories (3 for terciles)
 #'
 #' @return 
 #' bincat: list with two elements:  
-#' bin: 3D-array of binary (0/1) observations, dimensions = (nbins, time, npoints)
+#' bin: 3D-array of binary (0/1) observations, dimensions = (n.categories, time, npoints)
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 #'
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
 
-obs2bin <- function(obs, nbins){
-      bin <- array(0, c(nbins, dim(obs)[1], dim(obs)[2]))
+obs2bin <- function(obs, n.categories){
+      bin <- array(0, c(n.categories, dim(obs)[1], dim(obs)[2]))
       cat <- array(NA, c(dim(obs)[1], dim(obs)[2]))
       v.err <- rep(NA, dim(obs)[2])
       for (inod in 1:dim(obs)[2]) {
             tryCatch({
                   ## categorias obs     
-                  catsobs <- quantile(obs[, inod], 0:nbins/nbins, na.rm = TRUE)
+                  catsobs <- quantile(obs[, inod], 0:n.categories/n.categories, na.rm = TRUE)
                   auxobscat <- quantile2disc(obs[, inod], catsobs)
                   auxobscat$mids <- sort(auxobscat$mids)
                   
-                  for (ibins in 1:nbins){
+                  for (ibins in 1:n.categories){
                         indcat <- which(auxobscat$new == auxobscat$mids[ibins])        
                         bin[ibins, indcat, inod] <- 1     
                         cat[indcat, inod] <- ibins
@@ -624,17 +627,17 @@ obs2bin <- function(obs, nbins){
 #' @param prd 3D-array of predictions, dimensions = (member, time, npoints)
 #' @param prd4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
 #' @param dimensions (member, time, npoints)
-#' @param nbins Number of categories (3 for terciles)
+#' @param n.categories Number of categories (3 for terciles)
 #'
 #' @return 
-#' prdprob: 3D-array of probabilistic predictions, dimensions = (nbins, time, npoints)
+#' prdprob: 3D-array of probabilistic predictions, dimensions = (n.categories, time, npoints)
 #' @note For prd4cats, categories are calculated at model- (not at member-) level
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-prd2prob <- function(prd, nbins, prd4cats = NULL){
+prd2prob <- function(prd, n.categories, prd4cats = NULL){
       
-      prob <- array(NA, c(nbins, dim(prd)[2], dim(prd)[3]))
+      prob <- array(NA, c(n.categories, dim(prd)[2], dim(prd)[3]))
       cat <- array(NA, c(dim(prd)[1], dim(prd)[2], dim(prd)[3]))
       v.err <- rep(NA, dim(prd)[3])
       for (inod in 1:dim(prd)[3]) {
@@ -648,10 +651,10 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
             tmpprdcat <- do.call("c", tmpprdcat)
             
             if (!is.null(prd4cats)) {
-                  catsprd <- quantile(tmpprd4catscat, 0:nbins/nbins, na.rm = TRUE) 
+                  catsprd <- quantile(tmpprd4catscat, 0:n.categories/n.categories, na.rm = TRUE) 
                   rm(tmpprd4catscat)
             } else {
-                  catsprd <- quantile(tmpprdcat, 0:nbins/nbins, na.rm = TRUE) 
+                  catsprd <- quantile(tmpprdcat, 0:n.categories/n.categories, na.rm = TRUE) 
             }
             tryCatch({
                   catsprd <- quantile2disc(tmpprdcat, catsprd)
@@ -664,7 +667,7 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
                         auxprd[, imemb] <- catsprd$new[i1:i2]
                   }  
                   tmp2 <- matrix(NA, dim(prd)[1], dim(prd)[2])
-                  for (ibins in 1:nbins){      
+                  for (ibins in 1:n.categories){      
                         tmp <- auxprd == catsprd$mids[ibins]
                         prob[ibins, , inod] <- apply(tmp, 1, sum) / dim(prd)[1]             
                         tmp2[t(tmp)] <- ibins 
@@ -700,29 +703,29 @@ prd2prob <- function(prd, nbins, prd4cats = NULL){
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param obs 2D-matrix of observations, dimensions = (time, npoints)
-#' @param nbins number of categories (3 for terciles)
-#' @param nbinsprob nbinsprob
+#' @param n.categories number of categories (3 for terciles)
+#' @param n.bins n.bins
 #'
 #' @return 
 #' bincat: list with two elements:  
-#' bin: 3D-array of binary (0/1) observations, dimensions = (nbins, time, npoints)
+#' bin: 3D-array of binary (0/1) observations, dimensions = (n.categories, time, npoints)
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 #' @import verification
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
+concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
       # Description
       # 
       # Usage:
-      # concatenateDataResDiagram(obsbin, prdprob, nod, nbins) 
+      # concatenateDataResDiagram(obsbin, prdprob, nod, n.categories) 
       # Arguments:
-      # obsbin: 4D-array of binary (0/1) observations, dimensions = (nbins, ynod, xnod, time)
-      # prdprob: 4D-array of probabilistic predictions, dimensions = (nbins, ynod, xnod, time)
+      # obsbin: 4D-array of binary (0/1) observations, dimensions = (n.categories, ynod, xnod, time)
+      # prdprob: 4D-array of probabilistic predictions, dimensions = (n.categories, ynod, xnod, time)
       # nod: matrix of coordinates, longitudes (latitudes) in first (second) column (common for obs and prd)
-      # nbins: number of categories (3 for terciles)
+      # n.categories: number of categories (3 for terciles)
       # Value:
-      # dataRelDiagram: list with nbins elements, containing all the information to plot reliability diagrams 
+      # dataRelDiagram: list with n.categories elements, containing all the information to plot reliability diagrams 
       # (call the attribute.R function from verification R-package: 
       # http://cran.r-project.org/web/packages/verification/verification.pdf)
       
@@ -730,17 +733,17 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
       
       dataRelDiagram <- list()
       if (identical(as.vector(dim(obsbin)), as.vector(dim(prdprob)))){
-            nbins <- dim(obsbin)[1]
+            n.categories <- dim(obsbin)[1]
             nyear <- dim(obsbin)[2]
             npoint <- dim(obsbin)[3]
             n <- nyear*npoint
       }
-      dataRelDiagram$nbins <- nbins
+      dataRelDiagram$n.categories <- n.categories
       dataRelDiagram$nyear <- nyear
       dataRelDiagram$npoint <- npoint
       dataRelDiagram$n <- n
       
-      for (ibins in 1:nbins) {    
+      for (ibins in 1:n.categories) {    
             obsbinconca <- as.vector(obsbin[ibins, ,])
             prdprobconca <- as.vector(prdprob[ibins, ,])  
             # nodos sin NAs
@@ -748,7 +751,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, nbinsprob) {
             aux <- verify(obsbinconca[indnona], 
                           prdprobconca[indnona], 
                           obs.type = "binary", frcst.type = "prob",
-                          thresholds = seq(0, 1, 1/nbinsprob), show = FALSE)
+                          thresholds = seq(0, 1, 1/n.bins), show = FALSE)
             aux$n <- length(length(indnona))
             eval(parse(text = sprintf("dataRelDiagram$cat%d = aux",ibins)))   
             
