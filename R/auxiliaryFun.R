@@ -494,6 +494,7 @@ QuantileProbs <- function(obj, obj2=NULL, nbins=3){
 #' @title Detrend data from a S4 object
 #' @description Detrend data from a S4 object with the dimensions c("var", "member", "time", "y", "x")
 #' @param obj S4 object with dimensions c("var", "member", "time", "y", "x") it can be a station, field, multi-member field, etc
+#' @param obj2 obj2. Default to \code{NULL}.
 #' @return A S4 object with the data detrended. The object has dimensions c("var", "member", "time", "y", "x")
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and J. Bedia
 #' @export
