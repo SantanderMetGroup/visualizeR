@@ -24,10 +24,10 @@
 #' @param prd Grid of forecast data
 #' @param regions SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 #' the relaiability is calculated. Default is NULL (See details).
-#' @param n.quantiles Number of quantiles considered. Default is 3 (terciles)
-#' @param labels Character of the names to be given at the quantiles defined in \code{n.quantiles} 
-#' (e.g. c("lower", "middle", "upper")). If NULL (default) numbered quantiles are returned 
-#' (Quantile 1 corresponds to the lowest values).
+#' @param n.events Number of events considered. Default is 3 (terciles)
+#' @param labels Character of the names to be given at the events defined in \code{n.events} 
+#' (e.g. c("lower", "middle", "upper")). If NULL (default) numbered events are returned 
+#' (Event 1 corresponds to the lowest values).
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
 #' @param conf.level Confidence interval for the reliability line. By default conf.level = 0.9 (two sided)
@@ -36,7 +36,7 @@
 #' for the minimum n frequency (n = 1) (see parameter \code{n.bins}.  The sizes for points that correspond to n > 1 
 #' are reescaled according to parameter \code{cex.scale}.
 #' @param cex.scale numeric (default is 20). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0}) 
-#' @param layout integer (default = c(1, n.quantiles)). Sets the layout of panels (rows,cols)
+#' @param layout integer (default = c(1, n.events)). Sets the layout of panels (rows,cols)
 #' @param backdrop.theme Reference geographical lines to be added to the plot. Default is "countries" 
 #' (See \code{\link[transformeR]{plotClimatology}} for options).
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
@@ -47,7 +47,7 @@
 #' @details If parameter regions is NULL (default) the whole region in \code{obs} and \code{prd} is considered 
 #' for computing reliability. A subregion will be considered If the corresponding SpatialPolygons* object
 #' is provided. In these cases, if parameter \code{diagrams = TRUE}, reliability diagrams are plotted for 
-#' each specified quantile. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed 
+#' each specified event. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed 
 #' separately for each region and reliability maps are plotted instead. 
 #' 
 #' A SpartialPolygons* object is easily obtained by reading a shapefile with function 
@@ -95,7 +95,7 @@
 reliabilityCategories <- function(obs,
                                   prd,
                                   regions = NULL,
-                                  n.quantiles = 3,
+                                  n.events = 3,
                                   labels = NULL,
                                   n.bins = 10,
                                   n.boot = 100,
@@ -103,7 +103,7 @@ reliabilityCategories <- function(obs,
                                   diagrams = TRUE,
                                   cex0 = 0.5,
                                   cex.scale = 20,
-                                  layout = c(1,n.quantiles),
+                                  layout = c(1,n.events),
                                   backdrop.theme = "countries",
                                   return.diagrams = FALSE){ 
       if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
@@ -111,7 +111,7 @@ reliabilityCategories <- function(obs,
       }
       sigboot <- 1-conf.level
       layout <- rev(layout)
-      if(is.null(labels)) labels <- paste("Quantile", 1:n.quantiles)
+      if(is.null(labels)) labels <- paste("Event", 1:n.events)
       red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
       orange <- rgb(1, 0.65, 0.3, 1, names = "orange", maxColorValue = 1)
       yellow <- rgb(1, 1, 0, 1, names = "yellow", maxColorValue = 1)
@@ -145,15 +145,15 @@ reliabilityCategories <- function(obs,
             obs.fin <- transformeR::climatology(obs)
       )
       ob.full <- array3Dto2Dmat(obs$Data)
-      ob.clim <- array(dim = c(n.quantiles, dim(ob.full)[-1]))
-      lower <- array(dim = c(length(regs), (n.quantiles)))
+      ob.clim <- array(dim = c(n.events, dim(ob.full)[-1]))
+      lower <- array(dim = c(length(regs), (n.events)))
       rownames(lower) <- names(regs)
-      upper <- array(dim = c(length(regs), (n.quantiles)))
+      upper <- array(dim = c(length(regs), (n.events)))
       rownames(upper) <- names(regs)
-      sl <- array(dim = c(length(regs), (n.quantiles)))
+      sl <- array(dim = c(length(regs), (n.events)))
       rownames(sl) <- names(regs)
       ob.slope <- list("sl" = sl, "lower" = lower, "upper" = upper)
-      ob.catname  <- array(dim = c(length(regs), (n.quantiles)))
+      ob.catname  <- array(dim = c(length(regs), (n.events)))
       rownames(ob.catname) <- names(regs)
       for(l in 1:length(regs)){
             o <- over(spoints, regs[l,])
@@ -178,7 +178,7 @@ reliabilityCategories <- function(obs,
                         sena <- se
                   }
                   message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
-                  sl <- calculateReliability(obs = obna, prd = sena, n.quantiles = n.quantiles, n.bins = n.bins, n.boot = n.boot)
+                  sl <- calculateReliability(obs = obna, prd = sena, n.events = n.events, n.bins = n.bins, n.boot = n.boot)
                   
                   n <- sl$n
                   nyear <- sl$nyear
@@ -189,11 +189,11 @@ reliabilityCategories <- function(obs,
                   obsfreq <- sl$obsfreq
                   prdfreq <- sl$prdfreq
                   
-                  cat <- rep(NA, n.quantiles)
-                  catcol <- rep(NA, n.quantiles)
-                  catname <- rep("", n.quantiles)
+                  cat <- rep(NA, n.events)
+                  catcol <- rep(NA, n.events)
+                  catname <- rep("", n.events)
                   
-                  for (ibins in 1:n.quantiles) {
+                  for (ibins in 1:n.events) {
                         aux <- quantile(slope_boot[, ibins], c(sigboot/2, 1-sigboot/2), na.rm = T)
                         slope_lower <- aux[[1]]
                         slope_upper <- aux[[2]]
@@ -236,7 +236,7 @@ reliabilityCategories <- function(obs,
             }
       }
       l.obs.fin <- list()
-      for(i in 1:n.quantiles){
+      for(i in 1:n.events){
             obs.fin$Data <- mat2Dto3Darray(as.matrix(ob.clim[i, , drop = F]), x = obs$xyCoords$x, y = obs$xyCoords$y)
             suppressMessages(
                   cats <- transformeR::climatology(obs.fin)
@@ -258,23 +258,23 @@ reliabilityCategories <- function(obs,
                   
                   print(pc)
             }else{
-                  x1 <- 1/n.quantiles
-                  y1 <- 1/n.quantiles
+                  x1 <- 1/n.events
+                  y1 <- 1/n.events
                   x2 <- 1
-                  y2 <- (1/n.quantiles) + (0.5*(1-(1/n.quantiles)))
+                  y2 <- (1/n.events) + (0.5*(1-(1/n.events)))
                   a <- (y2-y1)/(x2-x1)
                   b <- y1-((x1*(y2-y1))/(x2-y1))
                   
                   y <- unlist(obsfreq)
                   x <- unlist(prdprob)
-                  z <- rep(1:n.quantiles, each = n.bins)
+                  z <- rep(1:n.events, each = n.bins)
                   # w <- rep(labels, each = n.bins)
                   
                   a_lower <- ob.slope$lower #slope_lower 
-                  b_lower <-(1-ob.slope$lower)/n.quantiles
+                  b_lower <-(1-ob.slope$lower)/n.events
                   ## upper bound
                   a_upper <- ob.slope$upper
-                  b_upper <- (1-ob.slope$upper)/n.quantiles
+                  b_upper <- (1-ob.slope$upper)/n.events
                   
                   
                   # Customized Lattice Example
@@ -289,19 +289,19 @@ reliabilityCategories <- function(obs,
                                # panel.locfit(...)
                                
                                panel.grid(h = -1, v = -1)
-                               panel.polygon(c(0, 1/n.quantiles, 1/n.quantiles, 0), c(0, 0, 1/n.quantiles, b),
+                               panel.polygon(c(0, 1/n.events, 1/n.events, 0), c(0, 0, 1/n.events, b),
                                              border = NA, col = "lightgray")
-                               panel.polygon(c(1/n.quantiles, 1, 1, 1/n.quantiles), c(1/n.quantiles, y2, 1, 1),
+                               panel.polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, y2, 1, 1),
                                              border = NA, col = "lightgray")
-                               for(i in 1:n.quantiles){
+                               for(i in 1:n.events){
                                      if(packet.number() == i){
-                                           panel.polygon(c(0, 1/n.quantiles, 0, 0), c(b_lower[,i], 1/n.quantiles, b_upper[,i], b_lower[,i]),
+                                           panel.polygon(c(0, 1/n.events, 0, 0), c(b_lower[,i], 1/n.events, b_upper[,i], b_lower[,i]),
                                                          border = NA, col = catcol[i])
-                                           panel.polygon(c(1/n.quantiles, 1, 1, 1/n.quantiles), c(1/n.quantiles, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/n.quantiles),
+                                           panel.polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/n.events),
                                                          border = NA, col = catcol[i])
                                            # panel.abline(b_lower[,i], a_lower[,i], col = "gray40", lty = 2, lwd = 1)
                                            # panel.abline(b_upper[,i], a_upper[,i], col = "gray40", lty = 2, lwd = 1)
-                                           panel.abline((1-slope[i])/n.quantiles, slope[i], col = "black", lty = 1, lwd = 1.5)
+                                           panel.abline((1-slope[i])/n.events, slope[i], col = "black", lty = 1, lwd = 1.5)
                                            panel.text(0.35, 0.85, catname[i])
                                            
                                            panel.xyplot(x, y, pch = 16, col = "black", 
@@ -316,7 +316,7 @@ reliabilityCategories <- function(obs,
                                      panel.text(0.8, 0.08, "n = 1")
                                }
                                panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
-                               panel.abline(h = 1/n.quantiles, col = "black", lty = 3, lwd = 1.5)
+                               panel.abline(h = 1/n.events, col = "black", lty = 3, lwd = 1.5)
                                panel.abline(coef = c(b, a), lty = 3, lwd = 1.5)
                                
                                
@@ -331,13 +331,13 @@ reliabilityCategories <- function(obs,
                   #########################################################
 
 # 
-#                   par(mfrow = c(1, n.quantiles), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
-#                   for(i in 1:n.quantiles){
+#                   par(mfrow = c(1, n.events), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
+#                   for(i in 1:n.events){
 #                         ## reliability diagram
-#                         x1 <- 1/n.quantiles
-#                         y1 <- 1/n.quantiles
+#                         x1 <- 1/n.events
+#                         y1 <- 1/n.events
 #                         x2 <- 1
-#                         y2 <- (1/n.quantiles) + (0.5*(1-(1/n.quantiles)))
+#                         y2 <- (1/n.events) + (0.5*(1-(1/n.events)))
 #                         a <- (y2-y1)/(x2-x1)
 #                         b <- y1-((x1*(y2-y1))/(x2-y1))
 # 
@@ -348,28 +348,28 @@ reliabilityCategories <- function(obs,
 #                              sub = list(catname[i], cex = 1.2),
 #                              font.sub=4)
 #                         abline(b, a, col = "black", lty = 3)
-#                         polygon(c(0, 1/n.quantiles, 1/n.quantiles, 0), c(0, 0, 1/n.quantiles, b),
+#                         polygon(c(0, 1/n.events, 1/n.events, 0), c(0, 0, 1/n.events, b),
 #                                 border = NA, col = "lightgray")
-#                         polygon(c(1/n.quantiles, 1, 1, 1/n.quantiles), c(1/n.quantiles, y2, 1, 1),
+#                         polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, y2, 1, 1),
 #                                 border = NA, col = "lightgray")
 #                         abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
-#                         abline(h = 1/n.quantiles, col = "black", lty = 3)
-#                         abline(v = 1/n.quantiles, col = "black", lty = 3)
+#                         abline(h = 1/n.events, col = "black", lty = 3)
+#                         abline(v = 1/n.events, col = "black", lty = 3)
 # 
 #                         ## intervalo de confianza para la pendiente
 #                         ## lower bound
 #                         a_lower <- ob.slope$lower[ , i] #<- #slope_lower
-#                         b_lower <- (1-ob.slope$lower[ , i])/n.quantiles
+#                         b_lower <- (1-ob.slope$lower[ , i])/n.events
 #                         ## upper bound
 #                         a_upper <- ob.slope$upper[ , i]
-#                         b_upper <- (1-ob.slope$upper[ , i])/n.quantiles
-#                         polygon(c(0, 1/n.quantiles, 0, 0), c(b_lower, 1/n.quantiles, b_upper, b_lower),
+#                         b_upper <- (1-ob.slope$upper[ , i])/n.events
+#                         polygon(c(0, 1/n.events, 0, 0), c(b_lower, 1/n.events, b_upper, b_lower),
 #                                 border = NA, col = catcol[i])
-#                         polygon(c(1/n.quantiles, 1, 1, 1/n.quantiles), c(1/n.quantiles, a_lower+b_lower, a_upper+b_upper, 1/n.quantiles),
+#                         polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, a_lower+b_lower, a_upper+b_upper, 1/n.events),
 #                                 border = NA, col = catcol[i])
 #                         abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
 #                         abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
-#                         abline((1-slope[i])/n.quantiles, slope[i], col = "black", lwd = 2)
+#                         abline((1-slope[i])/n.events, slope[i], col = "black", lwd = 2)
 # 
 #                         ## puntos del reliability diagram (escalados por el peso)
 #                         points(0.1, .8, pch = 19, cex = cex0)
@@ -425,20 +425,20 @@ reliabilityCategories <- function(obs,
 #' 
 #' @param obs m*n matrix of observations (m = years, n = locations)
 #' @param prd m*n*l matrix of predictions (m = members, n = years, l = locations)
-#' @param n.quantiles (optional): number of categories considered (e.g. 3 for terciles). By default n.quantiles = 3
+#' @param n.events (optional): number of categories considered (e.g. 3 for terciles). By default n.events = 3
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
 #'
 #' @return List with the following elements:
-#' n.quantiles = n.quantiles
+#' n.events = n.events
 #' nyear = number of years
 #' npoint = number of locations
 #' n = nyear*npoint
-#' prdprob = probability bins (center), per quantile (e.g. per tercile)
-#' obsfreq = observed frequency, per quantile (e.g. per tercile)
-#' prdfreq = predicted frequency, per quantile (e.g. per tercile)
-#' slope = slope of the reliability line, per quantile (e.g. per tercile)
-#' slope_boot = n.boot*n.quantiles matrix, with all the boostrapped values for the slope of the reliability line 
+#' prdprob = probability bins (center), per event (e.g. per tercile)
+#' obsfreq = observed frequency, per event (e.g. per tercile)
+#' prdfreq = predicted frequency, per event (e.g. per tercile)
+#' slope = slope of the reliability line, per event (e.g. per tercile)
+#' slope_boot = n.boot*n.events matrix, with all the boostrapped values for the slope of the reliability line 
 #' 
 #' @author R. Manzanas \& M.Iturbide
 #' @importFrom abind abind
@@ -450,26 +450,26 @@ reliabilityCategories <- function(obs,
 
 
 
-calculateReliability <- function(obs, prd, n.quantiles = n.quantiles, n.bins = n.bins, n.boot = n.boot) {
+calculateReliability <- function(obs, prd, n.events = n.events, n.bins = n.bins, n.boot = n.boot) {
       if (!(dim(obs)[1] == dim(prd)[2] & dim(obs)[2] == dim(prd)[3])) {
             stop("Observations and predictions are not congruent in size")
       }
       nyear <- dim(obs)[1]
       nmemb <- dim(prd)[1]
-      O <- obs2bin(obs, n.quantiles)
-      P <- prd2prob(prd, n.quantiles)
+      O <- obs2bin(obs, n.events)
+      P <- prd2prob(prd, n.events)
       ## calculo puntos diagrama fiabilidad
       aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins) 
-      n.quantiles <- aux$n.quantiles
+      n.events <- aux$n.events
       nyear <- aux$nyear
       npoint <- aux$npoint
       n <- aux$n
-      prdprob <- vector("list", n.quantiles)
-      obsfreq <- vector("list", n.quantiles)
-      prdfreq <- vector("list", n.quantiles)
-      slope <- rep(NA, n.quantiles)
-      # intercept <- rep(NA, 1, n.quantiles)
-      for (ibins in 1:n.quantiles) {
+      prdprob <- vector("list", n.events)
+      obsfreq <- vector("list", n.events)
+      prdfreq <- vector("list", n.events)
+      slope <- rep(NA, n.events)
+      # intercept <- rep(NA, 1, n.events)
+      for (ibins in 1:n.events) {
             prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
             prdprob[[ibins]] <- prdprob.bin
             obsfreq.bin <- eval(parse(text = sprintf("aux$cat%d$obar.i", ibins)))
@@ -489,8 +489,8 @@ calculateReliability <- function(obs, prd, n.quantiles = n.quantiles, n.bins = n
       }
       
       ## bootstrapping
-      slope_boot <- matrix(NA, n.boot, n.quantiles)
-      # intercept_boot <- matrix(NA, n.boot, n.quantiles)
+      slope_boot <- matrix(NA, n.boot, n.events)
+      # intercept_boot <- matrix(NA, n.boot, n.events)
       message("...[", Sys.time(), "] Computing bootstrapping...")
       for (iboot in 1:n.boot){
             #             if (abs(iboot/50 - round(iboot/50)) < eps()) {
@@ -501,21 +501,21 @@ calculateReliability <- function(obs, prd, n.quantiles = n.quantiles, n.bins = n
             indyearperm <- sample(1:nyear, nyear, replace = TRUE)
             indnodperm <- sample(1:dim(obs)[2], dim(obs)[2], replace = TRUE)
             
-            P.prob.boot <- array(NA, c(n.quantiles, nyear, dim(obs)[2]))
+            P.prob.boot <- array(NA, c(n.events, nyear, dim(obs)[2]))
             Pcat.boot <- P$cat[indmembperm, indyearperm, indnodperm]
             for (inod in 1:dim(obs)[2]) {
-                  for (ibins in 1:n.quantiles) {
+                  for (ibins in 1:n.events) {
                         P.prob.boot[ibins, , inod] <- apply(Pcat.boot[, , inod] == ibins, 2, sum) / nmemb
                         # P.prob.boot[ibins, , inod] <- apply(P$cat[, , inod] == ibins, 2, sum) / nmemb
                   }
             }
             
-            # O <- obs2bin(obs[indyearperm, indnodperm], n.quantiles)
-            # P <- prd2prob(prd[indmembperm, indyearperm, indnodperm], n.quantiles)
+            # O <- obs2bin(obs[indyearperm, indnodperm], n.events)
+            # P <- prd2prob(prd[indmembperm, indyearperm, indnodperm], n.events)
             
             aux <- concatenateDataRelDiagram_v2(O$bin[, indyearperm, indnodperm], P.prob.boot, n.bins)  
             # aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins)  
-            for (ibins in 1:n.quantiles) {   
+            for (ibins in 1:n.events) {   
                   
                   prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
                   obsfreq.bin <- eval(parse(text = sprintf("aux$cat%d$obar.i", ibins)))
@@ -534,9 +534,9 @@ calculateReliability <- function(obs, prd, n.quantiles = n.quantiles, n.bins = n
       }
       message("...[", Sys.time(), "] Done.")
       # # intervalos de confianza para la pendiente de la reliability line
-      # slope_lower <- matrix(NA, length(sigboot), n.quantiles)
-      # slope_upper <- matrix(NA, length(sigboot), n.quantiles)
-      # for (ibins in 1:n.quantiles) {
+      # slope_lower <- matrix(NA, length(sigboot), n.events)
+      # slope_upper <- matrix(NA, length(sigboot), n.events)
+      # for (ibins in 1:n.events) {
       #   for (isigboot in 1:length(sigboot)) {
       #   aux <- quantile(slope_boot[, ibins], c(sigboot[isigboot], 1-sigboot[isigboot]))
       #   slope_lower[isigboot, ibins] <- aux[[1]]
@@ -545,7 +545,7 @@ calculateReliability <- function(obs, prd, n.quantiles = n.quantiles, n.bins = n
       # }
       
       result <- list()
-      result$n.quantiles <- n.quantiles
+      result$n.events <- n.events
       result$nyear <- nyear
       result$npoint <- npoint
       result$n <- n
@@ -572,29 +572,29 @@ calculateReliability <- function(obs, prd, n.quantiles = n.quantiles, n.bins = n
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param obs 2D-matrix of observations, dimensions = (time, npoints)
-#' @param n.quantiles number of categories (3 for terciles)
+#' @param n.events number of categories (3 for terciles)
 #'
 #' @return 
 #' bincat: list with two elements:  
-#' bin: 3D-array of binary (0/1) observations, dimensions = (n.quantiles, time, npoints)
+#' bin: 3D-array of binary (0/1) observations, dimensions = (n.events, time, npoints)
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 #'
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
 
-obs2bin <- function(obs, n.quantiles){
-      bin <- array(0, c(n.quantiles, dim(obs)[1], dim(obs)[2]))
+obs2bin <- function(obs, n.events){
+      bin <- array(0, c(n.events, dim(obs)[1], dim(obs)[2]))
       cat <- array(NA, c(dim(obs)[1], dim(obs)[2]))
       v.err <- rep(NA, dim(obs)[2])
       for (inod in 1:dim(obs)[2]) {
             tryCatch({
                   ## categorias obs     
-                  catsobs <- quantile(obs[, inod], 0:n.quantiles/n.quantiles, na.rm = TRUE)
+                  catsobs <- quantile(obs[, inod], 0:n.events/n.events, na.rm = TRUE)
                   auxobscat <- quantile2disc(obs[, inod], catsobs)
                   auxobscat$mids <- sort(auxobscat$mids)
                   
-                  for (ibins in 1:n.quantiles){
+                  for (ibins in 1:n.events){
                         indcat <- which(auxobscat$new == auxobscat$mids[ibins])        
                         bin[ibins, indcat, inod] <- 1     
                         cat[indcat, inod] <- ibins
@@ -627,17 +627,17 @@ obs2bin <- function(obs, n.quantiles){
 #' @param prd 3D-array of predictions, dimensions = (member, time, npoints)
 #' @param prd4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
 #' @param dimensions (member, time, npoints)
-#' @param n.quantiles Number of categories (3 for terciles)
+#' @param n.events Number of categories (3 for terciles)
 #'
 #' @return 
-#' prdprob: 3D-array of probabilistic predictions, dimensions = (n.quantiles, time, npoints)
+#' prdprob: 3D-array of probabilistic predictions, dimensions = (n.events, time, npoints)
 #' @note For prd4cats, categories are calculated at model- (not at member-) level
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-prd2prob <- function(prd, n.quantiles, prd4cats = NULL){
+prd2prob <- function(prd, n.events, prd4cats = NULL){
       
-      prob <- array(NA, c(n.quantiles, dim(prd)[2], dim(prd)[3]))
+      prob <- array(NA, c(n.events, dim(prd)[2], dim(prd)[3]))
       cat <- array(NA, c(dim(prd)[1], dim(prd)[2], dim(prd)[3]))
       v.err <- rep(NA, dim(prd)[3])
       for (inod in 1:dim(prd)[3]) {
@@ -651,10 +651,10 @@ prd2prob <- function(prd, n.quantiles, prd4cats = NULL){
             tmpprdcat <- do.call("c", tmpprdcat)
             
             if (!is.null(prd4cats)) {
-                  catsprd <- quantile(tmpprd4catscat, 0:n.quantiles/n.quantiles, na.rm = TRUE) 
+                  catsprd <- quantile(tmpprd4catscat, 0:n.events/n.events, na.rm = TRUE) 
                   rm(tmpprd4catscat)
             } else {
-                  catsprd <- quantile(tmpprdcat, 0:n.quantiles/n.quantiles, na.rm = TRUE) 
+                  catsprd <- quantile(tmpprdcat, 0:n.events/n.events, na.rm = TRUE) 
             }
             tryCatch({
                   catsprd <- quantile2disc(tmpprdcat, catsprd)
@@ -667,7 +667,7 @@ prd2prob <- function(prd, n.quantiles, prd4cats = NULL){
                         auxprd[, imemb] <- catsprd$new[i1:i2]
                   }  
                   tmp2 <- matrix(NA, dim(prd)[1], dim(prd)[2])
-                  for (ibins in 1:n.quantiles){      
+                  for (ibins in 1:n.events){      
                         tmp <- auxprd == catsprd$mids[ibins]
                         prob[ibins, , inod] <- apply(tmp, 1, sum) / dim(prd)[1]             
                         tmp2[t(tmp)] <- ibins 
@@ -703,12 +703,12 @@ prd2prob <- function(prd, n.quantiles, prd4cats = NULL){
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param obs 2D-matrix of observations, dimensions = (time, npoints)
-#' @param n.quantiles number of categories (3 for terciles)
+#' @param n.events number of categories (3 for terciles)
 #' @param n.bins n.bins
 #'
 #' @return 
 #' bincat: list with two elements:  
-#' bin: 3D-array of binary (0/1) observations, dimensions = (n.quantiles, time, npoints)
+#' bin: 3D-array of binary (0/1) observations, dimensions = (n.events, time, npoints)
 #' cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 #' @import verification
 #' @author R. Manzanas \& M.Iturbide
@@ -718,14 +718,14 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
       # Description
       # 
       # Usage:
-      # concatenateDataResDiagram(obsbin, prdprob, nod, n.quantiles) 
+      # concatenateDataResDiagram(obsbin, prdprob, nod, n.events) 
       # Arguments:
-      # obsbin: 4D-array of binary (0/1) observations, dimensions = (n.quantiles, ynod, xnod, time)
-      # prdprob: 4D-array of probabilistic predictions, dimensions = (n.quantiles, ynod, xnod, time)
+      # obsbin: 4D-array of binary (0/1) observations, dimensions = (n.events, ynod, xnod, time)
+      # prdprob: 4D-array of probabilistic predictions, dimensions = (n.events, ynod, xnod, time)
       # nod: matrix of coordinates, longitudes (latitudes) in first (second) column (common for obs and prd)
-      # n.quantiles: number of categories (3 for terciles)
+      # n.events: number of categories (3 for terciles)
       # Value:
-      # dataRelDiagram: list with n.quantiles elements, containing all the information to plot reliability diagrams 
+      # dataRelDiagram: list with n.events elements, containing all the information to plot reliability diagrams 
       # (call the attribute.R function from verification R-package: 
       # http://cran.r-project.org/web/packages/verification/verification.pdf)
       
@@ -733,17 +733,17 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
       
       dataRelDiagram <- list()
       if (identical(as.vector(dim(obsbin)), as.vector(dim(prdprob)))){
-            n.quantiles <- dim(obsbin)[1]
+            n.events <- dim(obsbin)[1]
             nyear <- dim(obsbin)[2]
             npoint <- dim(obsbin)[3]
             n <- nyear*npoint
       }
-      dataRelDiagram$n.quantiles <- n.quantiles
+      dataRelDiagram$n.events <- n.events
       dataRelDiagram$nyear <- nyear
       dataRelDiagram$npoint <- npoint
       dataRelDiagram$n <- n
       
-      for (ibins in 1:n.quantiles) {    
+      for (ibins in 1:n.events) {    
             obsbinconca <- as.vector(obsbin[ibins, ,])
             prdprobconca <- as.vector(prdprob[ibins, ,])  
             # nodos sin NAs
