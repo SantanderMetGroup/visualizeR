@@ -46,10 +46,12 @@
 #'  conditions (e.g. always dry). Default is NULL.
 #' @param pch.data.nan pch value to highlight those whose score cannot be computed due to time series with all NA values in 
 #'  the observations and/or models. If score=F, highlight those grids with all forecasts NaN. 
+#' @param ... Optional. Further arguments passed to \code{\link[transformeR]{aggregateGrid}} to indicate temporal aggregation options
+#' (including parallelization options). See Temporal Aggregation Section.
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid subsetGrid
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid subsetGrid aggregateGrid
 #' @importFrom abind abind
 #' @importFrom grDevices gray
 #' @importFrom graphics par plot mtext points legend
@@ -58,7 +60,7 @@
 #' @export
 #' 
 #' @details  
-#'  First daily data are averaged to obtain a single seasonal value. The corresponding terciles 
+#'  First daily data are averaged to obtain a single seasonal value (See the Temporal Aggregation Section). The corresponding terciles 
 #'  for each ensemble member are then computed for the hindcast period. Thus, each particular grid point, member and season,
 #'  are categorized into three categories (above, between or below), according to their respective climatological 
 #'  terciles. Then, a probabilistic forecast is computed year by year by considering the number of members falling 
@@ -74,6 +76,25 @@
 #'  skill compared with a random prediction. The transparency of the bubble is associated to the ROCSS. By default only positive values
 #'  are plotted if the score argument is TRUE. The target year is considered as forecast and it is not included in the computation of 
 #'  the score (operational point of view). 
+#'  
+#' @section Temporal aggregation:
+#'  
+#'  The function operates on a grid-box basis using the interannual series of seasonally-averaged values
+#'   (i.e., one value for summer 1982, one value for summer 1983 ...). If the temporal resolution of the data is higher than
+#'  that (e.g. sub-daily to monthly data), the default behaviour is computing the "mean" for each time step
+#'  (i.e. daily means -> monthly means -> seaonal means). Otherwise, the different aggregations for the different
+#'   time steps can be flexibly defined by passing the corresponding arguments to \code{\link[transformeR]{aggregateGrid}}.
+#'   For instance, the total accumulated precipitation for one particular season, would use \code{"sum"} instead of \code{"mean"}.
+#'    Suppose the input data are daily accumulated precipitation, then the following arguments would perform the desired operation:
+#'    \code{aggr.m = list(FUN = "sum", na.rm = TRUE), aggr.y = list(FUN = "sum", na.rm = TRUE)}, to specify the daily to monthly and
+#'    monthy to seasonal aggregation. The use of \code{na.rm = TRUE} is just to be on the safe side in case of any possible spurious
+#'   missing value, just to illustrate how further arguments can be passed to the aggregation functions. 
+#'   
+#'  It is assumed that input data specified in arguments \code{hindcast}, \code{obs} (and \code{forecast} if in use),
+#'   have the same aggregation, and that the user is aware of them. Nevertheless, in case some aggregation options do not apply the aggregation specification will be simply ignored
+#'   (i.e., the daily aggregation specification will be ignored for monthly datasets and so on...)
+#'  
+#'  In the same vein, the parallelization options of \code{\link[transformeR]{aggregateGrid} }can be also passed here.  
 #' 
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
 #' 
@@ -90,283 +111,323 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=1, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
-      yy <- unique(getYearsAsINDEX(hindcast))
-      if (is.null(score.range)){
-        score.range <- c(0,1)
+bubblePlot <- function(hindcast,
+                       obs,
+                       forecast = NULL,
+                       year.target = NULL,
+                       detrend = FALSE,
+                       score = TRUE,
+                       size.as.probability = TRUE,
+                       bubble.size = 1,
+                       score.range = NULL,
+                       piechart = FALSE,
+                       subtitle = NULL,
+                       color.reverse = FALSE,
+                       pch.neg.score = NULL,
+                       pch.obs.constant = NULL,
+                       pch.data.nan = NULL,
+                       ...) {
+  arg.list <- list(...)
+  yy <- unique(getYearsAsINDEX(hindcast))
+  if (is.null(score.range)) {
+    score.range <- c(0,1)
+  }
+  # Check grid from the data. 
+  if (!checkCoords(hindcast, obs)) {
+    message("WARNING: Data with no common grid. Interpolating observations to hindcast grid")
+    # Interpolate observations to the hindcast grid
+    obs <- interpGrid(obs, new.coordinates = getGrid(hindcast), method = "nearest")
+  }
+  if (!checkCoords(hindcast, forecast)) {
+    message("WARNING: Data with no common grid. Interpolating forecasts to hindcast grid")
+    # Interpolate forecast to the hindcast grid
+    forecast <- interpGrid(forecast, new.coordinates = getGrid(hindcast), method = "nearest")
+  }
+  if (is.null(forecast)) {
+    if (is.null(year.target)) {
+      year.target <- last(yy)
+    }
+    if (!year.target %in% yy) {
+      stop("Target year outside temporal data range")
+    }
+    yy.forecast <- year.target
+    forecast <- subsetGrid(hindcast, years = yy.forecast, drop = FALSE)
+    hindcast <- subsetGrid(hindcast, years = yy[yy != yy.forecast], drop = FALSE)
+    obs <- subsetGrid(obs, years = yy[yy != yy.forecast], drop = FALSE)
+    yy <- yy[yy != yy.forecast]
+  }      
+  # Temporal aggregation BEFORE S4 conversion (seasMean extremely slow, and applied by default even when not needed)
+  if (length(arg.list) == 0) {
+    fun = list(FUN = "mean", na.rm = TRUE)
+    arg.list <- rep(list(fun), 3)
+    names(arg.list) <- c("aggr.d", "aggr.m", "aggr.y")
+  }
+  # hindcast
+  arg.list[["grid"]] <- hindcast
+  hindcast <- suppressMessages(do.call(aggregateGrid, arg.list))
+  # observations
+  arg.list[["grid"]] <- obs
+  obs <- suppressMessages(do.call(aggregateGrid, arg.list))
+  # forecast
+  if (!is.null(forecast)) {
+    arg.list[["grid"]] <- forecast
+    forecast <- suppressMessages(do.call(aggregateGrid, arg.list))
+  }
+  # Check input datasets
+  if (!isS4(hindcast)) {
+    hindcast <- convertIntoS4(hindcast)
+  }
+  
+  if (!isS4(obs)) {
+    obs <- convertIntoS4(obs)
+  }
+  stopifnot(checkData(hindcast, obs))
+  
+  
+  if (!is.null(forecast)){
+    yy.forecast <- unique(getYearsAsINDEX(forecast))
+    if (length(yy.forecast) > 1) {
+      stop("Select just one year for forecast")
+    }
+    year.target <- NULL
+    if (isS4(forecast)==FALSE){
+      forecast <- convertIntoS4(forecast)
+    }
+  }
+  # Detrend
+  if (detrend){
+    hindcast <- detrend.data(hindcast)
+    obs <- detrend.data(obs)
+    forecast <- detrend.data(hindcast, forecast)
+  }
+  # Juaco: renaming needed for backwards compatibility
+  sm.hindcast <- hindcast
+  sm.obs <- obs
+  sm.forecast <- forecast
+  # # Computation of seasonal mean
+  # sm.hindcast <- seasMean(hindcast)
+  # sm.obs <- seasMean(obs)
+  # sm.forecast <- seasMean(forecast)
+  # Computation exceedance probabilities
+  probs.hindcast <- QuantileProbs(sm.hindcast)
+  probs.obs <- QuantileProbs(sm.obs)
+  probs.forecast <- QuantileProbs(sm.forecast, sm.hindcast)
+  # Detect gridpoints with time series with all NA values 
+  obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
+  hindcast.na <- as.vector(apply(getData(sm.hindcast)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
+  forecast.na <- as.vector(apply(getData(sm.forecast)[1,,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
+  # Tercile for the maximum probability
+  prob <- getData(probs.hindcast)
+  prob.forecast <- getData(probs.forecast)
+  margin <- c(getDimIndex(probs.hindcast,"member"), getDimIndex(probs.hindcast,"time"), getDimIndex(probs.hindcast,"y"), getDimIndex(probs.hindcast,"x"))
+  t.max <- function(t.probs, margin.dim){
+    # Mask for cases with no all probs equal to NAN. This avoid errors in ROCSS computation.  
+    mask.nallnan <- apply(t.probs, MARGIN = margin.dim, FUN = function(x) {sum(!is.na(x))}) 
+    t.max.prob <- apply(t.probs, MARGIN = margin.dim, FUN = which.max)
+    t.max.prob[mask.nallnan==0] <- NaN
+    return(t.max.prob)
+  } 
+  t.max.prob <- t.max(prob, margin)
+  t.max.forecast <- t.max(prob.forecast, margin)
+  obs.t <- getData(probs.obs)[1,,,,]+getData(probs.obs)[2,,,,]*2+getData(probs.obs)[3,,,,]*3  
+  idxmat.max.prob <- cbind(c(as.numeric(t.max.forecast)), 1:prod(dim(t.max.forecast))) 
+  # Probability of the most likely tercile
+  max.prob.forecast <- apply(prob.forecast, MARGIN = margin, FUN = max)      
+  ve.max.prob <- as.vector(max.prob.forecast)
+  v.t.max.prob <- as.vector(t.max.forecast, mode="numeric") 
+  gridpoints <- length(ve.max.prob)
+  if (!size.as.probability){
+    ve.max.prob <- rep(1, gridpoints)
+  }
+  v.prob <- array(dim = c(gridpoints,3))
+  for (i in 1:3){
+    v.prob[,i] <- as.vector(prob.forecast[i,1,1,,])
+  }
+  # Select the corresponding lon and lat
+  x.mm <- attr(getxyCoords(hindcast),"longitude") 
+  y.mm <- attr(getxyCoords(hindcast),"latitude")  
+  nn.yx <- as.matrix(expand.grid(y.mm, x.mm))
+  # Define colors
+  df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
+  df$color <- "black"
+  t.colors <- c("blue", "darkgrey", "red")
+  if (color.reverse){
+    t.colors <- c("red", "darkgrey", "blue")
+  }
+  df$color[df$t.max.prob == 3] <- t.colors[3]
+  df$color[df$t.max.prob == 2] <- t.colors[2]
+  df$color[df$t.max.prob == 1] <- t.colors[1]      
+  # Compute ROCSS for all terciles
+  if (score) { 
+    rocss <- array(dim=dim(prob)[-2:-3]) # remove member and year dimensions       
+    for (i.tercile in 1:3){
+      rocss[i.tercile, , ] <- apply(
+        array(c(obs.t==i.tercile, prob[i.tercile, 1, , ,]), dim=c(dim(obs.t),2)),
+        MARGIN=c(2,3),
+        FUN=function(x){rocss.fun(x[,1],x[,2])})
+    }  
+    # Select those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
+    t.obs.constant <- apply(obs.t, MARGIN=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
+    t.obs.constant <- as.vector(t.obs.constant)
+    # Compute transparency of the bubbles
+    rocss <- unshape(rocss)
+    colors <- array(dim=dim(rocss))
+    min.score.range <- score.range[1]
+    max.score.range <- score.range[2]
+    # y=a+bx line to compute the transparency ([color=0, min.score.range], [color=255, max.score.range]).
+    a <- -(255*min.score.range)/(max.score.range-min.score.range)
+    b <- 255/(max.score.range-min.score.range)
+    for (i.tercile in 1:3){
+      transparency <- a+b*rocss[i.tercile,]
+      transparency[rocss[i.tercile,]>max.score.range] <- 255
+      transparency[rocss[i.tercile,]<min.score.range] <- 0
+      colors[i.tercile,] <- alpha(t.colors[i.tercile],transparency)
+    }
+    rocss <- deunshape(rocss)
+    if (!piechart) { 
+      df$transp <- colors[idxmat.max.prob]  # Select the transparency for the tercile with max prob
+      rocss <- unshape(rocss)
+      v.score <- rocss[idxmat.max.prob]  # Select the rocss for the tercile with max prob.
+      rocss <- deunshape(rocss)
+      pos.val <- v.score >= 0
+      neg.val <- v.score < 0
+    }
+  }
+  # Starting with the plot
+  mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
+  mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
+  title <- sprintf("%s, %s to %s, %d", attr(getVariable(hindcast), "longname"), mons.start, mons.end, yy.forecast)
+  opar <- par(no.readonly=TRUE)
+  par(bg = "white", mar = c(4, 3, 3, 1))
+  plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
+  mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)
+  if (!is.null(subtitle)){
+    mtext(subtitle, side=3, line=0.5, at=min(x.mm), adj=0, cex=0.8)
+  }
+  symb.size <- (df$max.prob-0.33) * bubble.size
+  symb.size.lab1 <- (1-0.33) * bubble.size
+  symb.size.lab075 <- (0.75-0.33) * bubble.size
+  symb.size.lab050 <- (0.5-0.33) * bubble.size
+  if (piechart){   # Plot with pies
+    pch.neg.score <- NULL
+    size.as.probability <- F
+    #dx <- diff(x.mm[1:2])
+    #dy <- diff(y.mm[1:2])
+    #radius <- min(dx,dy)/2*0.8
+    radius <- bubble.size
+    if (score){
+      v.valid <- c(1:gridpoints)
+      # Remove gridpoints with ROCSS or forecast data all NaN
+      all.nan <- unique(sort(c(which(colSums(is.na(rocss))==3), which(forecast.na))))
+      if (length(all.nan)!=0){
+        v.valid <- v.valid[-all.nan]
       }
-      # Check grid from the data. 
-      if (!checkCoords(hindcast, obs)){
-        message("WARNING: Data with no common grid. Interpolating observations to hindcast grid")
-        # Interpolate observations to the hindcast grid
-        obs <- interpGrid(obs, new.coordinates = getGrid(hindcast), method = "nearest")
-      }
-      if (!checkCoords(hindcast, forecast)){
-        message("WARNING: Data with no common grid. Interpolating forecasts to hindcast grid")
-        # Interpolate forecast to the hindcast grid
-        forecast <- interpGrid(forecast, new.coordinates = getGrid(hindcast), method = "nearest")
-      }
-      if (is.null(forecast)){
-        if (is.null(year.target)){
-          year.target <- last(yy)
+    } else {
+      colors <- matrix(rep(t.colors, gridpoints), nrow = 3)
+      v.valid <- which(!forecast.na)
+    }
+    # Plot the piechart only for those grid points with no NaN probabilities
+    for (i.loc in v.valid){
+      add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=colors[,i.loc],
+              radius=radius, init.angle=90, clockwise = F, border="lightgray", labels=NA
+      )  
+    }
+    if (score){
+      # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)       
+      if (!is.null(pch.obs.constant)){
+        valid.points <- which(t.obs.constant)
+        for (i.loc in valid.points){  
+          points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.obs.constant, xlab="", ylab="")
         }
-        if (!year.target %in% yy) {
-          stop("Target year outside temporal data range")
-        }
-        yy.forecast <- year.target
-        forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
-        hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
-        obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
-        yy <- yy[yy!=yy.forecast]
-      }      
-      # Check input datasets
-      if (isS4(hindcast)==FALSE){
-        hindcast <- convertIntoS4(hindcast)
       }
-      if (isS4(obs)==FALSE){
-        obs <- convertIntoS4(obs)
-      }
-      stopifnot(checkData(hindcast, obs))
-      if (!is.null(forecast)){
-        yy.forecast <- unique(getYearsAsINDEX(forecast))
-        if (length(yy.forecast)>1) {
-          stop("Select just one year for forecast")
-        }
-        year.target <- NULL
-        if (isS4(forecast)==FALSE){
-          forecast <- convertIntoS4(forecast)
+      # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
+      if (!is.null(pch.data.nan)){
+        valid.points <- which((obs.na + hindcast.na)>0)
+        for (i.loc in valid.points){   
+          points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.data.nan, xlab="", ylab="")
         }
       }
-      # Detrend
-      if (detrend){
-        hindcast <- detrend.data(hindcast)
-        obs <- detrend.data(obs)
-        forecast <- detrend.data(hindcast, forecast)
-      } 
-      # Computation of seasonal mean
-      sm.hindcast <- seasMean(hindcast)
-      sm.obs <- seasMean(obs)
-      sm.forecast <- seasMean(forecast)
-      # Computation exceedance probabilities
-      probs.hindcast <- QuantileProbs(sm.hindcast)
-      probs.obs <- QuantileProbs(sm.obs)
-      probs.forecast <- QuantileProbs(sm.forecast, sm.hindcast)
-      # Detect gridpoints with time series with all NA values 
-      obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-      hindcast.na <- as.vector(apply(getData(sm.hindcast)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
-      forecast.na <- as.vector(apply(getData(sm.forecast)[1,,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-      # Tercile for the maximum probability
-      prob <- getData(probs.hindcast)
-      prob.forecast <- getData(probs.forecast)
-      margin <- c(getDimIndex(probs.hindcast,"member"), getDimIndex(probs.hindcast,"time"), getDimIndex(probs.hindcast,"y"), getDimIndex(probs.hindcast,"x"))
-      t.max <- function(t.probs, margin.dim){
-        # Mask for cases with no all probs equal to NAN. This avoid errors in ROCSS computation.  
-        mask.nallnan <- apply(t.probs, MARGIN = margin.dim, FUN = function(x) {sum(!is.na(x))}) 
-        t.max.prob <- apply(t.probs, MARGIN = margin.dim, FUN = which.max)
-        t.max.prob[mask.nallnan==0] <- NaN
-        return(t.max.prob)
-      } 
-      t.max.prob <- t.max(prob, margin)
-      t.max.forecast <- t.max(prob.forecast, margin)
-      obs.t <- getData(probs.obs)[1,,,,]+getData(probs.obs)[2,,,,]*2+getData(probs.obs)[3,,,,]*3  
-      idxmat.max.prob <- cbind(c(as.numeric(t.max.forecast)), 1:prod(dim(t.max.forecast))) 
-      # Probability of the most likely tercile
-      max.prob.forecast <- apply(prob.forecast, MARGIN = margin, FUN = max)      
-      ve.max.prob <- as.vector(max.prob.forecast)
-      v.t.max.prob <- as.vector(t.max.forecast, mode="numeric") 
-      gridpoints <- length(ve.max.prob)
-      if (!size.as.probability){
-        ve.max.prob <- rep(1, gridpoints)
+    } else{
+      # Highlight those grids with all forecasts NaN. 
+      if (!is.null(pch.data.nan)){
+        na.points <- which(forecast.na)
+        points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=radius/2, col="white", pch=pch.data.nan, xlab="", ylab="")
       }
-      v.prob <- array(dim = c(gridpoints,3))
-      for (i in 1:3){
-        v.prob[,i] <- as.vector(prob.forecast[i,1,1,,])
+    }
+  } else { # Plot with bubbles
+    cex.val <- 0.5
+    if (score) {
+      points(nn.yx[pos.val, 2], nn.yx[pos.val, 1], cex=symb.size[pos.val], col=df$transp[pos.val], pch=16, xlab="", ylab="")          
+      # Highlight those whose ROCSS is negative
+      if (!is.null(pch.neg.score)){
+        points(nn.yx[neg.val, 2], nn.yx[neg.val, 1], pch=pch.neg.score, cex=cex.val, col="black")
       }
-      # Select the corresponding lon and lat
-      x.mm <- attr(getxyCoords(hindcast),"longitude") 
-      y.mm <- attr(getxyCoords(hindcast),"latitude")  
-      nn.yx <- as.matrix(expand.grid(y.mm, x.mm))
-      # Define colors
-      df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
-      df$color <- "black"
-      t.colors <- c("blue", "darkgrey", "red")
-      if (color.reverse){
-        t.colors <- c("red", "darkgrey", "blue")
+      # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
+      if (!is.null(pch.obs.constant)){
+        points(nn.yx[which(t.obs.constant), 2], nn.yx[which(t.obs.constant), 1], cex=cex.val, col="black", pch=pch.obs.constant, xlab="", ylab="")
+      }          
+      # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
+      if (!is.null(pch.data.nan)){
+        na.points <- (obs.na + hindcast.na)>0
+        points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=cex.val, col="black", pch=pch.data.nan, xlab="", ylab="")
       }
-      df$color[df$t.max.prob == 3] <- t.colors[3]
-      df$color[df$t.max.prob == 2] <- t.colors[2]
-      df$color[df$t.max.prob == 1] <- t.colors[1]      
-      # Compute ROCSS for all terciles
-      if (score) { 
-        rocss <- array(dim=dim(prob)[-2:-3]) # remove member and year dimensions       
-        for (i.tercile in 1:3){
-          rocss[i.tercile, , ] <- apply(
-            array(c(obs.t==i.tercile, prob[i.tercile, 1, , ,]), dim=c(dim(obs.t),2)),
-            MARGIN=c(2,3),
-            FUN=function(x){rocss.fun(x[,1],x[,2])})
-        }  
-        # Select those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
-        t.obs.constant <- apply(obs.t, MARGIN=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
-        t.obs.constant <- as.vector(t.obs.constant)
-        # Compute transparency of the bubbles
-        rocss <- unshape(rocss)
-        colors <- array(dim=dim(rocss))
-        min.score.range <- score.range[1]
-        max.score.range <- score.range[2]
-        # y=a+bx line to compute the transparency ([color=0, min.score.range], [color=255, max.score.range]).
-        a <- -(255*min.score.range)/(max.score.range-min.score.range)
-        b <- 255/(max.score.range-min.score.range)
-        for (i.tercile in 1:3){
-          transparency <- a+b*rocss[i.tercile,]
-          transparency[rocss[i.tercile,]>max.score.range] <- 255
-          transparency[rocss[i.tercile,]<min.score.range] <- 0
-          colors[i.tercile,] <- alpha(t.colors[i.tercile],transparency)
-        }
-        rocss <- deunshape(rocss)
-        if (!piechart) { 
-          df$transp <- colors[idxmat.max.prob]  # Select the transparency for the tercile with max prob
-          rocss <- unshape(rocss)
-          v.score <- rocss[idxmat.max.prob]  # Select the rocss for the tercile with max prob.
-          rocss <- deunshape(rocss)
-          pos.val <- v.score >= 0
-          neg.val <- v.score < 0
-        }
+    } else {
+      # Plot bubbles only for those grid points with not all NaN values
+      v.valid <- which(!forecast.na)
+      points(nn.yx[v.valid, 2], nn.yx[v.valid, 1], cex=symb.size[v.valid], col=df$color[v.valid], pch=16, xlab="", ylab="")
+      # Highlight those grids with all NaN values.
+      if (!is.null(pch.data.nan)){
+        na.points <- which(forecast.na)
+        points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=cex.val, col="black", pch=pch.data.nan, xlab="", ylab="")
       }
-      # Starting with the plot
-      mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
-      mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(hindcast), "longname"), mons.start, mons.end, yy.forecast)
-      opar <- par(no.readonly=TRUE)
-      par(bg = "white", mar = c(4, 3, 3, 1))
-      plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
-      mtext(title, side=3, line=1.5, at=min(x.mm), adj=0, cex=1.2, font=2)
-      if (!is.null(subtitle)){
-        mtext(subtitle, side=3, line=0.5, at=min(x.mm), adj=0, cex=0.8)
+    }        
+  } 
+  # Add borders
+  draw.world.lines(lwd=1)
+  #world(add = TRUE, interior = T)      
+  #world(add = TRUE, interior = F, lwd=3)    
+  par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+  plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+  # Add legend
+  # Transparency color for mean of the score.range
+  mean.score.range <- mean(score.range)
+  #legend.color.transparency <- c(alpha(t.colors[1], 255*mean.score.range), alpha(t.colors[2], 255*mean.score.range), alpha(t.colors[3], 255*mean.score.range))
+  #legend.color.transparency <- c(t.colors)
+  if (size.as.probability) {
+    if (score & !is.null(pch.neg.score)){
+      legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score")
+      xcoords <- c(0, 0.55, 0.95, 1.35)
+      secondvector <- (1:length(legtext))-1
+      textwidths <- xcoords/secondvector 
+      textwidths[1] <- 0
+      legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
+    } else{
+      if (score){
+        #t.colors <- legend.color.transparency
+        legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
+      } else{
+        legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")     
       }
-      symb.size <- (df$max.prob-0.33) * bubble.size
-      symb.size.lab1 <- (1-0.33) * bubble.size
-      symb.size.lab075 <- (0.75-0.33) * bubble.size
-      symb.size.lab050 <- (0.5-0.33) * bubble.size
-      if (piechart){   # Plot with pies
-        pch.neg.score <- NULL
-        size.as.probability <- F
-        #dx <- diff(x.mm[1:2])
-        #dy <- diff(y.mm[1:2])
-        #radius <- min(dx,dy)/2*0.8
-        radius <- bubble.size
-        if (score){
-          v.valid <- c(1:gridpoints)
-          # Remove gridpoints with ROCSS or forecast data all NaN
-          all.nan <- unique(sort(c(which(colSums(is.na(rocss))==3), which(forecast.na))))
-          if (length(all.nan)!=0){
-            v.valid <- v.valid[-all.nan]
-          }
-        } else {
-          colors <- matrix(rep(t.colors, gridpoints), nrow = 3)
-          v.valid <- which(!forecast.na)
-        }
-        # Plot the piechart only for those grid points with no NaN probabilities
-        for (i.loc in v.valid){
-          add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=colors[,i.loc],
-                  radius=radius, init.angle=90, clockwise = F, border="lightgray", labels=NA
-          )  
-        }
-        if (score){
-          # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)       
-          if (!is.null(pch.obs.constant)){
-            valid.points <- which(t.obs.constant)
-            for (i.loc in valid.points){  
-              points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.obs.constant, xlab="", ylab="")
-            }
-          }
-          # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
-          if (!is.null(pch.data.nan)){
-            valid.points <- which((obs.na + hindcast.na)>0)
-            for (i.loc in valid.points){   
-              points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.data.nan, xlab="", ylab="")
-            }
-          }
-        } else{
-          # Highlight those grids with all forecasts NaN. 
-          if (!is.null(pch.data.nan)){
-            na.points <- which(forecast.na)
-            points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=radius/2, col="white", pch=pch.data.nan, xlab="", ylab="")
-          }
-        }
-      } else { # Plot with bubbles
-        cex.val <- 0.5
-        if (score) {
-          points(nn.yx[pos.val, 2], nn.yx[pos.val, 1], cex=symb.size[pos.val], col=df$transp[pos.val], pch=16, xlab="", ylab="")          
-          # Highlight those whose ROCSS is negative
-          if (!is.null(pch.neg.score)){
-            points(nn.yx[neg.val, 2], nn.yx[neg.val, 1], pch=pch.neg.score, cex=cex.val, col="black")
-          }
-          # Highlight those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
-          if (!is.null(pch.obs.constant)){
-            points(nn.yx[which(t.obs.constant), 2], nn.yx[which(t.obs.constant), 1], cex=cex.val, col="black", pch=pch.obs.constant, xlab="", ylab="")
-          }          
-          # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
-          if (!is.null(pch.data.nan)){
-            na.points <- (obs.na + hindcast.na)>0
-            points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=cex.val, col="black", pch=pch.data.nan, xlab="", ylab="")
-          }
-        } else {
-          # Plot bubbles only for those grid points with not all NaN values
-          v.valid <- which(!forecast.na)
-          points(nn.yx[v.valid, 2], nn.yx[v.valid, 1], cex=symb.size[v.valid], col=df$color[v.valid], pch=16, xlab="", ylab="")
-          # Highlight those grids with all NaN values.
-          if (!is.null(pch.data.nan)){
-            na.points <- which(forecast.na)
-            points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=cex.val, col="black", pch=pch.data.nan, xlab="", ylab="")
-          }
-        }        
-      } 
-      # Add borders
-      draw.world.lines(lwd=1)
-      #world(add = TRUE, interior = T)      
-      #world(add = TRUE, interior = F, lwd=3)    
-      par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-      plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-      # Add legend
-      # Transparency color for mean of the score.range
-      mean.score.range <- mean(score.range)
-      #legend.color.transparency <- c(alpha(t.colors[1], 255*mean.score.range), alpha(t.colors[2], 255*mean.score.range), alpha(t.colors[3], 255*mean.score.range))
-      #legend.color.transparency <- c(t.colors)
-      if (size.as.probability) {
-        if (score & !is.null(pch.neg.score)){
-          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score")
-          xcoords <- c(0, 0.55, 0.95, 1.35)
-          secondvector <- (1:length(legtext))-1
-          textwidths <- xcoords/secondvector 
-          textwidths[1] <- 0
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
-        } else{
-          if (score){
-            #t.colors <- legend.color.transparency
-            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
-          } else{
-            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")     
-          }
-          xcoords <- c(0, 0.55, 0.95)
-          secondvector <- (1:length(legtext))-1
-          textwidths <- xcoords/secondvector 
-          textwidths[1] <- 0
-          #legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1), horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col = c(t.colors), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1), horiz=T, bty="n", text.width=textwidths, xjust=0)     
-        }
-      } else {
-        if (score & !is.null(pch.neg.score)){
-          legend('bottomleft', c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, horiz=T, bty="n", xjust=0)        
-        } else{
-          if (score){
-            #t.colors <- legend.color.transparency
-            legtext <- c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
-          } else{
-            legtext <- c("Below", "Normal", "Above")     
-          }
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col=c(t.colors), cex=0.7, horiz=T, bty="n", xjust=0)        
-        }  
+      xcoords <- c(0, 0.55, 0.95)
+      secondvector <- (1:length(legtext))-1
+      textwidths <- xcoords/secondvector 
+      textwidths[1] <- 0
+      #legend('bottomleft', c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)"), pch=c(19, 19, 19), col = c(t.colors), cex=0.8, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1), horiz = T, inset = c(0, 0), xpd = TRUE, bty = "n")      
+      legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col = c(t.colors), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1), horiz=T, bty="n", text.width=textwidths, xjust=0)     
+    }
+  } else {
+    if (score & !is.null(pch.neg.score)){
+      legend('bottomleft', c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, horiz=T, bty="n", xjust=0)        
+    } else{
+      if (score){
+        #t.colors <- legend.color.transparency
+        legtext <- c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
+      } else{
+        legtext <- c("Below", "Normal", "Above")     
       }
-      par(opar)
+      legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col=c(t.colors), cex=0.7, horiz=T, bty="n", xjust=0)        
+    }  
+  }
+  par(opar)
 }
 # End
