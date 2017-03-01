@@ -257,7 +257,7 @@ convertIntoS4 <- function(obj) {
         }    
       }
     } else {
-      obj.o <- obj
+      stop ('Invalid input data list')
     }  
     return(obj.o)
   } else{

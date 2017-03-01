@@ -61,6 +61,12 @@
 #' @family VisualizeR
 
 spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
+      # Check data dimension from the original data sets
+      checkDim(hindcast)
+      checkDim(obs)
+      if (!is.null(forecast)){
+        checkDim(forecast)   
+      }
      # Check data temporal scale. Daily or subdaily required.
      check.daily(hindcast)
      mm.dates <-as.POSIXlt(hindcast$Dates$start)
