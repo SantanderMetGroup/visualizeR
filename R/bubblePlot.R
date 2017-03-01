@@ -91,6 +91,12 @@
 #'  Durham, UK, 1-3 April 2009.
 
 bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=1, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+      # Check data dimension from the original data sets
+      checkDim(hindcast)
+      checkDim(obs)
+      if (!is.null(forecast)){
+        checkDim(forecast)   
+      }
       yy <- unique(getYearsAsINDEX(hindcast))
       if (is.null(score.range)){
         score.range <- c(0,1)

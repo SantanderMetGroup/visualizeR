@@ -70,6 +70,12 @@
 #'
 
 tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, score.threshold=NULL, subtitle = NULL) {
+  # Check data dimension from the original data sets
+  checkDim(hindcast)
+  checkDim(obs)
+  if (!is.null(forecast)){
+    checkDim(forecast)   
+  }      
   yy <- unique(getYearsAsINDEX(hindcast))
   if (is.null(forecast)){
     if (is.null(year.target)){

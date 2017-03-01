@@ -81,6 +81,12 @@
 #'  
 
 tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
+      # Check data dimension from the original data sets
+      checkDim(hindcast)
+      checkDim(obs)
+      if (!is.null(forecast)){
+        checkDim(forecast)   
+      }
       color.pal <- match.arg(color.pal, c("bw", "reds", "ypb", "tcolor"))
       yy <- unique(getYearsAsINDEX(hindcast))  
       if (!is.null(year.target)){

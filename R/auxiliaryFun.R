@@ -104,6 +104,14 @@ getCountIndex <- function(obj, dim) {
   return(dim(obj.Data)[getDimIndex(obj, dim)])
 }
 
+# Check data dimensions from the original data set before performing plots
+#' @keywords internal
+checkDim <- function(obj) {
+  if (length(attr(obj$Data, "dimensions"))<3) { 
+    stop("Invalid input data array. Data dimensions should be at least: 'time', 'lat', 'lon'")    
+  }
+}
+
 # Check the data format and dates before performing plots
 #' @keywords internal
 checkData <- function(mm.obj, obs) {
@@ -232,31 +240,26 @@ rocss.fun <- function (obs, pred) {
 #' @family VisualizeR
 convertIntoS4 <- function(obj) {   
   if(class(obj)=="list"){
-    obj.dimNames <- attr(obj$Data, "dimensions")
-    if (length(obj.dimNames)>2) {  
-      if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
-        if(!is.null(obj$Members)){
-          if(length(obj$Members)>1){
-            # The input dataset is a multi-member ensemble.
-            obj.o <- as.MrEnsemble(obj)
-          } else{
-            # The input dataset is not a multi-member ensemble.
-            obj.o <- as.MrGrid(obj)
-          }
+    if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
+      if(!is.null(obj$Members)){
+        if(length(obj$Members)>1){
+          # The input dataset is a multi-member ensemble.
+          obj.o <- as.MrEnsemble(obj)
         } else{
-          if(!is.null(obj$Metadata)){
-            obj.o <- as.MrStation(obj)
-          } else{
-            obj.o <- as.MrGrid(obj)
-          }    
+          # The input dataset is not a multi-member ensemble.
+          obj.o <- as.MrGrid(obj)
         }
-      } else {
-        obj.o <- obj
-      }  
-      return(obj.o)
+      } else{
+        if(!is.null(obj$Metadata)){
+          obj.o <- as.MrStation(obj)
+        } else{
+          obj.o <- as.MrGrid(obj)
+        }    
+      }
     } else {
-      stop("Invalid input data array. Data dimensions should be at least: 'time', 'lat', 'lon'")    
-    }        
+      obj.o <- obj
+    }  
+    return(obj.o)
   } else{
     stop ('The input data is not a list')
   }
