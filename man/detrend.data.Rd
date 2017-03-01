@@ -20,3 +20,4 @@ Detrend data from a S4 object with the dimensions c("var", "member", "time", "y"
 \author{
 M. D. Frias \email{mariadolores.frias@unican.es}, J. Fernandez and J. Bedia
 }
+

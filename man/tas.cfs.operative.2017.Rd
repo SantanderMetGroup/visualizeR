@@ -24,3 +24,4 @@ plotClimatology(climatology(tas.cfs.operative.2017, parallel = TRUE), backdrop.t
 \references{
 Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 }
+

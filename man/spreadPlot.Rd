@@ -47,12 +47,13 @@ For rectangular spatial domains (i.e., for fields), the spatial average is first
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
+\author{
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+}
 \seealso{
 Other VisualizeR: \code{\link{as.MrEnsemble}},
   \code{\link{as.MrGrid}}, \code{\link{as.MrStation}},
   \code{\link{bubblePlot}}, \code{\link{convertIntoS4}},
   \code{\link{tercileBarplot}}
 }
-\author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
-}
+

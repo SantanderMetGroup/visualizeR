@@ -38,7 +38,7 @@ Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [aut]"))
 BugReports: https://github.com/SantanderMetGroup/visualizeR/issues
 URL: https://github.com/SantanderMetGroup/visualizeR/wiki
-Description: Implementation of various seasonal forecast verification plots. 
+Description: Implementation of various seasonal forecast verification plots.
 License: file LICENSE
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 5.0.1

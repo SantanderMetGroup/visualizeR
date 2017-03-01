@@ -24,3 +24,4 @@ Get exceedance probabilities from a S4 object with the dimensions c("var", "memb
 \author{
 M. D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
+

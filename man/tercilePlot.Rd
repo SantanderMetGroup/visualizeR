@@ -56,6 +56,10 @@ for each member prior to data analysis, with a warning.
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
+\author{
+M.D. Frias\email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
+conceived by A. Cofino (See Diez et al, 2011 for more details).
+}
 \references{
 Diez, E., Orfila, B., Frias, M.D., Fernandez, J., Cofino, A.S., Gutierrez, J.M., 2011. 
 Downscaling ECMWF seasonal precipitation forecasts in Europe using the RCA model.
@@ -64,7 +68,4 @@ Tellus A 63, 757-762. doi:10.1111/j.1600-0870.2011.00523.x
 Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in 
 Atmospheri Science, Wiley, NY
 }
-\author{
-M.D. Frias\email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
-conceived by A. Cofino (See Diez et al, 2011 for more details).
-}
+

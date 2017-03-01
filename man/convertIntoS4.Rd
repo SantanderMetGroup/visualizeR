@@ -25,12 +25,13 @@ Most of the visualization functions are programmed to work with S4 class. This f
 For gridded data sets with just one ensemble member use as.MrGrid function.
  For station data use as.MrStation function.
 }
+\author{
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+}
 \seealso{
 Other VisualizeR: \code{\link{as.MrEnsemble}},
   \code{\link{as.MrGrid}}, \code{\link{as.MrStation}},
   \code{\link{bubblePlot}}, \code{\link{spreadPlot}},
   \code{\link{tercileBarplot}}
 }
-\author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
-}
+

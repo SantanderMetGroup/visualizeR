@@ -52,6 +52,9 @@ for each member prior to data analysis, with a warning.
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
+\author{
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+}
 \references{
 Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in 
  Atmospheri Science, Wiley, NY
@@ -62,6 +65,4 @@ Other VisualizeR: \code{\link{as.MrEnsemble}},
   \code{\link{bubblePlot}}, \code{\link{convertIntoS4}},
   \code{\link{spreadPlot}}
 }
-\author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
-}
+

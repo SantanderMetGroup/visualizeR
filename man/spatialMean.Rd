@@ -18,3 +18,4 @@ Get the spatial mean from a S4 object with the dimensions c("var", "member", "ti
 \author{
 M. D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
+

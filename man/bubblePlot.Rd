@@ -77,6 +77,10 @@ First daily data are averaged to obtain a single seasonal value. The correspondi
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
+\author{
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
+ conceived by Slingsby et al 2009.
+}
 \references{
 Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in Atmospheric 
  Science, Wiley, NY.
@@ -91,7 +95,4 @@ Other VisualizeR: \code{\link{as.MrEnsemble}},
   \code{\link{convertIntoS4}}, \code{\link{spreadPlot}},
   \code{\link{tercileBarplot}}
 }
-\author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
- conceived by Slingsby et al 2009.
-}
+
