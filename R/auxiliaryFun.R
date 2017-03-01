@@ -232,26 +232,31 @@ rocss.fun <- function (obs, pred) {
 #' @family VisualizeR
 convertIntoS4 <- function(obj) {   
   if(class(obj)=="list"){
-    if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
-      if(!is.null(obj$Members)){
-        if(length(obj$Members)>1){
-          # The input dataset is a multi-member ensemble.
-          obj.o <- as.MrEnsemble(obj)
+    obj.dimNames <- attr(obj$Data, "dimensions")
+    if (length(obj.dimNames)>2) {  
+      if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
+        if(!is.null(obj$Members)){
+          if(length(obj$Members)>1){
+            # The input dataset is a multi-member ensemble.
+            obj.o <- as.MrEnsemble(obj)
+          } else{
+            # The input dataset is not a multi-member ensemble.
+            obj.o <- as.MrGrid(obj)
+          }
         } else{
-          # The input dataset is not a multi-member ensemble.
-          obj.o <- as.MrGrid(obj)
+          if(!is.null(obj$Metadata)){
+            obj.o <- as.MrStation(obj)
+          } else{
+            obj.o <- as.MrGrid(obj)
+          }    
         }
-      } else{
-        if(!is.null(obj$Metadata)){
-          obj.o <- as.MrStation(obj)
-        } else{
-          obj.o <- as.MrGrid(obj)
-        }    
-      }
+      } else {
+        obj.o <- obj
+      }  
+      return(obj.o)
     } else {
-      obj.o <- obj
-    }
-    return(obj.o)
+      stop("Invalid input data array. Data dimensions should be at least: 'time', 'lat', 'lon'")    
+    }        
   } else{
     stop ('The input data is not a list')
   }
