@@ -4,7 +4,7 @@
 \alias{reliabilityCategories}
 \title{Reliability categories of a probabilistic forecast.}
 \usage{
-reliabilityCategories(obs, prd, regions = NULL, n.events = 3,
+reliabilityCategories(obs, hindcast, regions = NULL, n.events = 3,
   labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.9,
   diagrams = TRUE, cex0 = 0.5, cex.scale = 20, layout = c(1, n.events),
   backdrop.theme = "countries", return.diagrams = FALSE)
@@ -12,7 +12,7 @@ reliabilityCategories(obs, prd, regions = NULL, n.events = 3,
 \arguments{
 \item{obs}{Grid of observations}
 
-\item{prd}{Grid of forecast data}
+\item{hindcast}{Grid of forecast data}
 
 \item{regions}{SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 the relaiability is calculated. Default is NULL (See details).}
@@ -58,7 +58,7 @@ Calculates (and draws)
 reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
 }
 \details{
-If parameter regions is NULL (default) the whole region in \code{obs} and \code{prd} is considered
+If parameter regions is NULL (default) the whole region in \code{obs} and \code{hindcast} is considered
 for computing reliability. A subregion will be considered If the corresponding SpatialPolygons* object
 is provided. In these cases, if parameter \code{diagrams = TRUE}, reliability diagrams are plotted for
 each specified event. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed
@@ -79,10 +79,13 @@ tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-10, 35), latLim = c(35,70), years = 
 #interpolate
 tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
 #calculate reliability
-rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int,
+rel.reg <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int,
                                  n.bins = 5, n.boot = 10,
-                                 regions = PRUDENCEregions)
-rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int,
+                                 regions = PRUDENCEregions,
+                                 return.diagrams = TRUE)
+rel.map
+
+rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int,
                              n.bins = 5, n.boot = 10)
 }
 }

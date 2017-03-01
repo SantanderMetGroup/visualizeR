@@ -21,7 +21,7 @@
 #' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
 #' 
 #' @param obs Grid of observations
-#' @param prd Grid of forecast data
+#' @param hindcast Grid of forecast data
 #' @param regions SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 #' the relaiability is calculated. Default is NULL (See details).
 #' @param n.events Number of events considered. Default is 3 (terciles)
@@ -44,7 +44,7 @@
 # @param xlim Required if diagrams = TRUE. Limits for maps
 # @param ylim Required if diagrams = TRUE. Limits for maps
 
-#' @details If parameter regions is NULL (default) the whole region in \code{obs} and \code{prd} is considered 
+#' @details If parameter regions is NULL (default) the whole region in \code{obs} and \code{hindcast} is considered 
 #' for computing reliability. A subregion will be considered If the corresponding SpatialPolygons* object
 #' is provided. In these cases, if parameter \code{diagrams = TRUE}, reliability diagrams are plotted for 
 #' each specified event. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed 
@@ -72,10 +72,13 @@
 #' #interpolate
 #' tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
 #' #calculate reliability
-#' rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int, 
+#' rel.reg <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int, 
 #'                                  n.bins = 5, n.boot = 10, 
-#'                                  regions = PRUDENCEregions)
-#' rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2.int, 
+#'                                  regions = PRUDENCEregions,
+#'                                  return.diagrams = TRUE)
+#' rel.map
+#'                                  
+#' rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int, 
 #'                              n.bins = 5, n.boot = 10)
 #' }
 #' 
@@ -93,7 +96,7 @@
 
 
 reliabilityCategories <- function(obs,
-                                  prd,
+                                  hindcast,
                                   regions = NULL,
                                   n.events = 3,
                                   labels = NULL,
@@ -106,8 +109,8 @@ reliabilityCategories <- function(obs,
                                   layout = c(1,n.events),
                                   backdrop.theme = "countries",
                                   return.diagrams = FALSE){ 
-      if (!identical(getGrid(obs)$y, getGrid(prd)$y) | !identical(getGrid(obs)$x, getGrid(prd)$x)) {
-            stop("obs and prd are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
+      if (!identical(getGrid(obs)$y, getGrid(hindcast)$y) | !identical(getGrid(obs)$x, getGrid(hindcast)$x)) {
+            stop("obs and hindcast are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
       }
       sigboot <- 1-conf.level
       layout <- rev(layout)
@@ -133,11 +136,11 @@ reliabilityCategories <- function(obs,
       if(class(regs) == "SpatialPolygonsDataFrame"){
             regs <-  SpatialPolygons(regs@polygons)
       }
-      prd <- redim(prd)
-      memind <- which(getDim(prd)=="member")
-      timeind <- which(getDim(prd)=="time")
-      nmem <- dim(prd$Data)[memind]
-      ntime <- dim(prd$Data)[timeind]
+      hindcast <- redim(hindcast)
+      memind <- which(getDim(hindcast)=="member")
+      timeind <- which(getDim(hindcast)=="time")
+      nmem <- dim(hindcast$Data)[memind]
+      ntime <- dim(hindcast$Data)[timeind]
       coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
       coords <- as.data.frame(cbind(coordinates[,2], coordinates[,1]))
       spoints <- SpatialPoints(coords)
@@ -162,14 +165,14 @@ reliabilityCategories <- function(obs,
                   ob <- ob.full[, w]
                   se <- array(dim = c(nmem, ntime, length(w)))
                   for(i in 1:nmem){
-                        prdarray <- prd$Data[i,,,]
-                        attr(prdarray, "dimensions") <-  attr(prd$Data, "dimensions")[-memind]
-                        se[i,,] <- array3Dto2Dmat(prdarray)[, w]
+                        hindcastarray <- hindcast$Data[i,,,]
+                        attr(hindcastarray, "dimensions") <-  attr(hindcast$Data, "dimensions")[-memind]
+                        se[i,,] <- array3Dto2Dmat(hindcastarray)[, w]
                   }
                   #remove empty pixels
                   naind.obs <- which(is.na(ob[1,]))
-                  naind.prd <- which(is.na(se[1,1,]))
-                  naind <- unique(c(naind.obs, naind.prd))
+                  naind.hindcast <- which(is.na(se[1,1,]))
+                  naind <- unique(c(naind.obs, naind.hindcast))
                   if(length(naind) != 0){
                         obna <- ob[,-naind]
                         sena <- se[,,-naind]
@@ -178,16 +181,16 @@ reliabilityCategories <- function(obs,
                         sena <- se
                   }
                   message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
-                  sl <- calculateReliability(obs = obna, prd = sena, n.events = n.events, n.bins = n.bins, n.boot = n.boot)
+                  sl <- calculateReliability(obs = obna, hindcast = sena, n.events = n.events, n.bins = n.bins, n.boot = n.boot)
                   
                   n <- sl$n
                   nyear <- sl$nyear
                   npoint <- sl$npoint
                   slope <- sl$slope
                   slope_boot <- sl$slope_boot
-                  prdprob <- sl$prdprob
+                  hindcastprob <- sl$hindcastprob
                   obsfreq <- sl$obsfreq
-                  prdfreq <- sl$prdfreq
+                  hindcastfreq <- sl$hindcastfreq
                   
                   cat <- rep(NA, n.events)
                   catcol <- rep(NA, n.events)
@@ -266,7 +269,7 @@ reliabilityCategories <- function(obs,
                   b <- y1-((x1*(y2-y1))/(x2-y1))
                   
                   y <- unlist(obsfreq)
-                  x <- unlist(prdprob)
+                  x <- unlist(hindcastprob)
                   z <- rep(1:n.events, each = n.bins)
                   # w <- rep(labels, each = n.bins)
                   
@@ -305,10 +308,10 @@ reliabilityCategories <- function(obs,
                                            panel.text(0.35, 0.85, catname[i])
                                            
                                            panel.xyplot(x, y, pch = 16, col = "black", 
-                                                        cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                                                        cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0)
                                            # panel.xyplot(0.45,0.2, pch = 16, col = "black", 
-                                           #              cex = min(prdfreq[[i]]) * cex.scale)
-                                           # panel.text(0.68, 0.2, paste0("min: n = ", min(prdfreq[[i]])*nyear*npoint))
+                                           #              cex = min(hindcastfreq[[i]]) * cex.scale)
+                                           # panel.text(0.68, 0.2, paste0("min: n = ", min(hindcastfreq[[i]])*nyear*npoint))
                                      }
                                }
                                if(packet.number() == 1){
@@ -343,7 +346,7 @@ reliabilityCategories <- function(obs,
 # 
 #                         plot(b, a, col = "black", lty = 3, typ = "l",
 #                              xlim = c(0,1), ylim = c(0,1),
-#                              xlab = "prd prob.", ylab = "obs. freq.",
+#                              xlab = "hindcast prob.", ylab = "obs. freq.",
 #                              main = labels[i],
 #                              sub = list(catname[i], cex = 1.2),
 #                              font.sub=4)
@@ -374,9 +377,9 @@ reliabilityCategories <- function(obs,
 #                         ## puntos del reliability diagram (escalados por el peso)
 #                         points(0.1, .8, pch = 19, cex = cex0)
 #                         text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
-#                         points(prdprob[[i]], obsfreq[[i]], pch = 19,
-#                         cex = prdfreq[[i]]*10)
-#                         # cex = ((((prdfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+#                         points(hindcastprob[[i]], obsfreq[[i]], pch = 19,
+#                         cex = hindcastfreq[[i]]*10)
+#                         # cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
 #                               grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
 #                   }
 #                   title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
@@ -424,7 +427,7 @@ reliabilityCategories <- function(obs,
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
 #' @param obs m*n matrix of observations (m = years, n = locations)
-#' @param prd m*n*l matrix of predictions (m = members, n = years, l = locations)
+#' @param hindcast m*n*l matrix of predictions (m = members, n = years, l = locations)
 #' @param n.events (optional): number of categories considered (e.g. 3 for terciles). By default n.events = 3
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
@@ -434,9 +437,9 @@ reliabilityCategories <- function(obs,
 #' nyear = number of years
 #' npoint = number of locations
 #' n = nyear*npoint
-#' prdprob = probability bins (center), per event (e.g. per tercile)
+#' hindcastprob = probability bins (center), per event (e.g. per tercile)
 #' obsfreq = observed frequency, per event (e.g. per tercile)
-#' prdfreq = predicted frequency, per event (e.g. per tercile)
+#' hindcastfreq = predicted frequency, per event (e.g. per tercile)
 #' slope = slope of the reliability line, per event (e.g. per tercile)
 #' slope_boot = n.boot*n.events matrix, with all the boostrapped values for the slope of the reliability line 
 #' 
@@ -450,36 +453,36 @@ reliabilityCategories <- function(obs,
 
 
 
-calculateReliability <- function(obs, prd, n.events = n.events, n.bins = n.bins, n.boot = n.boot) {
-      if (!(dim(obs)[1] == dim(prd)[2] & dim(obs)[2] == dim(prd)[3])) {
+calculateReliability <- function(obs, hindcast, n.events = n.events, n.bins = n.bins, n.boot = n.boot) {
+      if (!(dim(obs)[1] == dim(hindcast)[2] & dim(obs)[2] == dim(hindcast)[3])) {
             stop("Observations and predictions are not congruent in size")
       }
       nyear <- dim(obs)[1]
-      nmemb <- dim(prd)[1]
+      nmemb <- dim(hindcast)[1]
       O <- obs2bin(obs, n.events)
-      P <- prd2prob(prd, n.events)
+      P <- hindcast2prob(hindcast, n.events)
       ## calculo puntos diagrama fiabilidad
       aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins) 
       n.events <- aux$n.events
       nyear <- aux$nyear
       npoint <- aux$npoint
       n <- aux$n
-      prdprob <- vector("list", n.events)
+      hindcastprob <- vector("list", n.events)
       obsfreq <- vector("list", n.events)
-      prdfreq <- vector("list", n.events)
+      hindcastfreq <- vector("list", n.events)
       slope <- rep(NA, n.events)
       # intercept <- rep(NA, 1, n.events)
       for (ibins in 1:n.events) {
-            prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
-            prdprob[[ibins]] <- prdprob.bin
+            hindcastprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
+            hindcastprob[[ibins]] <- hindcastprob.bin
             obsfreq.bin <- eval(parse(text = sprintf("aux$cat%d$obar.i", ibins)))
             obsfreq[[ibins]] <- obsfreq.bin
-            # PESOS prdfreq!!!
-            prdfreq.bin <- eval(parse(text = sprintf("aux$cat%d$prob.y", ibins)))
-            prdfreq[[ibins]] <- prdfreq.bin
+            # PESOS hindcastfreq!!!
+            hindcastfreq.bin <- eval(parse(text = sprintf("aux$cat%d$prob.y", ibins)))
+            hindcastfreq[[ibins]] <- hindcastfreq.bin
             
-            if (!(is.null(prdprob.bin) | is.null(obsfreq.bin) | is.null(prdfreq.bin))) {
-                  fit <- lm(obsfreq.bin ~ prdprob.bin, weights = prdfreq.bin)
+            if (!(is.null(hindcastprob.bin) | is.null(obsfreq.bin) | is.null(hindcastfreq.bin))) {
+                  fit <- lm(obsfreq.bin ~ hindcastprob.bin, weights = hindcastfreq.bin)
                   slope[ibins] <- fit$coefficients[[2]]
                   # intercept[ibins] <- fit$coefficients[[1]]
             } else {
@@ -511,19 +514,19 @@ calculateReliability <- function(obs, prd, n.events = n.events, n.bins = n.bins,
             }
             
             # O <- obs2bin(obs[indyearperm, indnodperm], n.events)
-            # P <- prd2prob(prd[indmembperm, indyearperm, indnodperm], n.events)
+            # P <- hindcast2prob(hindcast[indmembperm, indyearperm, indnodperm], n.events)
             
             aux <- concatenateDataRelDiagram_v2(O$bin[, indyearperm, indnodperm], P.prob.boot, n.bins)  
             # aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins)  
             for (ibins in 1:n.events) {   
                   
-                  prdprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
+                  hindcastprob.bin <- eval(parse(text = sprintf("aux$cat%d$y.i", ibins)))
                   obsfreq.bin <- eval(parse(text = sprintf("aux$cat%d$obar.i", ibins)))
-                  # PESOS prdfreq!!!
-                  prdfreq.bin <- eval(parse(text = sprintf("aux$cat%d$prob.y", ibins)))
+                  # PESOS hindcastfreq!!!
+                  hindcastfreq.bin <- eval(parse(text = sprintf("aux$cat%d$prob.y", ibins)))
                   
-                  if (!(is.null(prdprob.bin) | is.null(obsfreq.bin) | is.null(prdfreq.bin))) {
-                        fit <- lm(obsfreq.bin ~ prdprob.bin, weights = prdfreq.bin)
+                  if (!(is.null(hindcastprob.bin) | is.null(obsfreq.bin) | is.null(hindcastfreq.bin))) {
+                        fit <- lm(obsfreq.bin ~ hindcastprob.bin, weights = hindcastfreq.bin)
                         slope_boot[iboot, ibins] <- fit$coefficients[[2]]
                         # intercept_boot[iboot, ibins] <- fit$coefficients[[1]]
                   } else {
@@ -549,9 +552,9 @@ calculateReliability <- function(obs, prd, n.events = n.events, n.bins = n.bins,
       result$nyear <- nyear
       result$npoint <- npoint
       result$n <- n
-      result$prdprob <- prdprob
+      result$hindcastprob <- hindcastprob
       result$obsfreq <- obsfreq
-      result$prdfreq <- prdfreq
+      result$hindcastfreq <- hindcastfreq
       result$slope <- slope
       # result$intercept <- intercept
       result$slope_boot <- slope_boot
@@ -624,67 +627,67 @@ obs2bin <- function(obs, n.events){
 #' @description This function provides the object needed by "calculateReliability_v2.R" 
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
-#' @param prd 3D-array of predictions, dimensions = (member, time, npoints)
-#' @param prd4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
+#' @param hindcast 3D-array of predictions, dimensions = (member, time, npoints)
+#' @param hindcast4cats Optional. 3D-array of predictions for which calculate the categories (e.g., terciles)
 #' @param dimensions (member, time, npoints)
 #' @param n.events Number of categories (3 for terciles)
 #'
 #' @return 
-#' prdprob: 3D-array of probabilistic predictions, dimensions = (n.events, time, npoints)
-#' @note For prd4cats, categories are calculated at model- (not at member-) level
+#' hindcastprob: 3D-array of probabilistic predictions, dimensions = (n.events, time, npoints)
+#' @note For hindcast4cats, categories are calculated at model- (not at member-) level
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-prd2prob <- function(prd, n.events, prd4cats = NULL){
+hindcast2prob <- function(hindcast, n.events, hindcast4cats = NULL){
       
-      prob <- array(NA, c(n.events, dim(prd)[2], dim(prd)[3]))
-      cat <- array(NA, c(dim(prd)[1], dim(prd)[2], dim(prd)[3]))
-      v.err <- rep(NA, dim(prd)[3])
-      for (inod in 1:dim(prd)[3]) {
-            ## categorias prd
+      prob <- array(NA, c(n.events, dim(hindcast)[2], dim(hindcast)[3]))
+      cat <- array(NA, c(dim(hindcast)[1], dim(hindcast)[2], dim(hindcast)[3]))
+      v.err <- rep(NA, dim(hindcast)[3])
+      for (inod in 1:dim(hindcast)[3]) {
+            ## categorias hindcast
             ## calculo los terciles de la prediccion a nivel de modelo (concateno todos los miembros)      
-            if (!is.null(prd4cats)) {
-                  tmpprd4catscat <- lapply(1:dim(prd4cats)[1], function(x) prd4cats[x, , inod])      
-                  tmpprd4catscat <- do.call("c", tmpprd4catscat)
+            if (!is.null(hindcast4cats)) {
+                  tmphindcast4catscat <- lapply(1:dim(hindcast4cats)[1], function(x) hindcast4cats[x, , inod])      
+                  tmphindcast4catscat <- do.call("c", tmphindcast4catscat)
             }      
-            tmpprdcat <- lapply(1:dim(prd)[1], function(x) prd[x, , inod])
-            tmpprdcat <- do.call("c", tmpprdcat)
+            tmphindcastcat <- lapply(1:dim(hindcast)[1], function(x) hindcast[x, , inod])
+            tmphindcastcat <- do.call("c", tmphindcastcat)
             
-            if (!is.null(prd4cats)) {
-                  catsprd <- quantile(tmpprd4catscat, 0:n.events/n.events, na.rm = TRUE) 
-                  rm(tmpprd4catscat)
+            if (!is.null(hindcast4cats)) {
+                  catshindcast <- quantile(tmphindcast4catscat, 0:n.events/n.events, na.rm = TRUE) 
+                  rm(tmphindcast4catscat)
             } else {
-                  catsprd <- quantile(tmpprdcat, 0:n.events/n.events, na.rm = TRUE) 
+                  catshindcast <- quantile(tmphindcastcat, 0:n.events/n.events, na.rm = TRUE) 
             }
             tryCatch({
-                  catsprd <- quantile2disc(tmpprdcat, catsprd)
-                  rm(tmpprdcat)
-                  catsprd$mids <- sort(catsprd$mids)
-                  auxprd <- matrix(NA, dim(prd)[2], dim(prd)[1])
-                  for (imemb in 1:dim(prd)[1]){
-                        i1 <- ((imemb-1)*dim(prd)[2]) + 1
-                        i2 <- i1 + dim(prd)[2] - 1
-                        auxprd[, imemb] <- catsprd$new[i1:i2]
+                  catshindcast <- quantile2disc(tmphindcastcat, catshindcast)
+                  rm(tmphindcastcat)
+                  catshindcast$mids <- sort(catshindcast$mids)
+                  auxhindcast <- matrix(NA, dim(hindcast)[2], dim(hindcast)[1])
+                  for (imemb in 1:dim(hindcast)[1]){
+                        i1 <- ((imemb-1)*dim(hindcast)[2]) + 1
+                        i2 <- i1 + dim(hindcast)[2] - 1
+                        auxhindcast[, imemb] <- catshindcast$new[i1:i2]
                   }  
-                  tmp2 <- matrix(NA, dim(prd)[1], dim(prd)[2])
+                  tmp2 <- matrix(NA, dim(hindcast)[1], dim(hindcast)[2])
                   for (ibins in 1:n.events){      
-                        tmp <- auxprd == catsprd$mids[ibins]
-                        prob[ibins, , inod] <- apply(tmp, 1, sum) / dim(prd)[1]             
+                        tmp <- auxhindcast == catshindcast$mids[ibins]
+                        prob[ibins, , inod] <- apply(tmp, 1, sum) / dim(hindcast)[1]             
                         tmp2[t(tmp)] <- ibins 
                   }
                   cat[, , inod] <- tmp2
                   rm(tmp2)
             }, error = function(ex) {
                   v.err[inod] <- 1
-                  nmemb<-dim(prd)[2]
-                  ntime<-dim(prd)[1]
+                  nmemb<-dim(hindcast)[2]
+                  ntime<-dim(hindcast)[1]
                   cat[, , inod] <- matrix(NA, nmemb, ntime)
             })
       }
       if(any(!is.na(v.err))){
-            message("Imposible to calculate categories in the ", (sum(v.err, na.rm = T)/length(v.err))*100, " percent of the grid boxes in prd. Removed for the analysis.")
+            message("Imposible to calculate categories in the ", (sum(v.err, na.rm = T)/length(v.err))*100, " percent of the grid boxes in hindcast. Removed for the analysis.")
       }
-      rm(auxprd)
+      rm(auxhindcast)
       probcat <- list()
       probcat$prob <- prob
       probcat$cat <- cat
@@ -714,15 +717,15 @@ prd2prob <- function(prd, n.events, prd4cats = NULL){
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
+concatenateDataRelDiagram_v2 <- function(obsbin, hindcastprob, n.bins) {
       # Description
       # 
       # Usage:
-      # concatenateDataResDiagram(obsbin, prdprob, nod, n.events) 
+      # concatenateDataResDiagram(obsbin, hindcastprob, nod, n.events) 
       # Arguments:
       # obsbin: 4D-array of binary (0/1) observations, dimensions = (n.events, ynod, xnod, time)
-      # prdprob: 4D-array of probabilistic predictions, dimensions = (n.events, ynod, xnod, time)
-      # nod: matrix of coordinates, longitudes (latitudes) in first (second) column (common for obs and prd)
+      # hindcastprob: 4D-array of probabilistic predictions, dimensions = (n.events, ynod, xnod, time)
+      # nod: matrix of coordinates, longitudes (latitudes) in first (second) column (common for obs and hindcast)
       # n.events: number of categories (3 for terciles)
       # Value:
       # dataRelDiagram: list with n.events elements, containing all the information to plot reliability diagrams 
@@ -732,7 +735,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
       #       require(verification)
       
       dataRelDiagram <- list()
-      if (identical(as.vector(dim(obsbin)), as.vector(dim(prdprob)))){
+      if (identical(as.vector(dim(obsbin)), as.vector(dim(hindcastprob)))){
             n.events <- dim(obsbin)[1]
             nyear <- dim(obsbin)[2]
             npoint <- dim(obsbin)[3]
@@ -745,11 +748,11 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
       
       for (ibins in 1:n.events) {    
             obsbinconca <- as.vector(obsbin[ibins, ,])
-            prdprobconca <- as.vector(prdprob[ibins, ,])  
+            hindcastprobconca <- as.vector(hindcastprob[ibins, ,])  
             # nodos sin NAs
-            indnona = unique(c(which(!is.na(obsbinconca)), which(!is.na(prdprobconca))))  
+            indnona = unique(c(which(!is.na(obsbinconca)), which(!is.na(hindcastprobconca))))  
             aux <- verify(obsbinconca[indnona], 
-                          prdprobconca[indnona], 
+                          hindcastprobconca[indnona], 
                           obs.type = "binary", frcst.type = "prob",
                           thresholds = seq(0, 1, 1/n.bins), show = FALSE)
             aux$n <- length(length(indnona))
@@ -757,7 +760,7 @@ concatenateDataRelDiagram_v2 <- function(obsbin, prdprob, n.bins) {
             
       }
       
-      rm(obsbin, obsbinconca, prdprob, prdprobconca)
+      rm(obsbin, obsbinconca, hindcastprob, hindcastprobconca)
       
       return(dataRelDiagram)
 }
