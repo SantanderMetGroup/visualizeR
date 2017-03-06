@@ -4,5 +4,4 @@ visualizeR
 * Added optional argument 'forecast' in all the visualizations (except reliabilityCategories) to show results for the forecast event  (not just for the hindcast).
 * Several improvements in the appearance of the visualizations.
 * Enhanced reliability diagrams, importing funcitonalities from lattice
-* New package vignette with examples. 
 * Other minor changes and enhancements.
