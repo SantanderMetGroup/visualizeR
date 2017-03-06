@@ -4,33 +4,31 @@
 \alias{calculateReliability}
 \title{Generate object needed by function reliability}
 \usage{
-calculateReliability(obs, prd, nbins = nbins, nbinsprob = nbinsprob,
-  nboot = nboot, sigboot = sigboot)
+calculateReliability(obs, hindcast, n.events = n.events, n.bins = n.bins,
+  n.boot = n.boot)
 }
 \arguments{
 \item{obs}{m*n matrix of observations (m = years, n = locations)}
 
-\item{prd}{m*n*l matrix of predictions (m = members, n = years, l = locations)}
+\item{hindcast}{m*n*l matrix of predictions (m = members, n = years, l = locations)}
 
-\item{nbins}{(optional): number of categories considered (e.g. 3 for terciles). By default nbins = 3}
+\item{n.events}{(optional): number of categories considered (e.g. 3 for terciles). By default n.events = 3}
 
-\item{nbinsprob}{(optional): number of probability bins considered. By default nbinsprob = 10}
+\item{n.bins}{(optional): number of probability bins considered. By default n.bins = 10}
 
-\item{nboot}{number of samples considered for bootstrapping. By default nboot = 100}
-
-\item{sigboot}{sigboot}
+\item{n.boot}{number of samples considered for bootstrapping. By default n.boot = 100}
 }
 \value{
 List with the following elements:
-nbins = nbins
+n.events = n.events
 nyear = number of years
 npoint = number of locations
 n = nyear*npoint
-prdprob = probability bins (center), per category (e.g. per tercile)
-obsfreq = observed frequency, per category (e.g. per tercile)
-prdfreq = predicted frequency, per category (e.g. per tercile)
-slope = slope of the reliability line, per category (e.g. per tercile)
-slope_boot = nboot*nbins matrix, with all the boostrapped values for the slope of the reliability line
+hindcastprob = probability bins (center), per event (e.g. per tercile)
+obsfreq = observed frequency, per event (e.g. per tercile)
+hindcastfreq = predicted frequency, per event (e.g. per tercile)
+slope = slope of the reliability line, per event (e.g. per tercile)
+slope_boot = n.boot*n.events matrix, with all the boostrapped values for the slope of the reliability line
 }
 \description{
 This function provides the object needed by "calculateReliability_v2.R" 

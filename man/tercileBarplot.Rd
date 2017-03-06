@@ -4,11 +4,11 @@
 \alias{tercileBarplot}
 \title{Tercile bar plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-tercileBarplot(mm.obj, obs, forecast = NULL, year.target = NULL,
+tercileBarplot(hindcast, obs, forecast = NULL, year.target = NULL,
   detrend = FALSE, score.threshold = NULL, subtitle = NULL)
 }
 \arguments{
-\item{mm.obj}{A multi-member list with the hindcast for verification. See details.}
+\item{hindcast}{A multi-member list with the hindcast for verification. See details.}
 
 \item{obs}{List with the benchmarking observations for forecast verification.}
 
@@ -16,7 +16,7 @@ tercileBarplot(mm.obj, obs, forecast = NULL, year.target = NULL,
 
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is FALSE.}
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{score.threshold}{Threshold to remark high positive score values in the figure.}
 

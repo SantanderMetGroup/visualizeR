@@ -10,7 +10,7 @@ devtools::install_github(c("SantanderMetGroup/transformeR", "SantanderMetGroup/v
 Alternatively, you can download the sources from the [Releases Tab](https://github.com/SantanderMetGroup/visualizeR/releases)
 
 
-**IMPORTANT:** Note that `downscaleR` need to be previously installed on your system ([installation info](https://github.com/SantanderMetGroup/downscaleR/wiki/installation))
+**IMPORTANT:** Note that `transformeR` must be previously installed on your system ([installation info](https://github.com/SantanderMetGroup/downscaleR/wiki/installation))
 
 ---
 To know more about the `loadeR` bundle and its components, visit the `loadeR` [GitHub repo](https://github.com/SantanderMetGroup/loadeR).

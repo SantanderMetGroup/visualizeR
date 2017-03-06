@@ -21,10 +21,10 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with predictions, either a field or a multi-member 
-#'  station object as a result of downscaling of a forecast using station data. See details.
-#' @param year.target Year selected to plot the probability of the tercile in bars.
-#' @param detrend Logical indicating if the data should be detrended. Default is TRUE.
+#' @param hindcast A multi-member list with the hindcast for verification. Daily values. See details.
+#' @param forecast A multi-member list with the forecasts. Daily values. Default is NULL. 
+#' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param boxplot Logical flag indicating whether a boxplot should be added to the graph. Default is TRUE.
 #' @param violin  Logical flag indicating whether a violin plot should be added to the graph instead of the boxplot. 
 #'  Default is FALSE.
@@ -33,7 +33,7 @@
 #' @param pch Single character or an integer code for one of the set of R graphics symbols. Cross is the default symbol. 
 #'  Only consider if add.points is TRUE. 
 #' 
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray 
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray subsetGrid
 #' @importFrom stats filter
 #' @importFrom graphics lines
 #' @import sm
@@ -60,36 +60,56 @@
 #' 
 #' @family VisualizeR
 
-spreadPlot <- function(mm.obj, year.target, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
+spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
+      # Check data dimension from the original data sets
+      checkDim(hindcast)
+      if (!is.null(forecast)){
+        checkDim(forecast)   
+      }
      # Check data temporal scale. Daily or subdaily required.
-     mm.dates <-as.POSIXlt(mm.obj$Dates$start)
-     if (diff.Date(mm.dates$mday)[1]==0){
-       # Annual data
-       if (diff.Date(mm.dates$year)[1]==1){
-         stop("Data are not at daily time scale")
-       } # Monthly data
-       if (diff.Date(mm.dates$mon)[1]==1){
-         stop("Data are not at daily time scale")
-       } 
-     }
+     check.daily(hindcast)
+     mm.dates <-as.POSIXlt(hindcast$Dates$start)
+     yy <- unique(getYearsAsINDEX(hindcast))  
+     if (is.null(forecast)){
+       if (is.null(year.target)){
+         year.target <- last(yy)
+       }
+       if (!year.target %in% yy) {
+         stop("Target year outside temporal data range")
+        }
+       yy.forecast <- year.target
+       forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
+       hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
+       mm.dates <-as.POSIXlt(hindcast$Dates$start)
+       yy <- yy[yy!=yy.forecast]
+     }      
      # Check input datasets
-     if (isS4(mm.obj)==FALSE){
-       mm.obj <- convertIntoS4(mm.obj)
+     if (isS4(hindcast)==FALSE){
+       hindcast <- convertIntoS4(hindcast)
      }
-     stopifnot(checkData(mm.obj))
-     yy <- unique(getYearsAsINDEX.S4(mm.obj))      
-     if (!year.target %in% yy) {
-       stop("Target year outside temporal data range")
+     stopifnot(checkData(hindcast))
+     if (!is.null(forecast)){
+       check.daily(forecast)
+       yy.forecast <- unique(getYearsAsINDEX(forecast))
+       year.target <- NULL
+       mm.dates.forecast <-as.POSIXlt(forecast$Dates$start)
+       if (isS4(forecast)==FALSE){
+         forecast <- convertIntoS4(forecast)
+       }
      }
      # Detrend
      if (detrend){
-       mm.obj <- detrend.forecast(mm.obj)
+       hindcast <- detrend.data(hindcast)
+       forecast <- detrend.data(hindcast, forecast)
      }
-     # Spatial mean of forecast and Benchmark if necessary
-     sp.mm.obj <- spatialMean(mm.obj)
+     # Spatial mean if necessary
+     sp.hindcast <- spatialMean(hindcast)
+     sp.forecast <- spatialMean(forecast)
      # Plot the climatology shadow 
-     ma <- function(x, n=31){filter(x, rep(1/n, n), sides=2)} # Time filter (moving average)
-     arr <- getData(sp.mm.obj)[1,,,1,1]
+     ma.time <- 31
+     ma <- function(x, n=ma.time){filter(x, rep(1/n, n), sides=2)} # Time filter (moving average)
+     arr <- getData(sp.hindcast)[1,,,1,1]
+     arr.forecast <- getData(sp.forecast)[1,,,1,1]
      mm.ma <- t(apply(arr, MARGIN=1, FUN=ma)) 
      days <- sprintf("%02d%02d", mm.dates$mon+1, mm.dates$mday)
      days <- factor(days, levels=unique(days))
@@ -97,18 +117,24 @@ spreadPlot <- function(mm.obj, year.target, detrend = FALSE, boxplot=TRUE, violi
      ens.quant <- t(do.call("rbind",
                             lapply(unique(days), FUN=function(x){quantile(c(mm.ma[,days==x]), probs=c(0.0,1/3,0.5,2/3,1.0), na.rm=T)})
      ))
-     season.days <- 1:length(unique(days))    
+     # Remove first and last 15 days since in the moving average the series is not continous in time (just a season). 
+     n.trunc <- floor(ma.time/2)
+     valid.range <- (n.trunc+1):(dim(ens.quant)[2]-n.trunc-1)
+     ens.quant <- ens.quant[, valid.range]
+     season.days <- (1:length(unique(days)))[valid.range]
+     # Starting with the plot
      par(bg="white", mar=c(4,4,1,1))
-     plot(season.days, ens.quant[3,], ylim = range(mm.ma, na.rm=T), ty = 'n', ylab = paste(getVarName(mm.obj),"- Daily Mean"), xlab = sprintf("time\n(shade: %d to %d, symbols: %d)", mm.dates[1]$year+1900, last(mm.dates)$year+1900, year.target), xaxt="n")
+     ylim <- range(c(as.vector(mm.ma),as.vector(arr.forecast)), na.rm=T)
+     xlim <- range(1:length(unique(days)))
+     plot(season.days, ens.quant[3,], xlim = xlim, ylim = ylim, ty = 'n', ylab = paste(attr(getVariable(hindcast), "longname"),"- Daily Mean"), xlab = sprintf("time\n(shade: %d to %d, symbols: %d)", yy[1], last(yy), yy.forecast), xaxt="n")
      polygon(x = c(season.days, rev(season.days)), y = c(ens.quant[1, ], rev(ens.quant[5, ])), border = "transparent", col = rgb(0.2,0.2,0.2,.2))
      polygon(x = c(season.days, rev(season.days)), y = c(ens.quant[2, ], rev(ens.quant[4, ])), border = "transparent", col = rgb(0.3,0.3,0.3,.3))
      lines(season.days, ens.quant[3,], lwd=2)      
      # Boxplot, Violinplot and/or points for the selected year
-     year.filter <- getYearsAsINDEX.S4(mm.obj)==year.target
-     month.index <- factor(months(mm.dates[year.filter]), levels=unique(months(mm.dates)))
-     nmembers <- length(getMembers(mm.obj))
-     mm.monmeans <- do.call("rbind", lapply(c(1:nmembers), function(x) tapply(arr[x,year.filter], INDEX = month.index, FUN = mean, na.rm = TRUE)))
-     pos.cen <- grep("..15", levels(days)) + 0.5
+     month.index <- factor(months(mm.dates.forecast), levels=unique(months(mm.dates)))
+     nmembers <- length(getMembers(forecast))
+     mm.monmeans <- do.call("rbind", lapply(c(1:nmembers), function(x) tapply(arr.forecast[x,], INDEX = month.index, FUN = mean, na.rm = TRUE)))
+     pos.cen <- grep("..15", levels(days))
      pos.ini <- grep("..01", levels(days)) 
      if (violin) {
        boxplot=FALSE # Uncompatible options
@@ -117,7 +143,7 @@ spreadPlot <- function(mm.obj, year.target, detrend = FALSE, boxplot=TRUE, violi
        }
      }       
      if (boxplot){
-       boxplot(mm.monmeans, boxwex=3, lwd=3, border="black", at=pos.cen, col=rgb(1,0,0,0), axes=F, add=T)
+       boxplot(mm.monmeans, boxwex=3, border="black", at=pos.cen, col=rgb(1,0,0,0), axes=F, add=T)
      }     
      if (add.points) {
        # Different color of the points depending on the tercile 

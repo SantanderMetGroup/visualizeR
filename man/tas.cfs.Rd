@@ -8,7 +8,7 @@
 Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 }
 \description{
-NCEP CFSv2 hindcast of DJF mean temperature for the entire globe (1983-2010). Data are annually aggregated.
+NCEP CFSv2 hindcast of December to February (DJF) mean temperature for the entire globe (1983-2010). Data are annually aggregated.
 Ensemble of 24 members, corresponding to the lead month 1 predictions (November initializations)
 
 For further detail on ensemble member definition, see \url{http://www.meteo.unican.es/ecoms-udg/dataserver/datasets/CFSv2}
@@ -21,6 +21,6 @@ plotClimatology(climatology(tas.cfs), backdrop.theme = "coastline")
 }
 }
 \references{
-Saha, S. et al. 2013. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
+Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 }
 

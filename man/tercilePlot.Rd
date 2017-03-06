@@ -4,12 +4,12 @@
 \alias{tercilePlot}
 \title{Tercile plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-tercilePlot(mm.obj, obs, forecast = NULL, year.target = NULL,
+tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
   detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"),
   subtitle = NULL)
 }
 \arguments{
-\item{mm.obj}{A multi-member list with the hindcast for verification. See details.}
+\item{hindcast}{A multi-member list with the hindcast for verification. See details.}
 
 \item{obs}{List with the benchmarking observations for forecast verification.}
 
@@ -17,7 +17,7 @@ tercilePlot(mm.obj, obs, forecast = NULL, year.target = NULL,
 
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is FALSE.}
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{color.pal}{Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 

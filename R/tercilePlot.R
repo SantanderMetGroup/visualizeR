@@ -21,18 +21,18 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with the hindcast for verification. See details.
+#' @param hindcast A multi-member list with the hindcast for verification. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray getYearsAsINDEX subsetGrid
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray getYearsAsINDEX subsetGrid 
 #' @importFrom abind abind
 #' @importFrom fields image.plot
 #' @importFrom grDevices grey.colors
@@ -80,9 +80,15 @@
 #' Atmospheri Science, Wiley, NY
 #'  
 
-tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
+tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
+      # Check data dimension from the original data sets
+      checkDim(hindcast)
+      checkDim(obs)
+      if (!is.null(forecast)){
+        checkDim(forecast)   
+      }
       color.pal <- match.arg(color.pal, c("bw", "reds", "ypb", "tcolor"))
-      yy <- unique(getYearsAsINDEX(mm.obj))  
+      yy <- unique(getYearsAsINDEX(hindcast))  
       if (!is.null(year.target)){
         if (!year.target %in% yy) {
           stop("Target year outside temporal data range")
@@ -90,19 +96,19 @@ tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend 
       }
       if (is.null(forecast) & !is.null(year.target)){
         yy.forecast <- year.target
-        forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
-        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
+        forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
+        hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
         obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
         yy <- yy[yy!=yy.forecast]
       }
       # Check input datasets
-      if (isS4(mm.obj)==FALSE){
-        mm.obj <- convertIntoS4(mm.obj)
+      if (isS4(hindcast)==FALSE){
+        hindcast <- convertIntoS4(hindcast)
       }
       if (isS4(obs)==FALSE){
         obs <- convertIntoS4(obs)
       }
-      stopifnot(checkData(mm.obj, obs))
+      stopifnot(checkData(hindcast, obs))
       if (!is.null(forecast)){
         yy.forecast <- unique(getYearsAsINDEX(forecast))
         year.target <- NULL
@@ -112,19 +118,22 @@ tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend 
       }
       # Detrend
       if (detrend){
-        mm.obj <- detrend.forecast(mm.obj)
-        obs <- detrend.forecast(obs)
+        hindcast <- detrend.data(hindcast)
+        obs <- detrend.data(obs)
+        if (!is.null(forecast)){
+          forecast <- detrend.data(hindcast, forecast)
+        }
       }
       # Spatial mean of forecast and Benchmark if necessary
-      sp.mm.obj <- spatialMean(mm.obj)
+      sp.hindcast <- spatialMean(hindcast)
       sp.obs <- spatialMean(obs)
       # Computation of seasonal mean
-      sm.mm.obj <- seasMean(sp.mm.obj)
+      sm.hindcast <- seasMean(sp.hindcast)
       sm.obs <- seasMean(sp.obs)
       # Computation of terciles and exceedance probabilities
-      probs.mm.obj <- QuantileProbs(sm.mm.obj)
+      probs.hindcast <- QuantileProbs(sm.hindcast)
       probs.obs <- QuantileProbs(sm.obs)
-      cofinogram.data <- t(getData(probs.mm.obj)[,,,,])
+      cofinogram.data <- t(getData(probs.hindcast)[,,,,])
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
       # Compute ROCSS
@@ -135,7 +144,7 @@ tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend 
       if (!is.null(forecast)){
         sp.forecast <- spatialMean(forecast)
         sm.forecast <- seasMean(sp.forecast)
-        probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
+        probs.forecast <- QuantileProbs(sm.forecast, sm.hindcast)
         cofinogram.data <- rbind(cofinogram.data,rep(NaN,3),t(getData(probs.forecast)[,,,,]))
       }
       # Color selection
@@ -177,14 +186,14 @@ tercilePlot <- function(mm.obj, obs, forecast=NULL, year.target = NULL, detrend 
           #par(oma = c(7, 0, 2, 2.7))
           image.plot(add = TRUE, horizontal = T, smallplot = c(00.20,0.85,0.16,0.21), legend.only = TRUE, breaks = brks, col = t.color[,1], zlim=c(0,1), legend.lab="Probability of the tercile")          
       } else{          
-          #par(oma = c(5, 0, 2, 3.2))
+          par(oma = c(3, 0, 1, 3.2))
           #image.plot(add = TRUE, legend.only = TRUE, breaks = brks, col = cbar, smallplot = c(0.96,0.99,0.2,0.8), zlim=c(0,1), legend.lab="Probability of the tercile")            
-          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.25,0.28), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile")            
+          image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.25,0.28), legend.only = TRUE, breaks = brks, col = cbar, zlim=c(0,1), legend.lab="Probability of the tercile", legend.cex=0.8, axis.args=c(cex.axis=0.8))            
       }
       mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
       mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
-      title <- sprintf("%s, %s to %s", attr(getVariable(mm.obj), "longname"), mons.start, mons.end)
-      mtext(title, side=3, line=-3, adj=0, cex=1.2, font=2)
+      title <- sprintf("%s, %s to %s", attr(getVariable(hindcast), "longname"), mons.start, mons.end)
+      mtext(title, side=3, line=-3, adj=0, cex=0.9, font=2)
       if (!is.null(subtitle)){
         mtext(subtitle, side=3, line=-4, adj=0, cex=0.7)
       }

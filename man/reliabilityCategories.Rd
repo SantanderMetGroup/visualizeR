@@ -2,48 +2,66 @@
 % Please edit documentation in R/reliabilityCategories.R
 \name{reliabilityCategories}
 \alias{reliabilityCategories}
-\title{Reliability categories of a probabilistic prd.}
+\title{Reliability categories of a probabilistic forecast.}
 \usage{
-reliabilityCategories(obs, prd, regions = NULL, nbins = 3, labels = NULL,
-  nbinsprob = 10, nboot = 100, sigboot = 0.05, diagrams = TRUE)
+reliabilityCategories(obs, hindcast, regions = NULL, n.events = 3,
+  labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.9,
+  diagrams = TRUE, cex0 = 0.5, cex.scale = 20, layout = c(1, n.events),
+  backdrop.theme = "countries", return.diagrams = FALSE)
 }
 \arguments{
 \item{obs}{Grid of observations}
 
-\item{prd}{Grid of forecast data}
+\item{hindcast}{Grid of forecast data}
 
 \item{regions}{SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 the relaiability is calculated. Default is NULL (See details).}
 
-\item{nbins}{Number of categories considered (e.g. 3 for terciles). By default nbins = 3}
+\item{n.events}{Number of events considered. Default is 3 (terciles)}
 
-\item{labels}{Character of the names to be given at the categories defined in \code{nbins} 
-(e.g. c("lower", "middle", "upper")). if NULL (default) numbered categories are returned.}
+\item{labels}{Character of the names to be given at the events defined in \code{n.events} 
+(e.g. c("lower", "middle", "upper")). If NULL (default) numbered events are returned 
+(Event 1 corresponds to the lowest values).}
 
-\item{nbinsprob}{(optional): number of probability bins considered. By default nbinsprob = 10}
+\item{n.bins}{(optional): number of probability bins considered. By default n.bins = 10}
 
-\item{nboot}{number of samples considered for bootstrapping. By default nboot = 100}
+\item{n.boot}{number of samples considered for bootstrapping. By default n.boot = 100}
 
-\item{sigboot}{Optional. Confidence interval for the reliability line. By default sigboot = 0.05}
+\item{conf.level}{Confidence interval for the reliability line. By default conf.level = 0.9 (two sided)}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
+
+\item{cex0}{numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
+for the minimum n frequency (n = 1) (see parameter \code{n.bins}.  The sizes for points that correspond to n > 1 
+are reescaled according to parameter \code{cex.scale}.}
+
+\item{cex.scale}{numeric (default is 20). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0})}
+
+\item{layout}{integer (default = c(1, n.events)). Sets the layout of panels (rows,cols)}
+
+\item{backdrop.theme}{Reference geographical lines to be added to the plot. Default is "countries" 
+(See \code{\link[transformeR]{plotClimatology}} for options).}
+
+\item{return.diagrams}{Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.}
 }
 \value{
-Grid of reliability categories with an additional data dimension for categories 
-and an additional slot ($ReliabilityCategories) containing the following elements:
+Grid of reliability categories with an additional data dimension for categories
+and an additional slot (\code{$ReliabilityCategories}) containing the following elements:
 catname: reliability categories.
 slope: \code{$slope} slope of the reliability line; \code{$lower} lower bound confidence for slope (according to "sigboot"); 
 \code{$upper} upper bound confidence for slope (according to "sigboot").
+
+If \code{return.diagrams} is TRUE, a list of two objects is returned, the grid object (\code{$grid}) and a trellis class object (\code{$plot}).
 }
 \description{
 Calculates (and draws) 
 reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
 }
 \details{
-If parameter regions is NULL (default) the whole region in \code{obs} and \code{prd} is considered 
+If parameter regions is NULL (default) the whole region in \code{obs} and \code{hindcast} is considered 
 for computing reliability. A subregion will be considered If the corresponding SpatialPolygons* object
 is provided. In these cases, if parameter \code{diagrams = TRUE}, reliability diagrams are plotted for 
-each specified category. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed 
+each specified event. If a SpatialPolygons* object of multiple subregions is provided, reliability is computed 
 separately for each region and reliability maps are plotted instead. 
 
 A SpartialPolygons* object is easily obtained by reading a shapefile with function 
@@ -53,15 +71,22 @@ A SpartialPolygons* object is easily obtained by reading a shapefile with functi
 \dontrun{
 data("tas.cfs")
 data("tas.ncep")
-data("AR5regions")
+data("PRUDENCEregions")
 require(transformeR)
-tas.cfs2 <- interpGrid(tas.cfs, getGrid(tas.ncep))
-tas.ncep2 <- subsetGrid(tas.ncep, years = 1983:2009)
-tas.cfs2 <- subsetGrid(tas.cfs2, years = 1983:2009)
-rel.reg <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2, 
-                           nboot = 100, regions = AR5regions)
-rel <- reliabilityCategories(obs = tas.ncep2, prd = tas.cfs2, 
-                           nboot = 100)
+#select spatio-temporal domain
+tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-10, 35), latLim = c(35,70), years = 1983:2009)
+tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-10, 35), latLim = c(35,70), years = 1983:2009)
+#interpolate
+tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
+#calculate reliability
+rel.reg <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int, 
+                                 n.bins = 5, n.boot = 10, 
+                                 regions = PRUDENCEregions,
+                                 return.diagrams = TRUE)
+rel.map
+                                 
+rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int, 
+                             n.bins = 5, n.boot = 10)
 }
 
 }

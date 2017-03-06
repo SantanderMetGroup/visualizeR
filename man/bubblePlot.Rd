@@ -4,14 +4,14 @@
 \alias{bubblePlot}
 \title{Bubble plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-bubblePlot(mm.obj, obs, forecast = NULL, year.target = NULL,
+bubblePlot(hindcast, obs, forecast = NULL, year.target = NULL,
   detrend = FALSE, score = TRUE, size.as.probability = TRUE,
-  bubble.size = 4, score.range = NULL, piechart = FALSE,
+  bubble.size = 1, score.range = NULL, piechart = FALSE,
   subtitle = NULL, color.reverse = FALSE, pch.neg.score = NULL,
   pch.obs.constant = NULL, pch.data.nan = NULL)
 }
 \arguments{
-\item{mm.obj}{A multi-member list with the hindcast for verification. See details.}
+\item{hindcast}{A multi-member list with the hindcast for verification. See details.}
 
 \item{obs}{List with the benchmarking observations for forecast verification.}
 
@@ -19,7 +19,7 @@ bubblePlot(mm.obj, obs, forecast = NULL, year.target = NULL,
 
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is FALSE.}
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{score}{Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 details. Default is TRUE}
@@ -27,11 +27,12 @@ details. Default is TRUE}
 \item{size.as.probability}{Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 are drawn in the plot. See details. Default is TRUE.}
 
-\item{bubble.size}{Number for the bubble size. bubble.size=4 by default.}
+\item{bubble.size}{Number for the bubble or pie size. bubble.size=1 by default.}
 
-\item{score.range}{Two dim vector to rescale the transparency of the bubbles (e.g c(0.5, 0.8) values
-lower than 0.5 are transparent while values up to 0.8 have maximum transparency). Default is NULL that is transparency 
-ranges from 0 to 1.}
+\item{score.range}{A vector of length two used to rescale the transparency of the bubbles.
+For instance, a \code{score.range = c(0.5, 0.8)} will turn ROCSS values below 0.5 completely transparent,
+ while values of 0.8 or will have minimum transparency (i.e., opaque). 
+ The default to \code{NULL}, that will set a transparency range between 0 and 1.}
 
 \item{piechart}{Logical flag indicating if pie charts should be plot instead of bubbles. Default is FALSE.}
 

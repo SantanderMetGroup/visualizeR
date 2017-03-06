@@ -4,16 +4,17 @@
 \alias{spreadPlot}
 \title{Box plot for visualization of forecast skill of ensemble predictions.}
 \usage{
-spreadPlot(mm.obj, year.target, detrend = FALSE, boxplot = TRUE,
-  violin = FALSE, add.points = FALSE, pch = NULL)
+spreadPlot(hindcast, forecast = NULL, year.target = NULL, detrend = FALSE,
+  boxplot = TRUE, violin = FALSE, add.points = FALSE, pch = NULL)
 }
 \arguments{
-\item{mm.obj}{A multi-member list with predictions, either a field or a multi-member 
-station object as a result of downscaling of a forecast using station data. See details.}
+\item{hindcast}{A multi-member list with the hindcast for verification. Daily values. See details.}
 
-\item{year.target}{Year selected to plot the probability of the tercile in bars.}
+\item{forecast}{A multi-member list with the forecasts. Daily values. Default is NULL.}
 
-\item{detrend}{Logical indicating if the data should be detrended. Default is TRUE.}
+\item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
+
+\item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{boxplot}{Logical flag indicating whether a boxplot should be added to the graph. Default is TRUE.}
 

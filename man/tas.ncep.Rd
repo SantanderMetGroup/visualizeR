@@ -8,7 +8,7 @@
 Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 }
 \description{
-NCEP/NCAR reanalysis DJF mean temperature for the entire globe (1949-2010). Data are annually aggregated.
+NCEP/NCAR reanalysis of December to February (DJF) mean temperature for the entire globe (1983-2010). Data are annually aggregated.
 }
 \examples{
 data(tas.ncep)

@@ -4,18 +4,18 @@
 \alias{concatenateDataRelDiagram_v2}
 \title{internal function concatenateDataRelDiagram_v2}
 \usage{
-concatenateDataRelDiagram_v2(obsbin, prdprob, nbinsprob)
+concatenateDataRelDiagram_v2(obsbin, hindcastprob, n.bins)
 }
 \arguments{
-\item{nbinsprob}{nbinsprob}
+\item{n.bins}{n.bins}
 
 \item{obs}{2D-matrix of observations, dimensions = (time, npoints)}
 
-\item{nbins}{number of categories (3 for terciles)}
+\item{n.events}{number of categories (3 for terciles)}
 }
 \value{
 bincat: list with two elements:  
-bin: 3D-array of binary (0/1) observations, dimensions = (nbins, time, npoints)
+bin: 3D-array of binary (0/1) observations, dimensions = (n.events, time, npoints)
 cat: 2D-matrix with the observed category, dimensions = (time, npoints)
 }
 \description{

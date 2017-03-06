@@ -23,19 +23,20 @@
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
-#' @param mm.obj A multi-member list with the hindcast for verification. See details.
+#' @param hindcast A multi-member list with the hindcast for verification. See details.
 #' @param obs List with the benchmarking observations for forecast verification.
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
-#' @param detrend Logical indicating if the data should be detrended. Default is FALSE.
+#' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
 #'  details. Default is TRUE
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
-#' @param bubble.size Number for the bubble size. bubble.size=4 by default.
-#' @param score.range Two dim vector to rescale the transparency of the bubbles (e.g c(0.5, 0.8) values
-#'  lower than 0.5 are transparent while values up to 0.8 have maximum transparency). Default is NULL that is transparency 
-#'  ranges from 0 to 1. 
+#' @param bubble.size Number for the bubble or pie size. bubble.size=1 by default.
+#' @param score.range A vector of length two used to rescale the transparency of the bubbles.
+#'  For instance, a \code{score.range = c(0.5, 0.8)} will turn ROCSS values below 0.5 completely transparent,
+#'   while values of 0.8 or will have minimum transparency (i.e., opaque). 
+#'   The default to \code{NULL}, that will set a transparency range between 0 and 1. 
 #' @param piechart Logical flag indicating if pie charts should be plot instead of bubbles. Default is FALSE.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
@@ -48,7 +49,7 @@
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid subsetGrid
 #' @importFrom abind abind
 #' @importFrom grDevices gray
 #' @importFrom graphics par plot mtext points legend
@@ -89,21 +90,27 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=4, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
-      yy <- unique(getYearsAsINDEX(mm.obj))
+bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=1, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+      # Check data dimension from the original data sets
+      checkDim(hindcast)
+      checkDim(obs)
+      if (!is.null(forecast)){
+        checkDim(forecast)   
+      }
+      yy <- unique(getYearsAsINDEX(hindcast))
       if (is.null(score.range)){
         score.range <- c(0,1)
       }
       # Check grid from the data. 
-      if (!checkCoords(mm.obj, obs)){
+      if (!checkCoords(hindcast, obs)){
         message("WARNING: Data with no common grid. Interpolating observations to hindcast grid")
         # Interpolate observations to the hindcast grid
-        obs <- interpGrid(obs, new.coordinates = getGrid(mm.obj), method = "nearest")
+        obs <- interpGrid(obs, new.coordinates = getGrid(hindcast), method = "nearest")
       }
-      if (!checkCoords(mm.obj, forecast)){
+      if (!checkCoords(hindcast, forecast)){
         message("WARNING: Data with no common grid. Interpolating forecasts to hindcast grid")
         # Interpolate forecast to the hindcast grid
-        forecast <- interpGrid(forecast, new.coordinates = getGrid(mm.obj), method = "nearest")
+        forecast <- interpGrid(forecast, new.coordinates = getGrid(hindcast), method = "nearest")
       }
       if (is.null(forecast)){
         if (is.null(year.target)){
@@ -113,19 +120,19 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           stop("Target year outside temporal data range")
         }
         yy.forecast <- year.target
-        forecast <- subsetGrid(mm.obj, years=yy.forecast, drop=F)
-        mm.obj <- subsetGrid(mm.obj, years=yy[yy!=yy.forecast], drop=F)
+        forecast <- subsetGrid(hindcast, years=yy.forecast, drop=F)
+        hindcast <- subsetGrid(hindcast, years=yy[yy!=yy.forecast], drop=F)
         obs <- subsetGrid(obs, years=yy[yy!=yy.forecast], drop=F)
         yy <- yy[yy!=yy.forecast]
       }      
       # Check input datasets
-      if (isS4(mm.obj)==FALSE){
-        mm.obj <- convertIntoS4(mm.obj)
+      if (isS4(hindcast)==FALSE){
+        hindcast <- convertIntoS4(hindcast)
       }
       if (isS4(obs)==FALSE){
         obs <- convertIntoS4(obs)
       }
-      stopifnot(checkData(mm.obj, obs))
+      stopifnot(checkData(hindcast, obs))
       if (!is.null(forecast)){
         yy.forecast <- unique(getYearsAsINDEX(forecast))
         if (length(yy.forecast)>1) {
@@ -138,25 +145,26 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       }
       # Detrend
       if (detrend){
-        mm.obj <- detrend.forecast(mm.obj)
-        obs <- detrend.forecast(obs)
+        hindcast <- detrend.data(hindcast)
+        obs <- detrend.data(obs)
+        forecast <- detrend.data(hindcast, forecast)
       } 
       # Computation of seasonal mean
-      sm.mm.obj <- seasMean(mm.obj)
+      sm.hindcast <- seasMean(hindcast)
       sm.obs <- seasMean(obs)
       sm.forecast <- seasMean(forecast)
       # Computation exceedance probabilities
-      probs.mm.obj <- QuantileProbs(sm.mm.obj)
+      probs.hindcast <- QuantileProbs(sm.hindcast)
       probs.obs <- QuantileProbs(sm.obs)
-      probs.forecast <- QuantileProbs(sm.forecast, sm.mm.obj)
+      probs.forecast <- QuantileProbs(sm.forecast, sm.hindcast)
       # Detect gridpoints with time series with all NA values 
       obs.na <- as.vector(apply(getData(sm.obs)[1,1,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
-      mm.obj.na <- as.vector(apply(getData(sm.mm.obj)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
+      hindcast.na <- as.vector(apply(getData(sm.hindcast)[1,,,,], MARGIN=c(3,4), FUN=function(x){sum(!is.na(x))==0}))
       forecast.na <- as.vector(apply(getData(sm.forecast)[1,,,,], MARGIN=c(2,3), FUN=function(x){sum(!is.na(x))==0}))
       # Tercile for the maximum probability
-      prob <- getData(probs.mm.obj)
+      prob <- getData(probs.hindcast)
       prob.forecast <- getData(probs.forecast)
-      margin <- c(getDimIndex(probs.mm.obj,"member"), getDimIndex(probs.mm.obj,"time"), getDimIndex(probs.mm.obj,"y"), getDimIndex(probs.mm.obj,"x"))
+      margin <- c(getDimIndex(probs.hindcast,"member"), getDimIndex(probs.hindcast,"time"), getDimIndex(probs.hindcast,"y"), getDimIndex(probs.hindcast,"x"))
       t.max <- function(t.probs, margin.dim){
         # Mask for cases with no all probs equal to NAN. This avoid errors in ROCSS computation.  
         mask.nallnan <- apply(t.probs, MARGIN = margin.dim, FUN = function(x) {sum(!is.na(x))}) 
@@ -181,8 +189,8 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         v.prob[,i] <- as.vector(prob.forecast[i,1,1,,])
       }
       # Select the corresponding lon and lat
-      x.mm <- attr(getxyCoords(mm.obj),"longitude") 
-      y.mm <- attr(getxyCoords(mm.obj),"latitude")  
+      x.mm <- attr(getxyCoords(hindcast),"longitude") 
+      y.mm <- attr(getxyCoords(hindcast),"latitude")  
       nn.yx <- as.matrix(expand.grid(y.mm, x.mm))
       # Define colors
       df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
@@ -211,6 +219,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         colors <- array(dim=dim(rocss))
         min.score.range <- score.range[1]
         max.score.range <- score.range[2]
+        # y=a+bx line to compute the transparency ([color=0, min.score.range], [color=255, max.score.range]).
         a <- -(255*min.score.range)/(max.score.range-min.score.range)
         b <- 255/(max.score.range-min.score.range)
         for (i.tercile in 1:3){
@@ -232,7 +241,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       # Starting with the plot
       mons.start <- months(as.POSIXlt((getDates(obs)$start)[1]),abbreviate=T)
       mons.end <- months(last(as.POSIXlt(getDates(obs)$end))-1, abbreviate=T)
-      title <- sprintf("%s, %s to %s, %d", attr(getVariable(mm.obj), "longname"), mons.start, mons.end, yy.forecast)
+      title <- sprintf("%s, %s to %s, %d", attr(getVariable(hindcast), "longname"), mons.start, mons.end, yy.forecast)
       opar <- par(no.readonly=TRUE)
       par(bg = "white", mar = c(4, 3, 3, 1))
       plot(0, xlim=range(x.mm), ylim=range(y.mm), type="n", xlab="")
@@ -247,9 +256,10 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       if (piechart){   # Plot with pies
         pch.neg.score <- NULL
         size.as.probability <- F
-        dx <- diff(x.mm[1:2])
-        dy <- diff(y.mm[1:2])
-        radius <- min(dx,dy)/2*0.8
+        #dx <- diff(x.mm[1:2])
+        #dy <- diff(y.mm[1:2])
+        #radius <- min(dx,dy)/2*0.8
+        radius <- bubble.size
         if (score){
           v.valid <- c(1:gridpoints)
           # Remove gridpoints with ROCSS or forecast data all NaN
@@ -277,7 +287,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           }
           # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
-            valid.points <- which((obs.na + mm.obj.na)>0)
+            valid.points <- which((obs.na + hindcast.na)>0)
             for (i.loc in valid.points){   
               points(nn.yx[i.loc, 2], nn.yx[i.loc, 1], cex=radius/2, col="black", pch=pch.data.nan, xlab="", ylab="")
             }
@@ -303,7 +313,7 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
           }          
           # Highlight those whose ROCSS cannot be computed due to time series with all NA values in the observations and/or models
           if (!is.null(pch.data.nan)){
-            na.points <- (obs.na + mm.obj.na)>0
+            na.points <- (obs.na + hindcast.na)>0
             points(nn.yx[na.points, 2], nn.yx[na.points, 1], cex=cex.val, col="black", pch=pch.data.nan, xlab="", ylab="")
           }
         } else {
@@ -326,19 +336,20 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
       # Add legend
       # Transparency color for mean of the score.range
       mean.score.range <- mean(score.range)
-      legend.color.transparency <- c(alpha(t.colors[1], 255*mean.score.range), alpha(t.colors[2], 255*mean.score.range), alpha(t.colors[3], 255*mean.score.range))
+      #legend.color.transparency <- c(alpha(t.colors[1], 255*mean.score.range), alpha(t.colors[2], 255*mean.score.range), alpha(t.colors[3], 255*mean.score.range))
+      #legend.color.transparency <- c(t.colors)
       if (size.as.probability) {
         if (score & !is.null(pch.neg.score)){
-          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%) Transparency: ROCSS=%3.2f", mean.score.range), "Negative score")
+          legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score")
           xcoords <- c(0, 0.55, 0.95, 1.35)
           secondvector <- (1:length(legtext))-1
           textwidths <- xcoords/secondvector 
           textwidths[1] <- 0
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(legend.color.transparency, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, pt.cex=c(symb.size.lab050, symb.size.lab075, symb.size.lab1, 1), horiz=T, bty="n", text.width=textwidths, xjust=0)      
         } else{
           if (score){
-            t.colors <- legend.color.transparency
-            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%) Transparency: ROCSS=%3.2f", mean.score.range))
+            #t.colors <- legend.color.transparency
+            legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", sprintf("Above (size: 100%%)   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
           } else{
             legtext <- c("Below (size: 50% likelihood)", "Normal (size: 75%)", "Above (size: 100%)")     
           }
@@ -351,11 +362,11 @@ bubblePlot <- function(mm.obj, obs, forecast=NULL, year.target=NULL, detrend=FAL
         }
       } else {
         if (score & !is.null(pch.neg.score)){
-          legend('bottomleft', c("Below", "Normal", sprintf("Above (Transparency: ROCSS=%3.2f)", mean.score.range), "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(legend.color.transparency, "black"), cex=0.7, horiz=T, bty="n", xjust=0)        
+          legend('bottomleft', c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range), "Negative score"), pch=c(19, 19, 19, pch.neg.score), col = c(t.colors, "black"), cex=0.7, horiz=T, bty="n", xjust=0)        
         } else{
           if (score){
-            t.colors <- legend.color.transparency
-            legtext <- c("Below", "Normal", sprintf("Above (Transparency: ROCSS=%3.2f)", mean.score.range))
+            #t.colors <- legend.color.transparency
+            legtext <- c("Below", "Normal", sprintf("Above   (Transparency: ROCSS=[%3.1f,%3.1f])", min.score.range, max.score.range))
           } else{
             legtext <- c("Below", "Normal", "Above")     
           }
