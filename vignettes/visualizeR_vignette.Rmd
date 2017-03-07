@@ -1,0 +1,211 @@
+---
+title: "visualizeR. Visualizing and Communicating Uncertainty in Seasonal Climate Prediction"
+author: "Santander MetGroup"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+    toc_depth: 3
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{visualizeR. Visualizing and Communicating Uncertainty in Seasonal Climate Prediction}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                 message = FALSE,
+                 warning = FALSE,
+                 fig.align = "center",
+                 tidy = TRUE,
+                 cache = FALSE,
+                 fig.width = 9,
+                 fig.height = 5)
+```
+
+
+# Introduction
+
+Unlike deterministic weather forecasts (e.g. _"tomorrow it will rain 15 mm in Madrid"_), probabilistic seasonal forecasts provide, a few months in advance, information on how seasonally averaged weather is likely to evolve (e.g. _"there is an 80\% chance that the next season will be wetter than usual in central Spain"_). Seasonal forecasting is a problem of probabilistic nature. Ensemble forecasting is used to sample different realizations (members) produced from slightly different initial conditions. The resulting ensemble allows estimating the likelihood of different events/indices related to the seasonal average weather (e.g. _"being wetter than usual"_). Despite their huge potential value for many sectors, there are still a number of problems which limit the practical application of these type of predictions, being the probabilistic communication of uncertainty of central importance. 
+
+`visualizeR` is an R package implementing a set of advanced tools for probabilistic forecast visualization and validation. It allows visualizing the predictions together with the corresponding validation results in a form suitable to communicate the underlying uncertainties, both from the prediction itself and from the skill of the model. Its aim is to translate the probabilistic seasonal predictions in comprehensible, actionable information for end-users in different fields of application. 
+
+# Data load and collocation
+
+```{r}
+library(visualizeR)
+library(transformeR)
+```
+
+First of all, the datasets required to produce the example visualizations are loaded. These datasets are included in `visualizeR`, so they can be automatically loaded. The datasets are:
+
+ 1. The reference historical observations of global mean temperature. The historical records come from the NCEP-NCAR reanalysis (`tas.ncep`).
+ 2. The re-forecast data (or historical _hindcast_), corresponding to the predictions of the model done in the past, over a period of several decades. In this case, these are winters from 1983 to 2010 (`tas.cfs`).
+ 3. The operative predictions issued by the model on november 2015 for winter 2016 (`tas.cfs.operative.2016`).
+
+```{r}
+# Load reanalysis
+data(tas.ncep)
+# Load hindcast
+data(tas.cfs)
+# Load operative predictions
+data(tas.cfs.operative.2016)
+```
+
+## Adjusting the temporal extent of hindcast and reanalysis 
+
+It is necessary to adjust the length of the hindcast and the reanalysis data, given that the latter has a more extended period. To this aim, we first extract the years encompassed by the hindcast:
+
+
+```{r, echo=TRUE}
+(years <- unique(getYearsAsINDEX(tas.cfs)))
+```
+
+Next, the reanalysis period is "trimmed" to match the hindcast length:
+
+```{r}
+obs <- subsetGrid(tas.ncep, years = years)
+```
+
+Finally, for clarity, the hindcast and the operative predictions dataset are renamed as `hindcast` and `forecast` respectively:
+
+```{r}
+hindcast <- tas.cfs
+forecast <- tas.cfs.operative.2016
+```
+
+## Adjusting the spatial resolution of hindcast, reanalysis and predictions
+
+The function `interpGrid` in package `transformeR` allows to change from one grid to another (re-gridding). In this case, we are re-gridding the model data (hindcast and operative predictions) to match the reanalysis grid (this is easily achieved using the `getGrid` command). The chosen method is bilinear interpolation. We are also using the parallelization option to speed-up the interpolation (Note that this is not available under Windows or in single-core machines):
+
+```{r}
+# grid definition as a names list with 'x' and 'y' components
+newgrid <- list(x = c(getGrid(hindcast)$x, 5), y = c(getGrid(hindcast)$y, 5))
+hindcast <- interpGrid(hindcast, new.coordinates = getGrid(obs), method = "bilinear",
+                       bilin.method = "fields", parallel = TRUE)
+forecast <- interpGrid(forecast, new.coordinates = getGrid(obs), method = "bilinear",
+                       bilin.method = "fields", parallel = TRUE)
+``` 
+
+# Spatial Visualization of the verification
+
+In order to have a spatial overview of the skill of the predictions globally, bubble plots are particularly effective. Bubble plots combine in a single map several aspects of the quality of the forecasting systems by means of three graphical features: bubble color (hue), bubble size (area) and brightness. These aspects can be combined in different ways in order to provide different levels of information. In the following examples different options are of forecast quality visualization are illustrated.
+
+```{r,message=FALSE,warning=FALSE}
+# This is a subtitle that will be added to each plot
+subtitle <- sprintf("Reference data: NCEP Reanalysis;  Hindcast: CFSv2 (%d members); %d-%d",
+                    getShape(hindcast, dimension = "member"),
+                    getYearsAsINDEX(hindcast)[1],
+                    tail(getYearsAsINDEX(hindcast),1))
+```
+
+In this basic example, the most likely tercile (i.e., the one with the highest probability, or in other words, the one predicted by the highest number of ensemble members) is indicated by the color of the bubbles. All bubles have equal size.
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast = hindcast,
+           obs = obs,
+           forecast = forecast,
+           size.as.probability = FALSE,
+           bubble.size = 1.5,
+           score = FALSE,
+           subtitle = subtitle)
+```
+
+In the next example, in addition to the most likely tercile, also the probability of that tercile is indicated. In this case, the sizes of the bubbles are relative to the probability, so the largest the bubble size, the highest the probability for that tercile.
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast,
+           obs = obs,
+           forecast = forecast,
+           size.as.probability = TRUE,
+           bubble.size = 1.5,
+           score = FALSE,
+           subtitle = subtitle)
+```
+
+In the next variant of the bubble plot, we set the argument `score = TRUE`. In this case, the ROC Skill Score (ROCSS) is computed considering the hindcast period. For each tercile, it provides a quantitative measure of the forecast skill, being a commonly used metric to evaluate the performance of probabilistic systems. The value of this score ranges from 1 (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill compared with a random prediction. The transparency of the bubbles is associated to the ROCSS, so the more transparent the color is, lower is the ROCSS. By default only positive ROCSS values are plotted when the `score` argument is set to `TRUE`.
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast,
+           obs,
+           forecast = forecast,
+           size.as.probability = TRUE,
+           bubble.size = 1.5,
+           score = TRUE,
+           subtitle = subtitle)
+```
+
+The `score.range` argument is useful in order to mask from the map all information deemed non-relevant or visually distracting depending on each user application. This is a vector of length two used to rescale the transparency of the bubbles. For instance, a `score.range = c(0.5, 0.8)` will turn ROCSS values below 0.5 completely transparent, while values of 0.8 or more have minimum transparency, i.e., opaque). The default is `NULL`, that will set a transparency range between 0 and 1, as in the previous plot.
+
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast,
+           obs,
+           forecast = forecast,
+           size.as.probability = TRUE,
+           bubble.size = 1.5,
+           score = TRUE,
+           score.range = c(0.5, 1),
+           subtitle = subtitle)
+```
+
+Another variant of bubble plots consists in replacing the bubbles by pie charts. Each of the three sectors of the pie-chart provide a quantitative measurement of the numbers of members falling in each tercile. The terciles are identified by colors (i.e., red upper, grey middle, blue lower tercile). The main advantage of this display is that it allows for the visualization of all terciles simultaneously, instead of just the most likely one, as with the ordinary bubbles. Furthermore, as in the previous examples, the ROCSS can be equally represented by transparency, and masking is also possible using the `score.range` argument, as before. This is represented in the next plot:
+
+
+```{r,message=FALSE,warning=FALSE}
+bubblePlot(hindcast,
+           obs,
+           forecast = forecast,
+           piechart = TRUE,
+           score = TRUE,
+           score.range = c(0.5,1),
+           subtitle = subtitle)
+```
+
+# Temporal Visualization of the verification
+
+This type of visualization is envisaged to provide a temporal overview of forecast skill. For this reason, its use is meaningful only at single-point locations or relatively small regions with an homogeneous forecast skill. 
+
+Tercile pots are computed considering seasonally averaged time series (i.e., interannual series). For rectangular spatial domains (i.e., for fields), the spatial average is first computed to obtain a unique series for the whole domain. The corresponding terciles for each ensemble member are then computed for the hindcast period. Thus, each particular member and season, are categorized into three categories (above, between or below), according to their respective climatological terciles. Then, a probabilistic forecast is computed year by year by considering the number of members falling within each category. This probability is represented by the colorbar. For instance, probabilities below 1/3 are very low, indicating that a minority of the members falls in the tercile. Conversely, probabilities above 2/3 indicate a high level of member agreement (more than 66\% of members falling in the same tercile). The observed terciles (the events that actually occurred) are represented by the white circles. If the forecast object is not `NULL`, then the probabilities for this season are also ploted next to the hindcast results.
+
+Finally, the ROC Skill Score (ROCSS) is computed for the hindcast. It is indicated in the secondary (right) Y axis. 
+
+In this example, we illustrate its usage considering the _Nino 3.4_ region, a rectangle of coordinates -5 to 5 degrees N and -170 to -120 degrees East, centered on the equator. To this aim, the subsetting operations are next performed with the global mean surface temperature dataset:
+
+```{r}
+# El Nino 3.4 
+crop.nino <- function(x) subsetGrid(x, lonLim = c(-170, -120), latLim = c(-5, 5))
+hindcast.nino <- crop.nino(hindcast)
+obs.nino <- crop.nino(obs)
+forecast.nino <- crop.nino(forecast)
+```
+
+Additional options include linear detrending of the input data and selection of various color palettes. The default values are used in the next example:
+
+```{r}
+tercilePlot(hindcast = hindcast.nino,
+            obs = obs.nino,
+            forecast = forecast.nino,
+            subtitle = subtitle)
+```
+
+
+In order to have a clearer overview of the tercile plot, the above results, which correspond to a world region where seasonal forecasts are particularly skillful, can be compared to another region of very limited forecast skill like the Mediterranean Basin:
+
+```{r}
+# Europe (35-45N and -10-42)
+crop.eu <- function(x) subsetGrid(x, lonLim = c(-10, 40), latLim = c(35, 47))
+hindcast.eu <- crop.eu(hindcast)
+obs.eu <- crop.eu(obs)
+forecast.eu <- crop.eu(forecast)
+```
+
+```{r}
+tercilePlot(hindcast.eu, obs.eu, forecast = forecast.eu, subtitle = subtitle)
+```
+```{r, echo=FALSE,eval=FALSE}
+# bubblePlot(hindcast.eu, obs.eu, forecast=forecast.eu, size.as.probability=T, bubble.size=1.5, score=T, subtitle=subtitle)
+# bubblePlot(hindcast.eu, obs.eu, forecast=forecast.eu, piechart=T, score=T, subtitle=subtitle)
+# tercileBarplot(hindcast.eu, obs.eu, forecast=forecast.eu, score.threshold= 0.3, subtitle=subtitle) 
+```
