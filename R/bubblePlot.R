@@ -1,4 +1,4 @@
-##     bubblePlot Bubble plot for visualization of forecast skill of ensemble predictions.
+##     bubblePlot Bubble plot for visualization of forecast skill of seasonal climate predictions.
 ##
 ##     Copyright (C) 2016 Santander Meteorology Group (http://www.meteo.unican.es)
 ##
@@ -15,9 +15,9 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Bubble plot for visualization of forecast skill of ensemble predictions.
+#' @title Bubble plot for visualization of forecast skill of seasonal climate predictions.
 #' 
-#' @description Bubble plot for visualization of forecast skill of ensemble predictions. It provides a
+#' @description Bubble plot for visualization of forecast skill of seasonal climate predictions. It provides a
 #'  spatially-explicit representation of the skill, resolution and reliability of a probabilistic predictive 
 #'  system in a single map. 
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
@@ -77,8 +77,33 @@
 #' 
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
 #' 
+#' @examples \dontrun{
+#' data(tas.cfs)
+#' data(tas.cfs.operative.2016)
+#' data(tas.ncep)
+#' require(transformeR)
+#' # Select spatial domain
+#' tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-80, -35), latLim = c(-12, 12))
+#' tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-80, -35), latLim = c(-12, 12))
+#' tas.cfs.operative2.2016 <- subsetGrid(tas.cfs.operative.2016, lonLim = c(-80, -35), latLim = c(-12, 12))
+#' # Interpolate
+#' tas.ncep2.int <- interpGrid(tas.ncep2, getGrid(tas.cfs2))
+#' # Bubble plot. Only colour of the bubble is plotted indicating the most likely tercile 
+#' bubblePlot(hindcast = tas.cfs2, obs = tas.ncep2.int, forecast = tas.cfs.operative2.2016,
+#'            bubble.size = 1.5, size.as.probability = FALSE, score = FALSE)
+#' # Bubble plot. Added size of the bubble indicating the probability of the most likely tercile 
+#' bubblePlot(hindcast = tas.cfs2, obs = tas.ncep2.int, forecast = tas.cfs.operative2.2016,
+#'            bubble.size = 1.5, score = FALSE)
+#' # Bubble plot. Added transparency of the bubble indicating the ROC skill score (ROCSS)
+#' bubblePlot(hindcast = tas.cfs2, obs = tas.ncep2.int, forecast = tas.cfs.operative2.2016,
+#'            bubble.size = 1.5)
+#' # 3-piece pie chart.
+#' bubblePlot(hindcast = tas.cfs2, obs = tas.ncep2.int, forecast = tas.cfs.operative2.2016,
+#'            bubble.size = 1, piechart = TRUE)
+#' } 
+#' 
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez based on the original diagram 
-#'  conceived by Slingsby et al 2009.
+#'  conceived by Slingsby et al (2009).
 #' 
 #' @family VisualizeR
 #' 
@@ -86,7 +111,7 @@
 #'  Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in Atmospheric 
 #'  Science, Wiley, NY.
 #'  
-#'  Slingsby A., Lowe R., Dykes J., Stephenson D. B., Wood J., Jupp T. E. 2009. A pilot study for the collaborative 
+#'  Slingsby A., Lowe R., Dykes J., Stephenson D. B., Wood J. and Jupp T. E. 2009. A pilot study for the collaborative 
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
@@ -370,7 +395,11 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
           } else{
             legtext <- c("Below", "Normal", "Above")     
           }
-          legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col=c(t.colors), cex=0.7, horiz=T, bty="n", xjust=0)        
+          xcoords <- c(0, 0.55, 0.95)
+          secondvector <- (1:length(legtext))-1
+          textwidths <- xcoords/secondvector 
+          textwidths[1] <- 0        
+          legend('bottomleft', legend=legtext, pch=c(19, 19, 19), col=c(t.colors), cex=0.7, horiz=T, bty="n", text.width=textwidths, xjust=0)        
         }  
       }
       par(opar)

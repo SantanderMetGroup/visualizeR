@@ -1,4 +1,4 @@
-##     spreadPlot Box plot for visualization of forecast skill of ensemble predictions. 
+##     spreadPlot Box plot for visualization of forecast skill of seasonal climate predictions. 
 ##
 ##     Copyright (C) 2016 Santander Meteorology Group (http://www.meteo.unican.es)
 ##
@@ -15,9 +15,9 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Box plot for visualization of forecast skill of ensemble predictions.
+#' @title Box plot for visualization of forecast skill of seasonal climate predictions.
 #' 
-#' @description Box plot for visualization of forecast skill of ensemble predictions. 
+#' @description Box plot for visualization of forecast skill of seasonal climate predictions. 
 #'  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
 #'  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 #' 
@@ -55,6 +55,23 @@
 #'   
 #' 
 #' @note The computation of climatological terciles requires a representative period to obtain meaningful results.
+#' 
+#' @examples \dontrun{
+#' url1 <- "http://meteo.unican.es/work/visualizeR/data/tas.cfs.operative.dly.br.2016.rda"
+#' temp_file <- tempfile()
+#' download.file(url1, destfile = temp_file)
+#' load(temp_file, .GlobalEnv, verbose = TRUE)
+#' url2 <- "http://meteo.unican.es/work/visualizeR/data/tas.cfs.dly.br.rda"
+#' temp_file <- tempfile()
+#' download.file(url2, destfile = temp_file)
+#' load(temp_file, envir = .GlobalEnv, verbose = TRUE)
+#' Figure with box plots
+#' spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016)
+#' # Added values of the members of the forecast
+#' spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, add.points = TRUE, pch = 20)
+#' # Violin plots
+#' spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, violin = TRUE)
+#' }
 #' 
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' 
@@ -114,13 +131,13 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
      days <- sprintf("%02d%02d", mm.dates$mon+1, mm.dates$mday)
      days <- factor(days, levels=unique(days))
      # Quantiles mixing for each day all the years and members
-     ens.quant <- t(do.call("rbind",
-                            lapply(unique(days), FUN=function(x){quantile(c(mm.ma[,days==x]), probs=c(0.0,1/3,0.5,2/3,1.0), na.rm=T)})
+     ens.quant.orig <- t(do.call("rbind", lapply(unique(days), 
+                  FUN=function(x){quantile(c(mm.ma[,days==x]), probs=c(0.0,1/3,0.5,2/3,1.0), na.rm=T)})
      ))
      # Remove first and last 15 days since in the moving average the series is not continous in time (just a season). 
      n.trunc <- floor(ma.time/2)
-     valid.range <- (n.trunc+1):(dim(ens.quant)[2]-n.trunc-1)
-     ens.quant <- ens.quant[, valid.range]
+     valid.range <- (n.trunc+1):(dim(ens.quant.orig)[2]-n.trunc-1)
+     ens.quant <- ens.quant.orig[, valid.range]
      season.days <- (1:length(unique(days)))[valid.range]
      # Starting with the plot
      par(bg="white", mar=c(4,4,1,1))
@@ -149,8 +166,8 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
        # Different color of the points depending on the tercile 
        color <- matrix(c(rep("#353535",nrow(mm.monmeans)*ncol(mm.monmeans))), ncol=ncol(mm.monmeans), nrow=nrow(mm.monmeans))
        for (i in seq(1,ncol(mm.monmeans))){
-         color[mm.monmeans[,i]<ens.quant[2, grep("..15", levels(days))[i]],i] <- "blue"
-         color[mm.monmeans[,i]>ens.quant[4, grep("..15", levels(days))[i]],i] <- "red"
+         color[mm.monmeans[,i]<ens.quant.orig[2, grep("..15", levels(days))[i]],i] <- "blue"
+         color[mm.monmeans[,i]>ens.quant.orig[4, grep("..15", levels(days))[i]],i] <- "red"
        }       
        if (is.null(pch)) {
          pch="+"
