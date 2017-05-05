@@ -90,10 +90,9 @@ rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int,
 }
 
 }
-\author{
-R. Manzanas \& M.Iturbide
-}
 \references{
 Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
 }
-
+\author{
+R. Manzanas \& M.Iturbide
+}

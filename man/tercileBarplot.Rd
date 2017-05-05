@@ -2,7 +2,7 @@
 % Please edit documentation in R/tercileBarplot.R
 \name{tercileBarplot}
 \alias{tercileBarplot}
-\title{Tercile bar plot for visualization of forecast skill of ensemble predictions.}
+\title{Tercile bar plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
 tercileBarplot(hindcast, obs, forecast = NULL, year.target = NULL,
   detrend = FALSE, score.threshold = NULL, subtitle = NULL)
@@ -23,7 +23,7 @@ tercileBarplot(hindcast, obs, forecast = NULL, year.target = NULL,
 \item{subtitle}{String to include a subtitle bellow the title. Default is NULL.}
 }
 \description{
-Tercile bar plot for visualization of the skill of ensemble predictions for a particular year.
+Tercile bar plot for visualization of the skill of seasonal climate predictions for a particular year.
  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 }
@@ -52,8 +52,19 @@ for each member prior to data analysis, with a warning.
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
-\author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+\examples{
+\dontrun{
+data(tas.cfs)
+data(tas.cfs.operative.2016)
+data(tas.ncep)
+require(transformeR)
+# Select spatial domain
+tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-80, -35), latLim = c(-12, 12))
+tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-80, -35), latLim = c(-12, 12))
+tas.cfs.operative2.2016 <- subsetGrid(tas.cfs.operative.2016, lonLim = c(-80, -35), latLim = c(-12, 12))
+# Tercile bar plot
+tercileBarplot(hindcast = tas.cfs2, obs = tas.ncep2, forecast = tas.cfs.operative2.2016)
+}
 }
 \references{
 Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in 
@@ -65,4 +76,6 @@ Other VisualizeR: \code{\link{as.MrEnsemble}},
   \code{\link{bubblePlot}}, \code{\link{convertIntoS4}},
   \code{\link{spreadPlot}}
 }
-
+\author{
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/spreadPlot.R
 \name{spreadPlot}
 \alias{spreadPlot}
-\title{Box plot for visualization of forecast skill of ensemble predictions.}
+\title{Box plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
 spreadPlot(hindcast, forecast = NULL, year.target = NULL, detrend = FALSE,
   boxplot = TRUE, violin = FALSE, add.points = FALSE, pch = NULL)
@@ -28,7 +28,7 @@ graph. Default is FALSE.}
 Only consider if add.points is TRUE.}
 }
 \description{
-Box plot for visualization of forecast skill of ensemble predictions. 
+Box plot for visualization of forecast skill of seasonal climate predictions. 
  This function is prepared to plot the data sets loaded from the ECOMS User Data Gateway (ECOMS-UDG). See 
  the loadeR.ECOMS R package for more details (http://meteo.unican.es/trac/wiki/udg/ecoms/RPackage).
 }
@@ -47,8 +47,24 @@ For rectangular spatial domains (i.e., for fields), the spatial average is first
 \note{
 The computation of climatological terciles requires a representative period to obtain meaningful results.
 }
-\author{
-M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+\examples{
+\dontrun{
+url1 <- "http://meteo.unican.es/work/visualizeR/data/tas.cfs.operative.dly.br.2016.rda"
+temp_file <- tempfile()
+download.file(url1, destfile = temp_file)
+load(temp_file, .GlobalEnv, verbose = TRUE)
+url2 <- "http://meteo.unican.es/work/visualizeR/data/tas.cfs.dly.br.rda"
+temp_file <- tempfile()
+download.file(url2, destfile = temp_file)
+load(temp_file, envir = .GlobalEnv, verbose = TRUE)
+Figure with box plots
+spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016)
+# Added values of the members of the forecast
+spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, add.points = TRUE, pch = 20)
+# Violin plots
+spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, violin = TRUE)
+}
+
 }
 \seealso{
 Other VisualizeR: \code{\link{as.MrEnsemble}},
@@ -56,4 +72,6 @@ Other VisualizeR: \code{\link{as.MrEnsemble}},
   \code{\link{bubblePlot}}, \code{\link{convertIntoS4}},
   \code{\link{tercileBarplot}}
 }
-
+\author{
+M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
+}
