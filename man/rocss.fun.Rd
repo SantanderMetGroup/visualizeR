@@ -24,4 +24,3 @@ Adapted from the roc.area function from the verification library.
 \author{
 M. D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
-

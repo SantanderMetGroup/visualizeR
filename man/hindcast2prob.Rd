@@ -29,4 +29,3 @@ For hindcast4cats, categories are calculated at model- (not at member-) level
 R. Manzanas \& M.Iturbide
 }
 \keyword{internal}
-

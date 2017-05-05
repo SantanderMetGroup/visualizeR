@@ -15,4 +15,3 @@ data(tas.ncep)
 require(transformeR)
 plotClimatology(climatology(tas.ncep), backdrop.theme = "coastline")
 }
-

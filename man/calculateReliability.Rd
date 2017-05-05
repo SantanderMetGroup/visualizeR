@@ -38,4 +38,3 @@ for calculating the reliability categories of a probabilistic prediction.
 R. Manzanas \& M.Iturbide
 }
 \keyword{internal}
-

@@ -23,4 +23,3 @@ plotClimatology(climatology(tas.cfs), backdrop.theme = "coastline")
 \references{
 Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 }
-

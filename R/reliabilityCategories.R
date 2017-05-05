@@ -162,7 +162,7 @@ reliabilityCategories <- function(obs,
             o <- over(spoints, regs[l,])
             w <- which(!is.na(o))
             if(length(w)>0){
-                  ob <- ob.full[, w]
+                  ob <- ob.full[, w, drop = F]
                   se <- array(dim = c(nmem, ntime, length(w)))
                   for(i in 1:nmem){
                         hindcastarray <- hindcast$Data[i,,,]
@@ -180,61 +180,63 @@ reliabilityCategories <- function(obs,
                         obna <- ob
                         sena <- se
                   }
-                  message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
-                  sl <- calculateReliability(obs = obna, hindcast = sena, n.events = n.events, n.bins = n.bins, n.boot = n.boot)
-                  
-                  n <- sl$n
-                  nyear <- sl$nyear
-                  npoint <- sl$npoint
-                  slope <- sl$slope
-                  slope_boot <- sl$slope_boot
-                  hindcastprob <- sl$hindcastprob
-                  obsfreq <- sl$obsfreq
-                  hindcastfreq <- sl$hindcastfreq
-                  
-                  cat <- rep(NA, n.events)
-                  catcol <- rep(NA, n.events)
-                  catname <- rep("", n.events)
-                  
-                  for (ibins in 1:n.events) {
-                        aux <- quantile(slope_boot[, ibins], c(sigboot/2, 1-sigboot/2), na.rm = T)
-                        slope_lower <- aux[[1]]
-                        slope_upper <- aux[[2]]
-                        rm(aux)
-                        if (!is.na(slope[ibins])) {
-                              if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
-                                    cat[ibins] <- 5 
-                                    catcol[ibins] <- green
-                                    catname[ibins] <- "perfect"
-                              } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
-                                         (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
-                                    cat[ibins] <- 4  
-                                    catcol[ibins] <- cyan
-                                    catname[ibins] <- "still useful"
-                                    ## OJO: nueva categoria! 
-                              } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
-                                    cat[ibins] <- 3.5  
-                                    catcol[ibins] <- darkyellow 
-                                    catname[ibins] <- "marginally useful +"
-                              } else if (slope[ibins] > 0 & slope_lower > 0) {
-                                    cat[ibins] <- 3  
-                                    catcol[ibins] <- yellow 
-                                    catname[ibins] <- "marginally useful"
-                              } else if (slope[ibins] > 0 & slope_lower < 0) {
-                                    cat[ibins] <- 2  
-                                    catcol[ibins] <- orange
-                                    catname[ibins] <- "not useful"
-                              } else if (slope[ibins] < 0) {
-                                    cat[ibins] <- 1  
-                                    catcol[ibins] <- red 
-                                    catname[ibins] <- "dangerously useless"
-                              } 
+                  if(!any(dim(obna) == 0)){
+                        message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
+                        sl <- calculateReliability(obs = obna, hindcast = sena, n.events = n.events, n.bins = n.bins, n.boot = n.boot)
+                        
+                        n <- sl$n
+                        nyear <- sl$nyear
+                        npoint <- sl$npoint
+                        slope <- sl$slope
+                        slope_boot <- sl$slope_boot
+                        hindcastprob <- sl$hindcastprob
+                        obsfreq <- sl$obsfreq
+                        hindcastfreq <- sl$hindcastfreq
+                        
+                        cat <- rep(NA, n.events)
+                        catcol <- rep(NA, n.events)
+                        catname <- rep("", n.events)
+                        
+                        for (ibins in 1:n.events) {
+                              aux <- quantile(slope_boot[, ibins], c(sigboot/2, 1-sigboot/2), na.rm = T)
+                              slope_lower <- aux[[1]]
+                              slope_upper <- aux[[2]]
+                              rm(aux)
+                              if (!is.na(slope[ibins])) {
+                                    if (slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_lower <= 1 & slope_upper >= 1) {  
+                                          cat[ibins] <- 5 
+                                          catcol[ibins] <- green
+                                          catname[ibins] <- "perfect"
+                                    } else if ((slope[ibins] >= 0.5 & slope_lower >= 0.5 & slope_upper <= 1) | 
+                                               (slope[ibins] >= 1 & slope_lower >= 1 & slope_upper >= 1)) {
+                                          cat[ibins] <- 4  
+                                          catcol[ibins] <- cyan
+                                          catname[ibins] <- "still useful"
+                                          ## OJO: nueva categoria! 
+                                    } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
+                                          cat[ibins] <- 3.5  
+                                          catcol[ibins] <- darkyellow 
+                                          catname[ibins] <- "marginally useful +"
+                                    } else if (slope[ibins] > 0 & slope_lower > 0) {
+                                          cat[ibins] <- 3  
+                                          catcol[ibins] <- yellow 
+                                          catname[ibins] <- "marginally useful"
+                                    } else if (slope[ibins] > 0 & slope_lower < 0) {
+                                          cat[ibins] <- 2  
+                                          catcol[ibins] <- orange
+                                          catname[ibins] <- "not useful"
+                                    } else if (slope[ibins] < 0) {
+                                          cat[ibins] <- 1  
+                                          catcol[ibins] <- red 
+                                          catname[ibins] <- "dangerously useless"
+                                    } 
+                              }
+                              ob.clim[ibins, w] <- cat[ibins]
+                              ob.slope$lower[l , ibins] <- slope_lower
+                              ob.slope$upper[l , ibins] <- slope_upper
+                              ob.slope$sl[l ,] <- slope
+                              ob.catname[l ,] <- catname
                         }
-                        ob.clim[ibins, w] <- cat[ibins]
-                        ob.slope$lower[l , ibins] <- slope_lower
-                        ob.slope$upper[l , ibins] <- slope_upper
-                        ob.slope$sl[l ,] <- slope
-                        ob.catname[l ,] <- catname
                   }
             }
       }
@@ -269,6 +271,7 @@ reliabilityCategories <- function(obs,
                   b <- y1-((x1*(y2-y1))/(x2-y1))
                   
                   y <- unlist(obsfreq)
+                  ylimcat <- 0.6
                   x <- unlist(hindcastprob)
                   z <- rep(1:n.events, each = n.bins)
                   # w <- rep(labels, each = n.bins)
@@ -281,108 +284,108 @@ reliabilityCategories <- function(obs,
                   
                   
                   # Customized Lattice Example
-                   xyp <- xyplot(y~x|z, par.strip = list(lines = 1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
-                                 scales=list(x = list(at = seq(0,1,round(1/n.bins, digits = 2)),
+                  xyp <- xyplot(y~x|z, par.strip = list(lines = 1), ylim = c(0,1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
+                                scales=list(x = list(at = seq(0,1,round(1/n.bins, digits = 2)),
                                                      labels = seq(0,1,round(1/n.bins, digits = 2))),
                                             y = list(at = seq(0,1,round(1/n.bins, digits = 2)),
                                                      labels = seq(0,1,round(1/n.bins, digits = 2))),
                                             
                                             cex=.8, col="black"),
-                         panel=function(x, y, z, ...) {
-                               # panel.locfit(...)
-                               
-                               panel.grid(h = -1, v = -1)
-                               panel.polygon(c(0, 1/n.events, 1/n.events, 0), c(0, 0, 1/n.events, b),
-                                             border = NA, col = "lightgray")
-                               panel.polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, y2, 1, 1),
-                                             border = NA, col = "lightgray")
-                               for(i in 1:n.events){
-                                     if(packet.number() == i){
-                                           panel.polygon(c(0, 1/n.events, 0, 0), c(b_lower[,i], 1/n.events, b_upper[,i], b_lower[,i]),
-                                                         border = NA, col = catcol[i])
-                                           panel.polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/n.events),
-                                                         border = NA, col = catcol[i])
-                                           # panel.abline(b_lower[,i], a_lower[,i], col = "gray40", lty = 2, lwd = 1)
-                                           # panel.abline(b_upper[,i], a_upper[,i], col = "gray40", lty = 2, lwd = 1)
-                                           panel.abline((1-slope[i])/n.events, slope[i], col = "black", lty = 1, lwd = 1.5)
-                                           panel.text(0.35, 0.85, catname[i])
-                                           
-                                           panel.xyplot(x, y, pch = 16, col = "black", 
-                                                        cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0)
-                                           # panel.xyplot(0.45,0.2, pch = 16, col = "black", 
-                                           #              cex = min(hindcastfreq[[i]]) * cex.scale)
-                                           # panel.text(0.68, 0.2, paste0("min: n = ", min(hindcastfreq[[i]])*nyear*npoint))
-                                     }
-                               }
-                               if(packet.number() == 1){
-                                     panel.xyplot(0.68,0.08, pch = 16, col = "black", cex = cex0)
-                                     panel.text(0.8, 0.08, "n = 1")
-                               }
-                               panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
-                               panel.abline(h = 1/n.events, col = "black", lty = 3, lwd = 1.5)
-                               panel.abline(coef = c(b, a), lty = 3, lwd = 1.5)
-                               
-                               
-                         },
-                         
-                         layout = layout,
-                         xlab = "Predicted probability", ylab= "Observed frequency",
-                         main= list(cex = 1, font = 1, label = sprintf("n = %d years x %d points", nyear, npoint)))
+                                panel=function(x, y, z, ...) {
+                                      # panel.locfit(...)
+                                      
+                                      panel.grid(h = -1, v = -1)
+                                      panel.polygon(c(0, 1/n.events, 1/n.events, 0), c(0, 0, 1/n.events, b),
+                                                    border = NA, col = "lightgray")
+                                      panel.polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, y2, 1, 1),
+                                                    border = NA, col = "lightgray")
+                                      for(i in 1:n.events){
+                                            if(packet.number() == i){
+                                                  panel.polygon(c(0, 1/n.events, 0, 0), c(b_lower[,i], 1/n.events, b_upper[,i], b_lower[,i]),
+                                                                border = NA, col = catcol[i])
+                                                  panel.polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, a_lower[,i]+b_lower[,i], a_upper[,i]+b_upper[,i], 1/n.events),
+                                                                border = NA, col = catcol[i])
+                                                  # panel.abline(b_lower[,i], a_lower[,i], col = "gray40", lty = 2, lwd = 1)
+                                                  # panel.abline(b_upper[,i], a_upper[,i], col = "gray40", lty = 2, lwd = 1)
+                                                  panel.abline((1-slope[i])/n.events, slope[i], col = "black", lty = 1, lwd = 1.5)
+                                                  panel.text(0.35, ylimcat, catname[i])
+                                                  
+                                                  panel.xyplot(x, y, pch = 16, col = "black", 
+                                                               cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                                                  # panel.xyplot(0.45,0.2, pch = 16, col = "black", 
+                                                  #              cex = min(hindcastfreq[[i]]) * cex.scale)
+                                                  # panel.text(0.68, 0.2, paste0("min: n = ", min(hindcastfreq[[i]])*nyear*npoint))
+                                            }
+                                      }
+                                      if(packet.number() == 1){
+                                            panel.xyplot(0.68,0.08, pch = 16, col = "black", cex = cex0)
+                                            panel.text(0.8, 0.08, "n = 1")
+                                      }
+                                      panel.abline(c(0, 1),  col = "black", lty = 3, lwd = 1.5)
+                                      panel.abline(h = 1/n.events, col = "black", lty = 3, lwd = 1.5)
+                                      panel.abline(coef = c(b, a), lty = 3, lwd = 1.5)
+                                      
+                                      
+                                },
+                                
+                                layout = layout,
+                                xlab = "Predicted probability", ylab= "Observed frequency",
+                                main= list(cex = 1, font = 1, label = sprintf("n = %d years x %d points", nyear, npoint)))
                   print(xyp)
                   # update(xyp, par.settings = list(fontsize = list(text = 8, points = 10)))
                   
                   #########################################################
-
-# 
-#                   par(mfrow = c(1, n.events), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
-#                   for(i in 1:n.events){
-#                         ## reliability diagram
-#                         x1 <- 1/n.events
-#                         y1 <- 1/n.events
-#                         x2 <- 1
-#                         y2 <- (1/n.events) + (0.5*(1-(1/n.events)))
-#                         a <- (y2-y1)/(x2-x1)
-#                         b <- y1-((x1*(y2-y1))/(x2-y1))
-# 
-#                         plot(b, a, col = "black", lty = 3, typ = "l",
-#                              xlim = c(0,1), ylim = c(0,1),
-#                              xlab = "hindcast prob.", ylab = "obs. freq.",
-#                              main = labels[i],
-#                              sub = list(catname[i], cex = 1.2),
-#                              font.sub=4)
-#                         abline(b, a, col = "black", lty = 3)
-#                         polygon(c(0, 1/n.events, 1/n.events, 0), c(0, 0, 1/n.events, b),
-#                                 border = NA, col = "lightgray")
-#                         polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, y2, 1, 1),
-#                                 border = NA, col = "lightgray")
-#                         abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
-#                         abline(h = 1/n.events, col = "black", lty = 3)
-#                         abline(v = 1/n.events, col = "black", lty = 3)
-# 
-#                         ## intervalo de confianza para la pendiente
-#                         ## lower bound
-#                         a_lower <- ob.slope$lower[ , i] #<- #slope_lower
-#                         b_lower <- (1-ob.slope$lower[ , i])/n.events
-#                         ## upper bound
-#                         a_upper <- ob.slope$upper[ , i]
-#                         b_upper <- (1-ob.slope$upper[ , i])/n.events
-#                         polygon(c(0, 1/n.events, 0, 0), c(b_lower, 1/n.events, b_upper, b_lower),
-#                                 border = NA, col = catcol[i])
-#                         polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, a_lower+b_lower, a_upper+b_upper, 1/n.events),
-#                                 border = NA, col = catcol[i])
-#                         abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
-#                         abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
-#                         abline((1-slope[i])/n.events, slope[i], col = "black", lwd = 2)
-# 
-#                         ## puntos del reliability diagram (escalados por el peso)
-#                         points(0.1, .8, pch = 19, cex = cex0)
-#                         text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
-#                         points(hindcastprob[[i]], obsfreq[[i]], pch = 19,
-#                         cex = hindcastfreq[[i]]*10)
-#                         # cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
-#                               grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
-#                   }
-#                   title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
+                  
+                  # 
+                  #                   par(mfrow = c(1, n.events), pty="s", mgp=c(2,1,0), mar=c(1,3,2,2), oma=c(2,0,2,0))
+                  #                   for(i in 1:n.events){
+                  #                         ## reliability diagram
+                  #                         x1 <- 1/n.events
+                  #                         y1 <- 1/n.events
+                  #                         x2 <- 1
+                  #                         y2 <- (1/n.events) + (0.5*(1-(1/n.events)))
+                  #                         a <- (y2-y1)/(x2-x1)
+                  #                         b <- y1-((x1*(y2-y1))/(x2-y1))
+                  # 
+                  #                         plot(b, a, col = "black", lty = 3, typ = "l",
+                  #                              xlim = c(0,1), ylim = c(0,1),
+                  #                              xlab = "hindcast prob.", ylab = "obs. freq.",
+                  #                              main = labels[i],
+                  #                              sub = list(catname[i], cex = 1.2),
+                  #                              font.sub=4)
+                  #                         abline(b, a, col = "black", lty = 3)
+                  #                         polygon(c(0, 1/n.events, 1/n.events, 0), c(0, 0, 1/n.events, b),
+                  #                                 border = NA, col = "lightgray")
+                  #                         polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, y2, 1, 1),
+                  #                                 border = NA, col = "lightgray")
+                  #                         abline(0, 1,  col = "black", lty = 3, lwd = 1.5)
+                  #                         abline(h = 1/n.events, col = "black", lty = 3)
+                  #                         abline(v = 1/n.events, col = "black", lty = 3)
+                  # 
+                  #                         ## intervalo de confianza para la pendiente
+                  #                         ## lower bound
+                  #                         a_lower <- ob.slope$lower[ , i] #<- #slope_lower
+                  #                         b_lower <- (1-ob.slope$lower[ , i])/n.events
+                  #                         ## upper bound
+                  #                         a_upper <- ob.slope$upper[ , i]
+                  #                         b_upper <- (1-ob.slope$upper[ , i])/n.events
+                  #                         polygon(c(0, 1/n.events, 0, 0), c(b_lower, 1/n.events, b_upper, b_lower),
+                  #                                 border = NA, col = catcol[i])
+                  #                         polygon(c(1/n.events, 1, 1, 1/n.events), c(1/n.events, a_lower+b_lower, a_upper+b_upper, 1/n.events),
+                  #                                 border = NA, col = catcol[i])
+                  #                         abline(b_lower, a_lower, col = "black", lty = 2, lwd = 2)
+                  #                         abline(b_upper, a_upper, col = "black", lty = 2, lwd = 2)
+                  #                         abline((1-slope[i])/n.events, slope[i], col = "black", lwd = 2)
+                  # 
+                  #                         ## puntos del reliability diagram (escalados por el peso)
+                  #                         points(0.1, .8, pch = 19, cex = cex0)
+                  #                         text(0.15, .8, "n = 1", cex=.95, font=2, pos=4)
+                  #                         points(hindcastprob[[i]], obsfreq[[i]], pch = 19,
+                  #                         cex = hindcastfreq[[i]]*10)
+                  #                         # cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*10-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                  #                               grid(nx = NULL, ny = NULL, col = "lightgray", lty = 4, lwd = 0.5)
+                  #                   }
+                  #                   title(sprintf("n = %d years x %d points", nyear, npoint), outer = T)
                   ###########################################################
                   
             }
