@@ -67,10 +67,9 @@ spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, violin = TR
 
 }
 \seealso{
-Other VisualizeR: \code{\link{as.MrEnsemble}},
-  \code{\link{as.MrGrid}}, \code{\link{as.MrStation}},
-  \code{\link{bubblePlot}}, \code{\link{convertIntoS4}},
-  \code{\link{tercileBarplot}}
+Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{reliabilityCategories}},
+  \code{\link{tercileBarplot}}, \code{\link{tercilePlot}}
 }
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez

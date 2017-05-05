@@ -75,7 +75,7 @@
 #' 
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' 
-#' @family VisualizeR
+#' @family visualization functions
 
 spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FALSE, boxplot=TRUE, violin = FALSE, add.points=FALSE, pch=NULL) {
       # Check data dimension from the original data sets

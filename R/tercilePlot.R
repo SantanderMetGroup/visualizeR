@@ -83,7 +83,7 @@
 #' @author M.D. Frias\email{mariadolores.frias@@unican.es} and J. Fernandez based on the original diagram 
 #' conceived by A. Cofino (See Diez et al, 2011 for more details).
 #' 
-#' @family visualizeR
+#' @family visualization functions
 #' 
 #' @references
 #' Diez, E., Orfila, B., Frias, M.D., Fernandez, J., Cofino, A.S., Gutierrez, J.M., 2011. 

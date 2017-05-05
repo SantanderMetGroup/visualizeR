@@ -37,7 +37,6 @@
 #'  
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es}, J. Fernandez and Max Tuni
 #' 
-#' @family VisualizeR
 
 as.MrGrid <- function(obj.s3){
   lons <- obj.s3$xyCoords$x

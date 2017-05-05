@@ -80,6 +80,11 @@ Tellus A 63, 757-762. doi:10.1111/j.1600-0870.2011.00523.x
 Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in 
 Atmospheri Science, Wiley, NY
 }
+\seealso{
+Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{reliabilityCategories}},
+  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}}
+}
 \author{
 M.D. Frias\email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
 conceived by A. Cofino (See Diez et al, 2011 for more details).

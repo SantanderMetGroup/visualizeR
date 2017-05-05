@@ -106,7 +106,7 @@
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez based on the original diagram 
 #'  conceived by Slingsby et al (2009).
 #' 
-#' @family VisualizeR
+#' @family visualization functions
 #' 
 #' @references
 #'  Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitioner's Guide in Atmospheric 

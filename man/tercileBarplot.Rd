@@ -72,10 +72,9 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
  Atmospheri Science, Wiley, NY
 }
 \seealso{
-Other VisualizeR: \code{\link{as.MrEnsemble}},
-  \code{\link{as.MrGrid}}, \code{\link{as.MrStation}},
-  \code{\link{bubblePlot}}, \code{\link{convertIntoS4}},
-  \code{\link{spreadPlot}}
+Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{reliabilityCategories}},
+  \code{\link{spreadPlot}}, \code{\link{tercilePlot}}
 }
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez

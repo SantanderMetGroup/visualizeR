@@ -93,6 +93,11 @@ rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int,
 \references{
 Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
 }
+\seealso{
+Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
+  \code{\link{tercilePlot}}
+}
 \author{
 R. Manzanas \& M.Iturbide
 }
