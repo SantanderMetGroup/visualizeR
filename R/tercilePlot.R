@@ -74,7 +74,8 @@
 #' # Select spatial domain
 #' tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-80, -35), latLim = c(-12, 12))
 #' tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-80, -35), latLim = c(-12, 12))
-#' tas.cfs.operative2.2016 <- subsetGrid(tas.cfs.operative.2016, lonLim = c(-80, -35), latLim = c(-12, 12))
+#' tas.cfs.operative2.2016 <- subsetGrid(tas.cfs.operative.2016, 
+#'                            lonLim = c(-80, -35), latLim = c(-12, 12))
 #' # Tercile plot
 #' tercilePlot(hindcast = tas.cfs2, obs = tas.ncep2, forecast = tas.cfs.operative2.2016)
 #' }

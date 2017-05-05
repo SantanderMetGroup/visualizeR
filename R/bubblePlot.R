@@ -85,7 +85,8 @@
 #' # Select spatial domain
 #' tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-80, -35), latLim = c(-12, 12))
 #' tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-80, -35), latLim = c(-12, 12))
-#' tas.cfs.operative2.2016 <- subsetGrid(tas.cfs.operative.2016, lonLim = c(-80, -35), latLim = c(-12, 12))
+#' tas.cfs.operative2.2016 <- subsetGrid(tas.cfs.operative.2016, 
+#'                            lonLim = c(-80, -35), latLim = c(-12, 12))
 #' # Interpolate
 #' tas.ncep2.int <- interpGrid(tas.ncep2, getGrid(tas.cfs2))
 #' # Bubble plot. Only colour of the bubble is plotted indicating the most likely tercile 
