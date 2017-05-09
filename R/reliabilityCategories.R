@@ -314,7 +314,7 @@ reliabilityCategories <- function(obs,
                                                   panel.text(0.35, ylimcat, catname[i])
                                                   
                                                   panel.xyplot(x, y, pch = 16, col = "black", 
-                                                               cex = ((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0)
+                                                               cex = na.omit(((((hindcastfreq[[i]]*nyear*npoint)-cex0)*(cex0*cex.scale-cex0)) / ((nyear*npoint)-cex0)) + cex0))
                                                   # panel.xyplot(0.45,0.2, pch = 16, col = "black", 
                                                   #              cex = min(hindcastfreq[[i]]) * cex.scale)
                                                   # panel.text(0.68, 0.2, paste0("min: n = ", min(hindcastfreq[[i]])*nyear*npoint))
