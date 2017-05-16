@@ -216,7 +216,7 @@ reliabilityCategories <- function(obs,
                                           catcol[ibins] <- cyan
                                           catname[ibins] <- "still useful"
                                           ## OJO: nueva categoria! 
-                                    } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
+                                    } else if (slope[ibins] >= 0.5 & slope_lower > 0) {         
                                           cat[ibins] <- 3.5  
                                           catcol[ibins] <- darkyellow 
                                           catname[ibins] <- "marginally useful +"
