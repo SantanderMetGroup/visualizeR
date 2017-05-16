@@ -18,7 +18,7 @@
 #' @title Reliability categories of a probabilistic forecast.
 #' 
 #' @description Calculates (and draws) 
-#' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
+#' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014 and Manzanas et al. 2017.
 #' 
 #' @param obs Grid of observations
 #' @param hindcast Grid of forecast data
@@ -30,7 +30,7 @@
 #' (Event 1 corresponds to the lowest values).
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
-#' @param conf.level Confidence interval for the reliability line. By default conf.level = 0.9 (two sided)
+#' @param conf.level Confidence interval for the reliability line. By default conf.level = 0.75 (two sided), as in Weisheimer et al. 2014
 #' @param diagrams Logical (default = TRUE). Plotting results.  
 #' @param cex0 numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
 #' for the minimum n frequency (n = 1) (see parameter \code{n.bins}.  The sizes for points that correspond to n > 1 
@@ -94,6 +94,7 @@
 #' @family visualization functions
 #' 
 #' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
+#' @references Manzanas, R., Lucero, A., Weisheimer, A., Gutiérrez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
 
 
 
@@ -105,7 +106,7 @@ reliabilityCategories <- function(obs,
                                   labels = NULL,
                                   n.bins = 10,
                                   n.boot = 100,
-                                  conf.level = 0.9, 
+                                  conf.level = 0.75, 
                                   diagrams = TRUE,
                                   cex0 = 0.5,
                                   cex.scale = 20,
@@ -216,7 +217,7 @@ reliabilityCategories <- function(obs,
                                           catcol[ibins] <- cyan
                                           catname[ibins] <- "still useful"
                                           ## OJO: nueva categoria! 
-                                    } else if (slope[ibins] >= 0.5 & slope_lower > 0 & slope_upper <= 1) {         
+                                    } else if (slope[ibins] >= 0.5 & slope_lower > 0) {         
                                           cat[ibins] <- 3.5  
                                           catcol[ibins] <- darkyellow 
                                           catname[ibins] <- "marginally useful +"
