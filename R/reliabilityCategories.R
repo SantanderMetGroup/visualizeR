@@ -30,7 +30,7 @@
 #' (Event 1 corresponds to the lowest values).
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
-#' @param conf.level Confidence interval for the reliability line. By default conf.level = 0.75 (two sided), as in Weisheimer et al. 2014
+#' @param conf.level Confidence interval for the reliability line. By default \code{conf.level} = 0.75 (two sided), as in Weisheimer et al. 2014
 #' @param diagrams Logical (default = TRUE). Plotting results.  
 #' @param cex0 numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
 #' for the minimum n frequency (n = 1) (see parameter \code{n.bins}.  The sizes for points that correspond to n > 1 
@@ -89,12 +89,13 @@
 #' @importFrom transformeR getGrid redim getDim
 #' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
 #' @importFrom graphics plot.new abline polygon text grid title
+#' @importFrom stats na.omit
 #' @import lattice
 #' 
 #' @family visualization functions
 #' 
 #' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
-#' @references Manzanas, R., Lucero, A., Weisheimer, A., Gutiérrez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
+#' @references Manzanas, R., Lucero, A., Weisheimer, A., Guti\'errez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
 
 
 

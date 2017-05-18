@@ -5,7 +5,7 @@
 \title{Reliability categories of a probabilistic forecast.}
 \usage{
 reliabilityCategories(obs, hindcast, regions = NULL, n.events = 3,
-  labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.9,
+  labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.75,
   diagrams = TRUE, cex0 = 0.5, cex.scale = 20, layout = c(1, n.events),
   backdrop.theme = "countries", return.diagrams = FALSE)
 }
@@ -27,7 +27,7 @@ the relaiability is calculated. Default is NULL (See details).}
 
 \item{n.boot}{number of samples considered for bootstrapping. By default n.boot = 100}
 
-\item{conf.level}{Confidence interval for the reliability line. By default conf.level = 0.9 (two sided)}
+\item{conf.level}{Confidence interval for the reliability line. By default \code{conf.level} = 0.75 (two sided), as in Weisheimer et al. 2014}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
 
@@ -55,7 +55,7 @@ If \code{return.diagrams} is TRUE, a list of two objects is returned, the grid o
 }
 \description{
 Calculates (and draws) 
-reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014.
+reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014 and Manzanas et al. 2017.
 }
 \details{
 If parameter regions is NULL (default) the whole region in \code{obs} and \code{hindcast} is considered 
@@ -92,6 +92,8 @@ rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int,
 }
 \references{
 Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
+
+Manzanas, R., Lucero, A., Weisheimer, A., Guti\'errez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
