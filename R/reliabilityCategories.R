@@ -20,8 +20,8 @@
 #' @description Calculates (and draws) 
 #' reliability diagrams and the related reliability categories, according to Weisheimer et al. 2014 and Manzanas et al. 2017.
 #' 
-#' @param obs Grid of observations
 #' @param hindcast Grid of forecast data
+#' @param obs Grid of observations
 #' @param regions SpatialPolygons* object \code{\link[sp]{SpatialPolygons}}. delimiting the regions for which
 #' the relaiability is calculated. Default is NULL (See details).
 #' @param n.events Number of events considered. Default is 3 (terciles)
@@ -72,14 +72,14 @@
 #' #interpolate
 #' tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
 #' #calculate reliability
-#' rel.reg <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int, 
+#' rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,  
 #'                                  n.bins = 5, n.boot = 10, 
 #'                                  regions = PRUDENCEregions,
 #'                                  return.diagrams = TRUE)
-#' rel.map
 #'                                  
-#' rel <- reliabilityCategories(obs = tas.ncep2, hindcast = tas.cfs2.int, 
-#'                              n.bins = 5, n.boot = 10)
+#' rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2, 
+#'                              n.bins = 5, n.boot = 10, 
+#'                              cex0 = 0.5, cex.scale = 20)
 #' }
 #' 
 #' @export
@@ -100,8 +100,8 @@
 
 
 
-reliabilityCategories <- function(obs,
-                                  hindcast,
+reliabilityCategories <- function(hindcast,
+                                  obs,
                                   regions = NULL,
                                   n.events = 3,
                                   labels = NULL,
@@ -434,8 +434,8 @@ reliabilityCategories <- function(obs,
 #' @description This function provides the object needed by "calculateReliability_v2.R" 
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
-#' @param obs m*n matrix of observations (m = years, n = locations)
 #' @param hindcast m*n*l matrix of predictions (m = members, n = years, l = locations)
+#' @param obs m*n matrix of observations (m = years, n = locations)
 #' @param n.events (optional): number of categories considered (e.g. 3 for terciles). By default n.events = 3
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
@@ -461,7 +461,7 @@ reliabilityCategories <- function(obs,
 
 
 
-calculateReliability <- function(obs, hindcast, n.events = n.events, n.bins = n.bins, n.boot = n.boot) {
+calculateReliability <- function(hindcast, obs, n.events = n.events, n.bins = n.bins, n.boot = n.boot) {
       if (!(dim(obs)[1] == dim(hindcast)[2] & dim(obs)[2] == dim(hindcast)[3])) {
             stop("Observations and predictions are not congruent in size")
       }
@@ -713,8 +713,8 @@ hindcast2prob <- function(hindcast, n.events, hindcast4cats = NULL){
 #' @description This function provides the object needed by "calculateReliability_v2.R" 
 #' for calculating the reliability categories of a probabilistic prediction.
 #' 
-#' @param obs 2D-matrix of observations, dimensions = (time, npoints)
-#' @param n.events number of categories (3 for terciles)
+#' @param hindcastprob Hinscast probabilities
+#' @param obsbin Observations bins 
 #' @param n.bins n.bins
 #'
 #' @return 
@@ -725,7 +725,7 @@ hindcast2prob <- function(hindcast, n.events, hindcast4cats = NULL){
 #' @author R. Manzanas \& M.Iturbide
 #' @keywords internal
 
-concatenateDataRelDiagram_v2 <- function(obsbin, hindcastprob, n.bins) {
+concatenateDataRelDiagram_v2 <- function(hindcastprob, obsbin, n.bins) {
       # Description
       # 
       # Usage:
