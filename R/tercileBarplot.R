@@ -53,7 +53,7 @@
 #' (perfectly bad forecast system). Zero indicates no skill compared with a random prediction. The selected year 
 #' is not included in the computation of the score (operational point of view). Negative values
 #' are written in red while high positive values are in blue. The threshold to highlight high positive values can be
-#' modified with the score.threshold argument.
+#' modified with the score.threshold argument. Significance of the Area under the ROC curve is highlighted with an *. 
 #'  
 #' In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 #' for each member prior to data analysis, with a warning.    
@@ -171,11 +171,19 @@ tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, det
   if (!is.null(subtitle)){
     mtext(subtitle, side=3, line=1, adj=0, cex=0.7)
   }
-  # Add skill score values to the plot
+  # Add skill score values and AUC significance to the plot to the plot 
+  add.significance <- function(obj){
+    if (obj$sig==TRUE){
+      lab <- paste(round(obj$score.val,2),"*", sep="")      
+    } else {
+      lab <- round(obj$score.val,2)       
+    }
+    return(lab)
+  } 
   mtext("ROCSS:", side=1, line=3, adj=0, font=2)
-  mtext(round(rocss.t.l,2), side=1, line=3, at=0.7, font=2, col=color.score(round(rocss.t.l,2)))
-  mtext(round(rocss.t.m,2), side=1, line=3, at=1.9, font=2, col=color.score(round(rocss.t.m,2)))
-  mtext(round(rocss.t.u,2), side=1, line=3, at=3.1, font=2, col=color.score(round(rocss.t.u,2)))
+  mtext(add.significance(rocss.t.l), side=1, line=3, at=0.7, font=2, col=color.score(round(rocss.t.l$score.val,2)))
+  mtext(add.significance(rocss.t.m), side=1, line=3, at=1.9, font=2, col=color.score(round(rocss.t.m$score.val,2)))
+  mtext(add.significance(rocss.t.u), side=1, line=3, at=3.1, font=2, col=color.score(round(rocss.t.u$score.val,2)))
   # Add legend
   par(oma = c(0, 0, 0, 10))
   brks <- c(-1,0,threshold,1)

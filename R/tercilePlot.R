@@ -59,7 +59,7 @@
 #' performance of probabilistic systems (Joliffe and Stephenson 2003). The value of this score ranges from 1 
 #' (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill compared with a random 
 #' prediction. If year.target is not NULL, this year is not included in the computation of the score (operational point 
-#' of view). 
+#' of view). Significance of the Area under the ROC curve is highlighted with an *. 
 #'  
 #' In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 #' for each member prior to data analysis, with a warning.   
@@ -184,14 +184,22 @@ tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detren
       } else{         
          image(n.x, c(-1,0,1), cofinogram.data, breaks=brks, col=cbar, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE)      
       }         
-      axis(1, at = 1:length(yy), labels=yy, pos=-1.5, cex.axis=0.75) 
+      axis(1, at = 1:length(yy), labels=yy, pos=-1.5, cex.axis=0.75, las=2) 
       if (!is.null(forecast)){
-        axis(1, at = (length(yy)+2):(length(yy)+1+length(yy.forecast)), labels=yy.forecast, pos=-1.5, cex.axis=0.75) 
+        axis(1, at = (length(yy)+2):(length(yy)+1+length(yy.forecast)), labels=yy.forecast, pos=-1.5, cex.axis=0.75, las=2) 
       }
       points(1:length(obs.t), obs.t, pch = 21, bg = "white")
-      axis(2, at=-1:1, labels=c("Below", "Normal", "Above"), las="2", cex.axis=0.75)
-      # Add skill score values to the plot    
-      axis(4, at=c(-1:1,2.3), labels=c(round(rocss.t.l,2), round(rocss.t.m,2), round(rocss.t.u,2), "ROCSS"), las="2", tick = FALSE, cex.axis=0.8)
+      axis(2, at=-1:1, labels=c("Below", "Normal", "Above"), cex.axis=0.75, las="2")
+      # Add skill score values and AUC significance to the plot   
+      add.significance <- function(obj){
+        if (obj$sig==TRUE){
+          lab <- paste(round(obj$score.val,2),"*", sep="")      
+        } else {
+          lab <- round(obj$score.val,2)       
+        }
+        return(lab)
+      } 
+      axis(4, at=c(-1:1,2.3), labels=c(add.significance(rocss.t.l), add.significance(rocss.t.m), add.significance(rocss.t.u), "ROCSS"), las="2", tick = FALSE, cex.axis=0.8)
       if (color.pal=="tcolor"){       
           #par(oma = c(7, 0, 2, 5.7))
           image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.3,0.35), legend.only = TRUE, breaks = brks, lab.breaks=c(rep("", length(brks))), col = t.color[,3], zlim=c(0,1))

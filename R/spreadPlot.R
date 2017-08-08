@@ -151,7 +151,7 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
      month.index <- factor(months(mm.dates.forecast), levels=unique(months(mm.dates)))
      nmembers <- length(getMembers(forecast))
      mm.monmeans <- do.call("rbind", lapply(c(1:nmembers), function(x) tapply(arr.forecast[x,], INDEX = month.index, FUN = mean, na.rm = TRUE)))
-     pos.cen <- grep("..15", levels(days))
+     pos.cen <- c(median(grep(levels(month.index)[1], month.index)), median(grep(levels(month.index)[2], month.index)), median(grep(levels(month.index)[3], month.index)))
      pos.ini <- grep("..01", levels(days)) 
      if (violin) {
        boxplot=FALSE # Uncompatible options
@@ -166,8 +166,8 @@ spreadPlot <- function(hindcast, forecast=NULL, year.target = NULL, detrend = FA
        # Different color of the points depending on the tercile 
        color <- matrix(c(rep("#353535",nrow(mm.monmeans)*ncol(mm.monmeans))), ncol=ncol(mm.monmeans), nrow=nrow(mm.monmeans))
        for (i in seq(1,ncol(mm.monmeans))){
-         color[mm.monmeans[,i]<ens.quant.orig[2, grep("..15", levels(days))[i]],i] <- "blue"
-         color[mm.monmeans[,i]>ens.quant.orig[4, grep("..15", levels(days))[i]],i] <- "red"
+         color[mm.monmeans[,i]<ens.quant.orig[2, pos.cen[i]],i] <- "blue"
+         color[mm.monmeans[,i]>ens.quant.orig[4, pos.cen[i]],i] <- "red"
        }       
        if (is.null(pch)) {
          pch="+"

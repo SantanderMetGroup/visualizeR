@@ -201,23 +201,26 @@ getSeason.S4 <- function(obj) {
   return(unique(aux))
 }
 
-#' @title Compute the ROC Area Skill Score
+#' @title Compute the ROC Area Skill Score and the significance of the Area under the Curve
 #' @description Computes the skill score for the area under the ROC curve compared to an 
 #' arbitrary reference forecast. 
 #' @param obs A binary observation (code: 0, 1)
 #' @param pred A probability prediction on the interval [0,1]
-#' @return The ROC area skill score
+#' @return The ROC area skill score and the significance (TRUE or FALSE)
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
-#' @note Adapted from the roc.area function from the verification library. 
+#' @importFrom SpecsVerification Auc
 #' @export
-rocss.fun <- function (obs, pred) {
-  id <- is.finite(obs) & is.finite(pred)
-  obs <- obs[id]
-  pred <- pred[id]
-  n1 <- sum(obs)
-  n <- length(obs)
-  A.tilda <- (mean(rank(pred)[obs == 1]) - (n1 + 1)/2)/(n - n1)
-  rval <- A.tilda*2-1
+rocss.fun <- function (obs, pred){
+  no.nan <- complete.cases(obs, pred)
+  if (sum(no.nan)==0){
+    rval <- list(score.val = NaN, sig = NaN)     
+  } else{ 
+    alfa <- 0.05
+    z <- qnorm(1-alfa/2)
+    auc.val <- Auc(pred[no.nan], obs[no.nan], handle.na = "only.complete.pairs")
+    sig <- auc.val[[1]] - z*auc.val[[2]] > 0.5
+    rval <- list(score.val = auc.val[[1]]*2-1, sig = sig)
+  }
   return(rval)
 }
 
