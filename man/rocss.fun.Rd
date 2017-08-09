@@ -4,12 +4,14 @@
 \alias{rocss.fun}
 \title{Compute the ROC Area Skill Score and the significance of the Area under the Curve}
 \usage{
-rocss.fun(obs, pred)
+rocss.fun(obs, pred, conf.level = 0.95)
 }
 \arguments{
 \item{obs}{A binary observation (code: 0, 1)}
 
 \item{pred}{A probability prediction on the interval [0,1]}
+
+\item{conf.level}{Confidence level to compute the score significance, by default conf.level=0.95}
 }
 \value{
 The ROC area skill score and the significance (TRUE or FALSE)

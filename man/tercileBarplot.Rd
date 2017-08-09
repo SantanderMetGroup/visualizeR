@@ -5,7 +5,8 @@
 \title{Tercile bar plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
 tercileBarplot(hindcast, obs, forecast = NULL, year.target = NULL,
-  detrend = FALSE, score.threshold = NULL, subtitle = NULL)
+  detrend = FALSE, conf.level = 0.95, score.threshold = NULL,
+  subtitle = NULL)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. See details.}
@@ -17,6 +18,8 @@ tercileBarplot(hindcast, obs, forecast = NULL, year.target = NULL,
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
 \item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
+
+\item{conf.level}{Confidence level to compute the score significance, by default conf.level=0.95}
 
 \item{score.threshold}{Threshold to remark high positive score values in the figure.}
 

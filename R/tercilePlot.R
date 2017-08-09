@@ -26,6 +26,7 @@
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
+#' @param conf.level Confidence level to compute the score significance, by default conf.level=0.95
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
@@ -94,7 +95,7 @@
 #' Atmospheri Science, Wiley, NY
  
 
-tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
+tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, conf.level = 0.95, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
       # Check data dimension from the original data sets
       checkDim(hindcast)
       checkDim(obs)
@@ -151,9 +152,9 @@ tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detren
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
       # Compute ROCSS
-      rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3])
-      rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2])
-      rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1])
+      rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3], conf.level)
+      rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2], conf.level)
+      rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1], conf.level)
       # Calculations for the forecast
       if (!is.null(forecast)){
         sp.forecast <- spatialMean(forecast)

@@ -26,6 +26,7 @@
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
+#' @param conf.level Confidence level to compute the score significance, by default conf.level=0.95
 #' @param score.threshold Threshold to remark high positive score values in the figure.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
 #' 
@@ -83,7 +84,7 @@
 #'  Atmospheri Science, Wiley, NY
 #'
 
-tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, score.threshold=NULL, subtitle = NULL) {
+tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, conf.level = 0.95, score.threshold=NULL, subtitle = NULL) {
   # Check data dimension from the original data sets
   checkDim(hindcast)
   checkDim(obs)
@@ -144,9 +145,9 @@ tercileBarplot <- function(hindcast, obs, forecast=NULL, year.target = NULL, det
   obs.terciles <- t(getData(probs.obs)[,,,,])
   obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
   # Compute ROCSS
-  rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3])
-  rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2])
-  rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1])
+  rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3], conf.level)
+  rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2], conf.level)
+  rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1], conf.level)
   # Threshold to write the score with different colors in the plot
   if (is.null(score.threshold)){
     threshold <- 0.5

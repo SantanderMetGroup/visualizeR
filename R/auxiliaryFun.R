@@ -206,16 +206,17 @@ getSeason.S4 <- function(obj) {
 #' arbitrary reference forecast. 
 #' @param obs A binary observation (code: 0, 1)
 #' @param pred A probability prediction on the interval [0,1]
+#' @param conf.level Confidence level to compute the score significance, by default conf.level=0.95
 #' @return The ROC area skill score and the significance (TRUE or FALSE)
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @importFrom SpecsVerification Auc
 #' @export
-rocss.fun <- function (obs, pred){
+rocss.fun <- function (obs, pred, conf.level = 0.95){
   no.nan <- complete.cases(obs, pred)
   if (sum(no.nan)==0){
     rval <- list(score.val = NaN, sig = NaN)     
   } else{ 
-    alfa <- 0.05
+    alfa <- 1-conf.level
     z <- qnorm(1-alfa/2)
     auc.val <- Auc(pred[no.nan], obs[no.nan], handle.na = "only.complete.pairs")
     sig <- auc.val[[1]] - z*auc.val[[2]] > 0.5

@@ -5,8 +5,8 @@
 \title{Tercile plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
 tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
-  detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"),
-  subtitle = NULL)
+  detrend = FALSE, conf.level = 0.95, color.pal = c("bw", "reds", "ypb",
+  "tcolor"), subtitle = NULL)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. See details.}
@@ -18,6 +18,8 @@ tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
 \item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
+
+\item{conf.level}{Confidence level to compute the score significance, by default conf.level=0.95}
 
 \item{color.pal}{Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
