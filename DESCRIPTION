@@ -13,6 +13,7 @@ Imports:
     vioplot,
     RCurl,
     SpecsVerification,
+    verification,
     sp,
     lattice
 Suggests:
@@ -21,8 +22,8 @@ Suggests:
     knitr
 Type: Package
 Title: Visualizing and Communicating Uncertainty in Seasonal Climate Prediction
-Version: 0.2.1
-Date: 2017-05-05
+Version: 1.0.0
+Date: 2017-10-20
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [ctb]",
     "Maria Dolores Frias <friasmd@unican.es> [aut, cre]",

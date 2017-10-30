@@ -4,13 +4,13 @@
 \alias{calculateReliability}
 \title{Generate object needed by function reliability}
 \usage{
-calculateReliability(hindcast, obs, n.events = n.events, n.bins = n.bins,
+calculateReliability(obs, hindcast, n.events = n.events, n.bins = n.bins,
   n.boot = n.boot)
 }
 \arguments{
-\item{hindcast}{m*n*l matrix of predictions (m = members, n = years, l = locations)}
-
 \item{obs}{m*n matrix of observations (m = years, n = locations)}
+
+\item{hindcast}{m*n*l matrix of predictions (m = members, n = years, l = locations)}
 
 \item{n.events}{(optional): number of categories considered (e.g. 3 for terciles). By default n.events = 3}
 

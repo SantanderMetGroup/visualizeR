@@ -4,14 +4,14 @@
 \alias{concatenateDataRelDiagram_v2}
 \title{internal function concatenateDataRelDiagram_v2}
 \usage{
-concatenateDataRelDiagram_v2(hindcastprob, obsbin, n.bins)
+concatenateDataRelDiagram_v2(obsbin, hindcastprob, n.bins)
 }
 \arguments{
-\item{hindcastprob}{Hinscast probabilities}
-
-\item{obsbin}{Observations bins}
-
 \item{n.bins}{n.bins}
+
+\item{obs}{2D-matrix of observations, dimensions = (time, npoints)}
+
+\item{n.events}{number of categories (3 for terciles)}
 }
 \value{
 bincat: list with two elements:  

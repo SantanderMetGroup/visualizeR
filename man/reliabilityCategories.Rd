@@ -83,10 +83,10 @@ rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
                                  n.bins = 5, n.boot = 10, 
                                  regions = PRUDENCEregions,
                                  return.diagrams = TRUE)
+rel.reg
                                  
 rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2, 
-                             n.bins = 5, n.boot = 10, 
-                             cex0 = 0.5, cex.scale = 20)
+                             n.bins = 5, n.boot = 10)
 }
 
 }
