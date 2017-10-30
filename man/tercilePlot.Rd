@@ -5,8 +5,8 @@
 \title{Tercile plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
 tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
-  detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"),
-  subtitle = NULL)
+  detrend = FALSE, conf.level = 0.95, color.pal = c("bw", "reds", "ypb",
+  "tcolor"), subtitle = NULL)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. See details.}
@@ -18,6 +18,8 @@ tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
 \item{year.target}{Year within the hindcast period considered as forecast. Default is NULL.}
 
 \item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
+
+\item{conf.level}{Confidence level to compute the score significance, by default conf.level=0.95}
 
 \item{color.pal}{Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
@@ -48,7 +50,7 @@ For each tercile, it provides a quantitative measure of the forecast skill, and 
 performance of probabilistic systems (Joliffe and Stephenson 2003). The value of this score ranges from 1 
 (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill compared with a random 
 prediction. If year.target is not NULL, this year is not included in the computation of the score (operational point 
-of view). 
+of view). Significance of the Area under the ROC curve is highlighted with an *. 
  
 In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 for each member prior to data analysis, with a warning.

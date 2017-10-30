@@ -26,6 +26,7 @@
 #' @param forecast A multi-member list with the forecasts. Default is NULL. 
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
+#' @param conf.level Confidence level to compute the score significance, by default conf.level=0.95
 #' @param color.pal Color palette for the representation of the probabilities. Default to \code{"bw"} (black and white).
 #'  \code{"reds"} for a white-red transition, \code{"ypb"} for a yellow-pink-blue transition  or 
 #'  \code{"tcolor"} for a colorbar for each tercile, blue-grey-red for below, normal and above terciles, respectively.
@@ -59,7 +60,7 @@
 #' performance of probabilistic systems (Joliffe and Stephenson 2003). The value of this score ranges from 1 
 #' (perfect forecast system) to -1 (perfectly bad forecast system). A value zero indicates no skill compared with a random 
 #' prediction. If year.target is not NULL, this year is not included in the computation of the score (operational point 
-#' of view). 
+#' of view). Significance of the Area under the ROC curve is highlighted with an *. 
 #'  
 #' In case of multi-member fields or stations, they are spatially averaged to obtain one single time series
 #' for each member prior to data analysis, with a warning.   
@@ -94,7 +95,7 @@
 #' Atmospheri Science, Wiley, NY
  
 
-tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
+tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detrend = FALSE, conf.level = 0.95, color.pal = c("bw", "reds", "ypb", "tcolor"), subtitle = NULL){
       # Check data dimension from the original data sets
       checkDim(hindcast)
       checkDim(obs)
@@ -151,9 +152,9 @@ tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detren
       obs.terciles <- t(getData(probs.obs)[,,,,])
       obs.t <- getData(probs.obs)[3,,,,]-getData(probs.obs)[1,,,,]
       # Compute ROCSS
-      rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3])
-      rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2])
-      rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1])
+      rocss.t.u <- rocss.fun(obs.terciles[,3], cofinogram.data[,3], conf.level)
+      rocss.t.m <- rocss.fun(obs.terciles[,2], cofinogram.data[,2], conf.level)
+      rocss.t.l <- rocss.fun(obs.terciles[,1], cofinogram.data[,1], conf.level)
       # Calculations for the forecast
       if (!is.null(forecast)){
         sp.forecast <- spatialMean(forecast)
@@ -184,14 +185,22 @@ tercilePlot <- function(hindcast, obs, forecast=NULL, year.target = NULL, detren
       } else{         
          image(n.x, c(-1,0,1), cofinogram.data, breaks=brks, col=cbar, ylab="", xlab="", asp = 1, yaxt="n", bty = "n", axes = FALSE)      
       }         
-      axis(1, at = 1:length(yy), labels=yy, pos=-1.5, cex.axis=0.75) 
+      axis(1, at = 1:length(yy), labels=yy, pos=-1.5, cex.axis=0.75, las=2) 
       if (!is.null(forecast)){
-        axis(1, at = (length(yy)+2):(length(yy)+1+length(yy.forecast)), labels=yy.forecast, pos=-1.5, cex.axis=0.75) 
+        axis(1, at = (length(yy)+2):(length(yy)+1+length(yy.forecast)), labels=yy.forecast, pos=-1.5, cex.axis=0.75, las=2) 
       }
       points(1:length(obs.t), obs.t, pch = 21, bg = "white")
-      axis(2, at=-1:1, labels=c("Below", "Normal", "Above"), las="2", cex.axis=0.75)
-      # Add skill score values to the plot    
-      axis(4, at=c(-1:1,2.3), labels=c(round(rocss.t.l,2), round(rocss.t.m,2), round(rocss.t.u,2), "ROCSS"), las="2", tick = FALSE, cex.axis=0.8)
+      axis(2, at=-1:1, labels=c("Below", "Normal", "Above"), cex.axis=0.75, las="2")
+      # Add skill score values and AUC significance to the plot   
+      add.significance <- function(obj){
+        if (obj$sig==TRUE){
+          lab <- paste(round(obj$score.val,2),"*", sep="")      
+        } else {
+          lab <- round(obj$score.val,2)       
+        }
+        return(lab)
+      } 
+      axis(4, at=c(-1:1,2.3), labels=c(add.significance(rocss.t.l), add.significance(rocss.t.m), add.significance(rocss.t.u), "ROCSS"), las="2", tick = FALSE, cex.axis=0.8)
       if (color.pal=="tcolor"){       
           #par(oma = c(7, 0, 2, 5.7))
           image.plot(add = TRUE, horizontal = T, smallplot = c(0.20,0.85,0.3,0.35), legend.only = TRUE, breaks = brks, lab.breaks=c(rep("", length(brks))), col = t.color[,3], zlim=c(0,1))

@@ -7,8 +7,8 @@
 bubblePlot(hindcast, obs, forecast = NULL, year.target = NULL,
   detrend = FALSE, score = TRUE, size.as.probability = TRUE,
   bubble.size = 1, score.range = NULL, piechart = FALSE,
-  subtitle = NULL, color.reverse = FALSE, pch.neg.score = NULL,
-  pch.obs.constant = NULL, pch.data.nan = NULL)
+  subtitle = NULL, t.colors = NULL, pie.border = NULL,
+  pch.neg.score = NULL, pch.obs.constant = NULL, pch.data.nan = NULL)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. See details.}
@@ -22,7 +22,7 @@ bubblePlot(hindcast, obs, forecast = NULL, year.target = NULL,
 \item{detrend}{Logical indicating if the data should be linear detrended. Default is FALSE.}
 
 \item{score}{Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
-details. Default is TRUE}
+details. Default is TRUE.}
 
 \item{size.as.probability}{Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 are drawn in the plot. See details. Default is TRUE.}
@@ -38,8 +38,10 @@ For instance, a \code{score.range = c(0.5, 0.8)} will turn ROCSS values below 0.
 
 \item{subtitle}{String to include a subtitle bellow the title. Default is NULL.}
 
-\item{color.reverse}{Logical indicating if the color palete for the terciles (blue, grey, red) should be
-reversed (e.g for precipitation). Default is FALSE.}
+\item{t.colors}{Three element vector representing the colors for the below, normal and above categories.
+Default is t.colors=c("blue", "gold", "red")}
+
+\item{pie.border}{Color for the pie border. Default is pie.border="gray"}
 
 \item{pch.neg.score}{pch value to highlight the negative score values. Default is NULL. Not available for piecharts.}
 

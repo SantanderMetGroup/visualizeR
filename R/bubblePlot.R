@@ -29,7 +29,7 @@
 #' @param year.target Year within the hindcast period considered as forecast. Default is NULL.
 #' @param detrend Logical indicating if the data should be linear detrended. Default is FALSE.
 #' @param score Logical indicating if the relative operating characteristic skill score (ROCSS) should be included. See 
-#'  details. Default is TRUE
+#'  details. Default is TRUE. 
 #' @param size.as.probability Logical indicating if the tercile probabilities (magnitude proportional to bubble radius) 
 #'  are drawn in the plot. See details. Default is TRUE.
 #' @param bubble.size Number for the bubble or pie size. bubble.size=1 by default.
@@ -39,8 +39,9 @@
 #'   The default to \code{NULL}, that will set a transparency range between 0 and 1. 
 #' @param piechart Logical flag indicating if pie charts should be plot instead of bubbles. Default is FALSE.
 #' @param subtitle String to include a subtitle bellow the title. Default is NULL.
-#' @param color.reverse Logical indicating if the color palete for the terciles (blue, grey, red) should be
-#'  reversed (e.g for precipitation). Default is FALSE.
+#' @param t.colors Three element vector representing the colors for the below, normal and above categories.
+#'  Default is t.colors=c("blue", "gold", "red")
+#' @param pie.border Color for the pie border. Default is pie.border="gray" 
 #' @param pch.neg.score pch value to highlight the negative score values. Default is NULL. Not available for piecharts.
 #' @param pch.obs.constant pch value to highlight those whose score cannot be computed due to constant obs 
 #'  conditions (e.g. always dry). Default is NULL.
@@ -116,7 +117,7 @@
 #'  development of new ways of visualising seasonal climate forecasts. Proc. 17th Annu. Conf. of GIS Research UK, 
 #'  Durham, UK, 1-3 April 2009.
 
-bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=1, score.range=NULL, piechart=FALSE, subtitle=NULL, color.reverse=FALSE, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
+bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=FALSE, score=TRUE, size.as.probability=TRUE, bubble.size=1, score.range=NULL, piechart=FALSE, subtitle=NULL, t.colors=NULL, pie.border=NULL, pch.neg.score=NULL, pch.obs.constant=NULL, pch.data.nan=NULL){
       # Check data dimension from the original data sets
       checkDim(hindcast)
       checkDim(obs)
@@ -221,9 +222,8 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
       # Define colors
       df <- data.frame(max.prob = ve.max.prob, t.max.prob = v.t.max.prob)
       df$color <- "black"
-      t.colors <- c("blue", "darkgrey", "red")
-      if (color.reverse){
-        t.colors <- c("red", "darkgrey", "blue")
+      if (is.null(t.colors)){
+        t.colors <- c("blue", "gold", "red")      
       }
       df$color[df$t.max.prob == 3] <- t.colors[3]
       df$color[df$t.max.prob == 2] <- t.colors[2]
@@ -235,7 +235,7 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
           rocss[i.tercile, , ] <- apply(
             array(c(obs.t==i.tercile, prob[i.tercile, 1, , ,]), dim=c(dim(obs.t),2)),
             MARGIN=c(2,3),
-            FUN=function(x){rocss.fun(x[,1],x[,2])})
+            FUN=function(x){rocss.fun(x[,1],x[,2])$score.val})
         }  
         # Select those whose ROCSS cannot be computed due to constant obs conditions (e.g. always dry)
         t.obs.constant <- apply(obs.t, MARGIN=c(2,3), FUN=function(x){diff(suppressWarnings(range(x, na.rm=T)))==0})
@@ -282,6 +282,9 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
       if (piechart){   # Plot with pies
         pch.neg.score <- NULL
         size.as.probability <- F
+        if (is.null(pie.border)){
+          pie.border <- "gray"
+        }
         #dx <- diff(x.mm[1:2])
         #dy <- diff(y.mm[1:2])
         #radius <- min(dx,dy)/2*0.8
@@ -300,7 +303,7 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
         # Plot the piechart only for those grid points with no NaN probabilities
         for (i.loc in v.valid){
           add.pie(v.prob[i.loc,], nn.yx[i.loc, 2], nn.yx[i.loc, 1], col=colors[,i.loc],
-                  radius=radius, init.angle=90, clockwise = F, border="lightgray", labels=NA
+                  radius=radius, init.angle=90, clockwise = F, border=pie.border, labels=NA
           )  
         }
         if (score){

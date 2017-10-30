@@ -1,5 +1,7 @@
-visualizeR 0.2.1
+visualizeR 1.0.0
 =================
 
-* Minor bug in reliabilityCategories and spreadPlot. 
+* Internal adaptation of reliabilityCategories to be consistent with the other functions. 
+* Implemented the ROCSS significance in tercilePlot and tercileBarplot. 
+* Added CITATION file to Environmental Modelling & Software. 
 * Other minor changes and documentation updates.
