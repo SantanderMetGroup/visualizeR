@@ -210,6 +210,7 @@ getSeason.S4 <- function(obj) {
 #' @return The ROC area skill score and the significance (TRUE or FALSE)
 #' @author M. D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez
 #' @importFrom SpecsVerification Auc
+#' @importFrom stats qnorm
 #' @export
 rocss.fun <- function (obs, pred, conf.level = 0.95){
   no.nan <- complete.cases(obs, pred)

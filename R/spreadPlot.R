@@ -36,6 +36,7 @@
 #' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray subsetGrid
 #' @importFrom stats filter
 #' @importFrom graphics lines
+#' @importFrom stats median
 #' @import sm
 #' @import vioplot 
 #'   

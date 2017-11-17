@@ -1,9 +1,9 @@
 Package: visualizeR
 Depends:
     R(>= 3.1.0),
-    sm
+    sm,
+    transformeR
 Imports:
-    transformeR,
     methods,
     fields,
     RColorBrewer,
@@ -15,7 +15,12 @@ Imports:
     SpecsVerification,
     verification,
     sp,
-    lattice
+    lattice,
+    latticeExtra,
+    magrittr,
+    padr,
+    grDevices,
+    data.table
 Suggests:
     loadeR.ECOMS,
     loadeR,
