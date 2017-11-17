@@ -265,8 +265,6 @@ reliabilityCategories <- function(hindcast,
                                            at = c(1, 2, 2.75, 3.25, 4, 5), 
                                            labels = c("dangerously useless", "not useful","marginally useful",
                                                       "marginally useful +","still useful","perfect"))))
-      
-      print(pc)
     }else{
       x1 <- 1/n.events
       y1 <- 1/n.events
@@ -289,7 +287,7 @@ reliabilityCategories <- function(hindcast,
       
       
       # Customized Lattice Example
-      xyp <- xyplot(y~x|z, par.strip = list(lines = 1), ylim = c(0,1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
+      pc <- xyplot(y~x|z, par.strip = list(lines = 1), ylim = c(0,1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
                     scales=list(x = list(at = seq(0,1,round(1/n.bins, digits = 2)),
                                          labels = seq(0,1,round(1/n.bins, digits = 2))),
                                 y = list(at = seq(0,1,round(1/n.bins, digits = 2)),
@@ -336,7 +334,7 @@ reliabilityCategories <- function(hindcast,
                     layout = layout,
                     xlab = "Predicted probability", ylab= "Observed frequency",
                     main= list(cex = 1, font = 1, label = sprintf("n = %d years x %d points", nyear, npoint)))
-      print(xyp)
+      
       # update(xyp, par.settings = list(fontsize = list(text = 8, points = 10)))
       
       #########################################################
@@ -394,6 +392,7 @@ reliabilityCategories <- function(hindcast,
       ###########################################################
       
     }
+    print(pc)
   }
   result.grid <- mg
   attr(result.grid$Data, "dimensions") <- c("cat", "var", "member", "time", "lat", "lon")
