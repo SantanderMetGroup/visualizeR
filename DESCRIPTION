@@ -20,7 +20,8 @@ Imports:
     magrittr,
     padr,
     grDevices,
-    data.table
+    data.table,
+    downscaleR
 Suggests:
     loadeR.ECOMS,
     loadeR,
