@@ -49,7 +49,7 @@ and the range for plotting. The range is used to plot the shadow of the multimem
  \strong{Future Work}
  
  Implement parameters missing.dates (default will be TRUE) to suppress 
- dates withoud values from xaxis when FALSE.
+ dates without values from xaxis when FALSE.
  Implement parameter show.na (default will be FALSE) to fill with gray
  NA values when TRUE.
  Implement auxiliary functions to reduce dependencies and remove from 
@@ -63,20 +63,20 @@ data("VALUE_Iberia_pr")
 a <- subsetGrid(CFS_Iberia_tas, years = 1985:1992)
 b <- subsetGrid(EOBS_Iberia_tas, years = 1985:1992)
 temporalPlot("EOBS" = b, "CFS" = a,
-             xyplot.custom = list(main = "winter temperature", ylab = "ºC"))
+             xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
 # Station and grid data can be combined, also different temporal ranges
 v <- subsetGrid(VALUE_Iberia_tas, years = 1988:1990)
 temporalPlot("VALUE" = v, "EOBS" = b, "CFS" = a, lwd = 0.9,
              aggr.spatial = list(FUN = min, na.rm = TRUE),
              xyplot.custom = list(main = "winter temperature",
-                                  ylab = "ºC", ylim = c(-20, 10)))
+                                  ylab = "Celsius", ylim = c(-20, 10)))
 # Use subsetGrid to obtain and plot a single location (no spatial aggregation)
 a1 <- subsetGrid(a, lonLim = 2, latLim = 42)
 b1 <- subsetGrid(b, lonLim = 2, latLim = 42)
 
 temporalPlot("EOBS" = b1, "CFS" = a1, 
              cols = c("green", "deeppink"), show.na = TRUE,
-             xyplot.custom = list(main = "winter temperature", ylab = "ºC"))
+             xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
 }
 \author{
 M. Iturbide
