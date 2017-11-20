@@ -39,64 +39,70 @@
 #'@export
 #'@importFrom grDevices colorRampPalette
 #'@importFrom transformeR aggregateGrid subsetGrid getShape redim climatology
-#'@importFrom downscaleR flatMemberDim
-#'@examples
-#'hindcast <- subsetGrid(CFS_Iberia_tas, years = 1983:2001)
-#'forecast <- subsetGrid(CFS_Iberia_tas, years = 2002)
-#'tercileMap <- (hindcast, forectast)
+#' @examples
+#' library(transformeR)
+#' hindcast <- subsetGrid(CFS_Iberia_tas, years = 1983:2001)
+#' forecast <- subsetGrid(CFS_Iberia_tas, years = 2002)
+#' tercileMap(hindcast, forecast)
 
 tercileMap <- function(hindcast, forecast, ...) {
       custom <- list(...)
-      hindyear <- aggregateGrid(hindcast, aggr.y = list(FUN = mean, na.rm = TRUE))
-      foreyear <- aggregateGrid(forecast, aggr.y = list(FUN = mean, na.rm = TRUE))
-      hind <- redim(downscaleR:::flatMemberDim(hindyear), drop = TRUE)
+      suppressMessages(hindyear <- aggregateGrid(hindcast, aggr.y = list(FUN = mean, na.rm = TRUE)))
+      suppressMessages(foreyear <- aggregateGrid(forecast, aggr.y = list(FUN = mean, na.rm = TRUE)))
+      nmem <- getShape(hindyear)["member"]
+      # hind <- redim(downscaleR:::flatMemberDim(hindyear), drop = TRUE)
+      hind <- lapply(1:nmem, function(x){
+        subsetGrid(hindyear, members = x)
+      })
+      hind <- do.call("bindGrid.time", hind)
+      hind <- redim(hind, drop = TRUE)
+      message("[", Sys.time(), "] Calculating terciles...")
       a <- apply(hind$Data, MARGIN = c(2,3), FUN = quantile, probs = c(1/3, 2/3))
       nmem <- getShape(forecast)["member"]
       nlon <- getShape(forecast)["lon"]
       nlat <- getShape(forecast)["lat"]
+      co <- expand.grid(1:nlat, 1:nlon)
       indtercile <- array(dim = c(nmem, nlat, nlon))
       for (m in 1:nmem) {
             formem <- subsetGrid(foreyear, members = m)$Data
-            for(i in 1:nlat) {
-                  for(l in 1:nlon) {
-                        indtercile[m,i,l] <- which(order(c(formem[i,l], a[,i,l])) == 1)
-                  }
+            for (i in 1:nrow(co)) {
+                  indtercile[m, co[i,1],co[i,2]] <- which(order(c(formem[co[i,1],co[i,2]], a[,co[i,1],co[i,2]])) == 1)
             }
       }
+      message("[", Sys.time(), "] Calculating probabilities...")
       probtercile <- array(dim = c(nlat, nlon))
-      for(i in 1:nlat) {
-            for(l in 1:nlon) {
-                  table(indtercile[,i,l])->z
+      for (i in 1:nrow(co)) {
+           z <- table(indtercile[,co[i,1],co[i,2]])
                   tercile <- which(z == max(z))[1]
-                  probtercile[i, l] <- round(z[tercile]/sum(z)*100, digits = 2)
+                  probtercile[co[i,1],co[i,2]] <- round(z[tercile]/sum(z)*100, digits = 2)
                   if(tercile == 2) {
-                        probtercile[i, l] <- 0
+                        probtercile[co[i,1],co[i,2]] <- 0
                   } else if (tercile == 1) {
-                        probtercile[i, l] <- (-1)*probtercile[i, l]
+                        probtercile[co[i,1],co[i,2]] <- (-1)*probtercile[co[i,1],co[i,2]]
                   }
-            }
       }
-      output <- aggregateGrid(foreyear, aggr.mem = list(FUN = frequency, na.rm = TRUE))
+      suppressMessages(output <- aggregateGrid(foreyear, aggr.mem = list(FUN = mean, na.rm = TRUE)))
       output$Data <- probtercile
       attr(output$Data, "dimensions") <- c("lat", "lon")
-      jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "white", "yellow", "#FF7F00", "red", "red3"))
-      custom[["grid"]] <- climatology(redim(output, member = FALSE))
+      jet.colors <- c("#00007F", "blue", "#007FFF", "cyan", "white", "yellow", "#FF7F00", "red", "red3")
+      suppressMessages(
+        suppressWarnings(custom[["grid"]] <- climatology(redim(output, member = FALSE)))
+      )
       if(is.null(custom[["backdrop.theme"]])) custom[["backdrop.theme"]] <- "coastline"
       if(is.null(custom[["at"]])) custom[["at"]] <- c(-100, -70, -60, -50, -40, 40, 50, 60, 70, 100)
       if(is.null(custom[["col.regions"]])) custom[["col.regions"]] <- jet.colors
       if(is.null(custom[["colorkey"]])) custom[["colorkey"]] <- FALSE
       if(is.null(custom[["scales"]])) custom[["scales"]] <- list(draw = TRUE, alternating = 3, cex = .6)
-      if(is.null(custom[["key"]])) custom[["key"]] <- list(space = "top", between = 0.2, between.columns = 0.2,
+      if(is.null(custom[["key"]])) custom[["key"]] <- list(space = "top", between = 0.3, between.columns = 0.5,
                                                            columns = 9, points = list( pch = 22, 
                                                                                        col = "black",
-                                                                                       fill = c("#00007F", "blue", "#007FFF", "cyan",
-                                                                                                "white", 
-                                                                                                "yellow", "#FF7F00", "red", "red3"),
-                                                                                       cex = 1),
+                                                                                       fill = custom[["col.regions"]],
+                                                                                       cex = 1.3),
                                                            text = list(c("100..70%", "70..60%", "60..50%", "50..40%",
                                                                          "other",
-                                                                         "40..50%", "50..60%", "60..70%", "70..100%"), cex = .55))
+                                                                         "40..50%", "50..60%", "60..70%", "70..100%"), cex = .65))
       
+      message("[", Sys.time(), "] Done.")
       pl <- do.call("spatialPlot", custom)
       return(pl)
 }
