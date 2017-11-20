@@ -47,6 +47,7 @@
 
 tercileMap <- function(hindcast, forecast, ...) {
       custom <- list(...)
+      message("[", Sys.time(), "]  Preparing data...")
       suppressMessages(hindyear <- aggregateGrid(hindcast, aggr.y = list(FUN = mean, na.rm = TRUE)))
       suppressMessages(foreyear <- aggregateGrid(forecast, aggr.y = list(FUN = mean, na.rm = TRUE)))
       nmem <- getShape(hindyear)["member"]
@@ -103,7 +104,7 @@ tercileMap <- function(hindcast, forecast, ...) {
                                                                          "40..50%", "50..60%", "60..70%", "70..100%"), cex = .65))
       
       message("[", Sys.time(), "] Done.")
-      pl <- do.call("spatialPlot", custom)
+      suppressWarnings(pl <- do.call("spatialPlot", custom))
       return(pl)
 }
 
