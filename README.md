@@ -12,4 +12,8 @@ devtools::install_github(c("SantanderMetGroup/transformeR", "SantanderMetGroup/v
 **IMPORTANT:** Note that `transformeR` must be previously installed on your system 
 
 ---
-To know more about [climate4R](http://www.meteo.unican.es/climate4r) and its components, read the paper: Cofiño et al, The ECOMS User Data Gateway: Towards seasonal forecast data provision and research reproducibility in the era of Climate Services. Climate Services, 2017, ISSN 2405-8807, http://dx.doi.org/10.1016/j.cliser.2017.07.001.
+Reference and further information: 
+
+Frías M.D., Iturbide M., Manzanas R., Bedia J., Fernández J., Herrera S., Cofiño A.S., Gutiérrez J.M. (2018) An R package to visualize and communicate uncertainty in seasonal climate prediction. **Environmental Modelling and Software**, 99, 101-110, http://doi.org/10.1016/j.envsoft.2017.09.008
+
+Cofiño et al. (2018) The ECOMS User Data Gateway: Towards seasonal forecast data provision and research reproducibility in the era of Climate Services. **Climate Services**, http://dx.doi.org/10.1016/j.cliser.2017.07.001.
