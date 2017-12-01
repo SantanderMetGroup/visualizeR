@@ -2,7 +2,7 @@
 
 `visualizeR` is an R package for climate data visualization, with special focus on ensemble forecasting and uncertainty communication. It includes functions for visualizing climatological, forecast and evaluation products, and combinations of them. Find out more about this package at the [visualizeR wiki](https://github.com/SantanderMetGroup/visualizeR/wiki). 
 
-This package is part of the **climate4R bundle** for climate data access and post-processing, formed by [loadeR](https://github.com/SantanderMetGroup/loadeR), [transformeR](https://github.com/SantanderMetGroup/transformeR), [downscaleR](https://github.com/SantanderMetGroup/downscaleR) and visualizeR.
+This package is part of the [climate4R bundle](http://www.meteo.unican.es/climate4r), formed by `loadeR`, `transformeR`, `downscaleR` and `visualizeR`.
 
 The recommended installation procedure is to use the `install_github` command from the devtools R package. See the [installation info](https://github.com/SantanderMetGroup/visualizeR/wiki/installation) instructions in the GitHub [wiki](https://github.com/SantanderMetGroup/visualizeR/wiki).
 
