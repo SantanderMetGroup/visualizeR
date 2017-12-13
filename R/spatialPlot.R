@@ -75,6 +75,7 @@
 #'  \code{\link{map.lines}}, to add lines and polygons to climatological maps
 #' Also see \code{\link[sp]{spplot}} in package \pkg{sp} for further information on plotting capabilities and options
 #' @examples
+#' require(transformeR)
 #' data("CFS_Iberia_tas")
 #' # Climatology is computed:
 #' clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
@@ -87,31 +88,30 @@
 #' 
 #' # ... a subset of members to be displayed, using 'zcol':
 #' spatialPlot(clim,
-#'                 backdrop.theme = "coastline",
-#'                 zcol = 1:4)
+#'             backdrop.theme = "coastline",
+#'             zcol = 1:4)
 #' 
 #' # ... regional focuses (e.g. the Iberian Peninsula).
 #' spatialPlot(clim,
-#'                 backdrop.theme = "countries",
-#'                 xlim = c(-10,5), ylim = c(35,44),
-#'                 zcol = 1:4,
-#'                 scales = list(draw = TRUE))
+#'             backdrop.theme = "countries",
+#'             xlim = c(-10,5), ylim = c(35,44),
+#'             zcol = 1:4,
+#'             scales = list(draw = TRUE))
 #' 
 #' # Changing the default color palette and ranges:
 #' spatialPlot(clim,
-#'                 backdrop.theme = "coastline",
-#'                 zcol = 1:4,
-#'                 col.regions = cm.colors(27), at = seq(10,37,1))
+#'             backdrop.theme = "coastline",
+#'             zcol = 1:4,
+#'             col.regions = cm.colors(27), at = seq(10,37,1))
 #' 
 #' # For ensemble means climatology should be called with 'by.member' set to FALSE:
 #' clim <- climatology(CFS_Iberia_tas, by.member = FALSE)
 #' 
 #' # Adding contours to the plot is direct with argument 'contour':
 #' spatialPlot(clim,
-#'                 scales = list(draw = TRUE),
-#'                 contour = TRUE,
-#'                 main = "tas Predictions July Ensemble Mean")
-#' 
+#'             scales = list(draw = TRUE),
+#'             contour = TRUE,
+#'             main = "tas Predictions July Ensemble Mean")
 #' 
 #' ## Example of multigrid plotting
 #' data("NCEP_Iberia_psl")
@@ -122,17 +122,16 @@
 #' ## Skip the temporal checks, as grids correspond to different time slices
 #' mg <- do.call("makeMultiGrid",
 #'               c(monthly.clim.grids, skip.temporal.check = TRUE))
-#'               ## We change the panel names
+#' ## We change the panel names
 #' spatialPlot(mg,
-#'                 backdrop.theme = "coastline",
-#'                 names.attr = c("DEC","JAN","FEB"),
-#'                 main = "Mean PSL climatology 1991-2010",
-#'                 scales = list(draw = TRUE))
+#'             backdrop.theme = "coastline",
+#'             names.attr = c("DEC","JAN","FEB"),
+#'             main = "Mean PSL climatology 1991-2010",
+#'             scales = list(draw = TRUE))
 #' 
 #' # Station data:
 #' data("VALUE_Iberia_pr")
 #' spatialPlot(climatology(VALUE_Iberia_pr), backdrop.theme = "countries")
-
 
 
 spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL, lonCenter = NULL, ...) {
@@ -140,8 +139,10 @@ spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max =
   bt <- match.arg(backdrop.theme, choices = c("none", "coastline", "countries"))
   if (!is.null(set.min) && !is.numeric(set.min)) stop("Invalid 'set.min' value")
   if (!is.null(set.min) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
+  ## add climatology:fun attribute if getShape(grid, "time") = 1
+  if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "undefined"
   ## Change lon center
-  if(!is.null(lonCenter)) {
+  if (!is.null(lonCenter)) {
     indcenter <- which(abs(grid$xyCoords$x - lonCenter) == min(abs(grid$xyCoords$x - lonCenter)))
     indcenter <- abs(length(grid$xyCoords$x)/2 - indcenter)
     newlon <- if (indcenter == 0) grid$xyCoords$x else c(tail(grid$xyCoords$x, -indcenter), 
@@ -155,7 +156,7 @@ spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max =
     attr(grid$Data, "climatology:fun") <- climfun
     grid$xyCoords$x <- newlon
   }
-  ## Covert to spatial object
+  ## Convert to spatial object
   df <- clim2sgdf(clim = grid, set.min, set.max)
   ## Backdrop theme 
   if (bt != "none") {
