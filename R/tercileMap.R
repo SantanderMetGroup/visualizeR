@@ -28,6 +28,9 @@
 #' @param ... Optional arguments passed to \code{\link{spatialPlot}}
 #' 
 #' @details The function applies the \code{\link{spatialPlot}} function, that in turn uses \code{lattice-methods}.
+#' 
+#' @note The function is based on the tercile maps delivered by
+#' C3S seasonal forecasts (\url{http://climate.copernicus.eu/s/charts/c3s_seasonal/}).
 #'  
 #'  Many different aspects of the plot can be controlled passing the relevant arguments to 
 #'  \code{\link[sp]{spplot}}.
@@ -58,7 +61,7 @@ tercileMap <- function(hindcast, forecast, ...) {
       hind <- do.call("bindGrid.time", hind)
       hind <- redim(hind, drop = TRUE)
       message("[", Sys.time(), "] Calculating terciles...")
-      a <- apply(hind$Data, MARGIN = c(2,3), FUN = quantile, probs = c(1/3, 2/3))
+      a <- apply(hind$Data, MARGIN = c(2,3), FUN = quantile, probs = c(1/3, 2/3), na.rm = TRUE)
       nmem <- getShape(forecast)["member"]
       nlon <- getShape(forecast)["lon"]
       nlat <- getShape(forecast)["lat"]
@@ -76,7 +79,7 @@ tercileMap <- function(hindcast, forecast, ...) {
            z <- table(indtercile[,co[i,1],co[i,2]])
                   tercile <- which(z == max(z))[1]
                   probtercile[co[i,1],co[i,2]] <- round(z[tercile]/sum(z)*100, digits = 2)
-                  if(tercile == 2) {
+                  if (tercile == 2) {
                         probtercile[co[i,1],co[i,2]] <- 0
                   } else if (tercile == 1) {
                         probtercile[co[i,1],co[i,2]] <- (-1)*probtercile[co[i,1],co[i,2]]
@@ -89,12 +92,12 @@ tercileMap <- function(hindcast, forecast, ...) {
       suppressMessages(
         suppressWarnings(custom[["grid"]] <- climatology(redim(output, member = FALSE)))
       )
-      if(is.null(custom[["backdrop.theme"]])) custom[["backdrop.theme"]] <- "coastline"
-      if(is.null(custom[["at"]])) custom[["at"]] <- c(-100, -70, -60, -50, -40, 40, 50, 60, 70, 100)
-      if(is.null(custom[["col.regions"]])) custom[["col.regions"]] <- jet.colors
-      if(is.null(custom[["colorkey"]])) custom[["colorkey"]] <- FALSE
-      if(is.null(custom[["scales"]])) custom[["scales"]] <- list(draw = TRUE, alternating = 3, cex = .6)
-      if(is.null(custom[["key"]])) custom[["key"]] <- list(space = "top", between = 0.3, between.columns = 0.5,
+      if (is.null(custom[["backdrop.theme"]])) custom[["backdrop.theme"]] <- "coastline"
+      if (is.null(custom[["at"]])) custom[["at"]] <- c(-100, -70, -60, -50, -40, 40, 50, 60, 70, 100)
+      if (is.null(custom[["col.regions"]])) custom[["col.regions"]] <- jet.colors
+      if (is.null(custom[["colorkey"]])) custom[["colorkey"]] <- FALSE
+      if (is.null(custom[["scales"]])) custom[["scales"]] <- list(draw = TRUE, alternating = 3, cex = .6)
+      if (is.null(custom[["key"]])) custom[["key"]] <- list(space = "top", between = 0.3, between.columns = 0.5,
                                                            columns = 9, points = list( pch = 22, 
                                                                                        col = "black",
                                                                                        fill = custom[["col.regions"]],

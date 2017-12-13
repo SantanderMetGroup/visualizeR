@@ -57,6 +57,7 @@ The function applies the \code{\link[sp]{spplot}} method after conversion of the
  be also controlled using \code{\link[lattice]{trellis.par.set}}.
 }
 \examples{
+require(transformeR)
 data("CFS_Iberia_tas")
 # Climatology is computed:
 clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
@@ -69,31 +70,30 @@ spatialPlot(clim, backdrop.theme = "coastline", center = 180)
 
 # ... a subset of members to be displayed, using 'zcol':
 spatialPlot(clim,
-                backdrop.theme = "coastline",
-                zcol = 1:4)
+            backdrop.theme = "coastline",
+            zcol = 1:4)
 
 # ... regional focuses (e.g. the Iberian Peninsula).
 spatialPlot(clim,
-                backdrop.theme = "countries",
-                xlim = c(-10,5), ylim = c(35,44),
-                zcol = 1:4,
-                scales = list(draw = TRUE))
+            backdrop.theme = "countries",
+            xlim = c(-10,5), ylim = c(35,44),
+            zcol = 1:4,
+            scales = list(draw = TRUE))
 
 # Changing the default color palette and ranges:
 spatialPlot(clim,
-                backdrop.theme = "coastline",
-                zcol = 1:4,
-                col.regions = cm.colors(27), at = seq(10,37,1))
+            backdrop.theme = "coastline",
+            zcol = 1:4,
+            col.regions = cm.colors(27), at = seq(10,37,1))
 
 # For ensemble means climatology should be called with 'by.member' set to FALSE:
 clim <- climatology(CFS_Iberia_tas, by.member = FALSE)
 
 # Adding contours to the plot is direct with argument 'contour':
 spatialPlot(clim,
-                scales = list(draw = TRUE),
-                contour = TRUE,
-                main = "tas Predictions July Ensemble Mean")
-
+            scales = list(draw = TRUE),
+            contour = TRUE,
+            main = "tas Predictions July Ensemble Mean")
 
 ## Example of multigrid plotting
 data("NCEP_Iberia_psl")
@@ -104,12 +104,12 @@ monthly.clim.grids <- lapply(getSeason(NCEP_Iberia_psl), function(x) {
 ## Skip the temporal checks, as grids correspond to different time slices
 mg <- do.call("makeMultiGrid",
               c(monthly.clim.grids, skip.temporal.check = TRUE))
-              ## We change the panel names
+## We change the panel names
 spatialPlot(mg,
-                backdrop.theme = "coastline",
-                names.attr = c("DEC","JAN","FEB"),
-                main = "Mean PSL climatology 1991-2010",
-                scales = list(draw = TRUE))
+            backdrop.theme = "coastline",
+            names.attr = c("DEC","JAN","FEB"),
+            main = "Mean PSL climatology 1991-2010",
+            scales = list(draw = TRUE))
 
 # Station data:
 data("VALUE_Iberia_pr")

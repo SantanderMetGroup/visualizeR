@@ -1,7 +1,6 @@
-visualizeR 1.0.0
+visualizeR 1.1.0
 =================
 
-* Internal adaptation of reliabilityCategories to be consistent with the other functions. 
-* Implemented the ROCSS significance in tercilePlot and tercileBarplot. 
-* Added CITATION file to Environmental Modelling & Software. 
+* New `tercileMap` function for forecast tercile maps (based on C3S seasonal forecast graphical products, http://climate.copernicus.eu/s/charts/c3s_seasonal/)
+* New function `spatialPlot` (essentially a renaming of `transformeR::plotClimatology`, the latter planned to be deprecated in future `transformeR` releases)
 * Other minor changes and documentation updates.
