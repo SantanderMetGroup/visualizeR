@@ -6,8 +6,9 @@
 \usage{
 reliabilityCategories(hindcast, obs, regions = NULL, n.events = 3,
   labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.75,
-  diagrams = TRUE, cex0 = 0.5, cex.scale = 20, layout = c(1, n.events),
-  backdrop.theme = "countries", return.diagrams = FALSE)
+  na.rate = 0.75, diagrams = TRUE, cex0 = 0.5, cex.scale = 20,
+  layout = c(1, n.events), backdrop.theme = "countries",
+  return.diagrams = FALSE)
 }
 \arguments{
 \item{hindcast}{Grid of forecast data}
@@ -28,6 +29,9 @@ the relaiability is calculated. Default is NULL (See details).}
 \item{n.boot}{number of samples considered for bootstrapping. By default n.boot = 100}
 
 \item{conf.level}{Confidence interval for the reliability line. By default \code{conf.level} = 0.75 (two sided), as in Weisheimer et al. 2014}
+
+\item{na.rate}{Allowed proportion of NA values in each region. Regions with proportions higher than na.rate
+are excuded from the analysis. Default is 0.75.}
 
 \item{diagrams}{Logical (default = TRUE). Plotting results.}
 
