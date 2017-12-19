@@ -23,6 +23,10 @@ Tercile map for the visualization of forecast skill of seasonal climate predicti
 }
 \details{
 The function applies the \code{\link{spatialPlot}} function, that in turn uses \code{lattice-methods}.
+}
+\note{
+The function is based on the tercile maps delivered by
+C3S seasonal forecasts (\url{http://climate.copernicus.eu/s/charts/c3s_seasonal/}).
  
  Many different aspects of the plot can be controlled passing the relevant arguments to 
  \code{\link[sp]{spplot}}.
