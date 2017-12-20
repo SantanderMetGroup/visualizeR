@@ -49,6 +49,65 @@
 #' 
 #' @author J. Bedia
 #' @export
+#' @examples \dontrun{
+#' 
+#' # The package 'easyVerification' will be used to calculate the RPSS:
+#'   
+#' require(easyVerification)
+#' require(transformeR)
+#' # First of all, a data subset is done, considering a spatial domain centered on the North Atlantic:
+#' tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-100, 40), latLim = c(-5, 75))
+#' # The same is done with the reanalysis dataset:
+#' tas.ncep2 <- subsetGrid(tas.ncep, lonLim = c(-100, 40), latLim = c(-5, 75))
+#' # In the next step, the reanalysis data are interpolated to the hindcast grid:
+#' tas.ncep2.int <- interpGrid(tas.ncep2, new.coordinates = getGrid(tas.cfs2), method = "nearest")
+#' # We compute the Ranked Probabiloity SKill Score using veriApply, and a cross-validation strategy:
+#' ev <- easyVerification::veriApply(verifun = "EnsRpss",
+#'                                   fcst = tas.cfs2$Data,
+#'                                   obs = tas.ncep2.int$Data,
+#'                                   prob = 1:2/3,
+#'                                   tdim = 2,
+#'                                   ensdim = 1,
+#'                                   parallel = TRUE,
+#'                                   ncpus = 3, 
+#'                                   strategy = "crossval")
+#' # The bridging function 'easyVeri2grid' converts the object returned by 'veriApply' 
+#' #    to a 'climate4R' climatological grid: 
+#' 
+#' easyVeriGrid <- easyVeri2grid(ev$skillscore,
+#'                               obs.grid = tas.ncep2.int,
+#'                               verifun = "EnsRpss")
+#' 
+#' # A basic RPSS map, using the spatialPlot defaults:
+#' skillMap(easyVeriGrid = easyVeriGrid, backdrop.theme = "coastline")
+#' 
+#' # Stippling. Mark significant RPSS values at the 95% ci
+#' thresh <- ev$skillscore.sd*qnorm(0.95)
+#' 
+#' skillMap(easyVeriGrid = easyVeriGrid,
+#'          stippling = list(threshold = th, condition = "GT"), # GT = greater than
+#'          stippling.point.options = list(pch = 19, cex = .2, col = "black"),
+#'          backdrop.theme = "coastline")
+#' 
+#' # Further customization: For instance a more elaborated title, colorblind-friendly palette etc.:
+#' 
+#' cb.colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))
+#' skillMap(easyVeriGrid = easyVeriGrid,
+#'          stippling = list(threshold = th, condition = "GT"),
+#'          stippling.point.options = list(pch = 19, cex = .2, col = "black"),
+#'          backdrop.theme = "coastline",
+#'          at = seq(-0.7, 0.7, .05),
+#'          set.max = 0.7, set.min = -0.7,
+#'          scales = list(draw = TRUE, alternating = 3),
+#'          colorkey = list(space = "bottom"),
+#'          col.regions = cb.colors(51),
+#'          title = paste("Ranked Probability Skill Score",
+#'                        "Forecasting System: CFSv2 - 24 members", 
+#'                        "November Initializations",
+#'                        "Observing System: NCEP/NCAR Reanalysis 1",
+#'                        "t2m DJF 1983-2010", sep = "\n")
+#' )
+#' }
 
 skillMap <- function(easyVeriGrid,
                      stippling = list(threshold = NULL, condition = NULL),
