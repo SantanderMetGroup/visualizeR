@@ -31,6 +31,8 @@
 #' @param n.bins (optional): number of probability bins considered. By default n.bins = 10
 #' @param n.boot number of samples considered for bootstrapping. By default n.boot = 100
 #' @param conf.level Confidence interval for the reliability line. By default \code{conf.level} = 0.75 (two sided), as in Weisheimer et al. 2014
+#' @param na.rate Allowed proportion of NA values in each region. Regions with proportions higher than na.rate
+#' are excuded from the analysis. Default is 0.75.
 #' @param diagrams Logical (default = TRUE). Plotting results.  
 #' @param cex0 numeric (default is 0.5). Minimum size of the points shown in the reliability diagrams, i.e. size of the point 
 #' for the minimum n frequency (n = 1) (see parameter \code{n.bins}.  The sizes for points that correspond to n > 1 
@@ -108,6 +110,7 @@ reliabilityCategories <- function(hindcast,
                                   n.bins = 10,
                                   n.boot = 100,
                                   conf.level = 0.75, 
+                                  na.rate = 0.75,
                                   diagrams = TRUE,
                                   cex0 = 0.5,
                                   cex.scale = 20,
@@ -166,7 +169,8 @@ reliabilityCategories <- function(hindcast,
   for(l in 1:length(regs)){
     o <- over(spoints, regs[l,])
     w <- which(!is.na(o))
-    if(length(w)>0){
+    if(1-length(w)/length(o) > na.rate) w <- NULL
+    if(length(w) > 0) {
       ob <- ob.full[, w, drop = F]
       se <- array(dim = c(nmem, ntime, length(w)))
       for(i in 1:nmem){
@@ -265,8 +269,6 @@ reliabilityCategories <- function(hindcast,
                                            at = c(1, 2, 2.75, 3.25, 4, 5), 
                                            labels = c("dangerously useless", "not useful","marginally useful",
                                                       "marginally useful +","still useful","perfect"))))
-      
-      print(pc)
     }else{
       x1 <- 1/n.events
       y1 <- 1/n.events
@@ -289,7 +291,7 @@ reliabilityCategories <- function(hindcast,
       
       
       # Customized Lattice Example
-      xyp <- xyplot(y~x|z, par.strip = list(lines = 1), ylim = c(0,1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
+      pc <- xyplot(y~x|z, par.strip = list(lines = 1), ylim = c(0,1), strip = strip.custom(fg = rgb(0,0,0,0), strip.names = c(T,F), strip.levels = c(F,T), factor.levels = labels), 
                     scales=list(x = list(at = seq(0,1,round(1/n.bins, digits = 2)),
                                          labels = seq(0,1,round(1/n.bins, digits = 2))),
                                 y = list(at = seq(0,1,round(1/n.bins, digits = 2)),
@@ -336,7 +338,7 @@ reliabilityCategories <- function(hindcast,
                     layout = layout,
                     xlab = "Predicted probability", ylab= "Observed frequency",
                     main= list(cex = 1, font = 1, label = sprintf("n = %d years x %d points", nyear, npoint)))
-      print(xyp)
+      
       # update(xyp, par.settings = list(fontsize = list(text = 8, points = 10)))
       
       #########################################################
@@ -394,6 +396,7 @@ reliabilityCategories <- function(hindcast,
       ###########################################################
       
     }
+    print(pc)
   }
   result.grid <- mg
   attr(result.grid$Data, "dimensions") <- c("cat", "var", "member", "time", "lat", "lon")
