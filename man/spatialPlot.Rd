@@ -55,6 +55,10 @@ The function applies the \code{\link[sp]{spplot}} method after conversion of the
  Many different aspects of the map can be controlled passing the relevant arguments to 
  \code{spplot}. Fine control of graphical parameters for the trellis display can
  be also controlled using \code{\link[lattice]{trellis.par.set}}.
+ 
+Some examples of specific map graphical options are available in the help of function \code{\link[sp]{spplot}}.
+ In addtion, fine-tuning of the resulting plots can be obtained using the arguments of \pkg{lattice} plots. For
+ an overview, see the help of function \code{\link[lattice]{xyplot}}.
 }
 \examples{
 require(transformeR)
