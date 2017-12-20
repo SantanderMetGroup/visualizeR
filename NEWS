@@ -1,8 +1,4 @@
-visualizeR 1.1.0
+visualizeR 1.1.1
 =================
 
-* New function `spatialPlot` (essentially a renaming of `transformeR::plotClimatology`, the latter planned to be deprecated in future `transformeR` releases)
-* New plotting functions for seasonal forecast products:
-  * `tercileMap` for forecast tercile maps (based on C3S seasonal forecast graphical products, http://climate.copernicus.eu/s/charts/c3s_seasonal/)
-  * `skillMap`: A convenient wrapper of `SpatialPlot` and `map.stippling` for plotting skill maps
-* Other minor changes and documentation updates.
+* Bug fix in the example of `spatialPlot` (the drawbacks of using \dontrun{} ...) 
