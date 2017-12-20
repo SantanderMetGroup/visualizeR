@@ -52,9 +52,10 @@
 #' @examples \dontrun{
 #' 
 #' # The package 'easyVerification' will be used to calculate the RPSS:
-#'   
 #' require(easyVerification)
 #' require(transformeR)
+#' data(tas.cfs)
+#' data(tas.ncep)
 #' # First of all, a data subset is done, considering a spatial domain centered on the North Atlantic:
 #' tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-100, 40), latLim = c(-5, 75))
 #' # The same is done with the reanalysis dataset:
@@ -85,7 +86,7 @@
 #' thresh <- ev$skillscore.sd*qnorm(0.95)
 #' 
 #' skillMap(easyVeriGrid = easyVeriGrid,
-#'          stippling = list(threshold = th, condition = "GT"), # GT = greater than
+#'          stippling = list(threshold = thresh, condition = "GT"), # GT = greater than
 #'          stippling.point.options = list(pch = 19, cex = .2, col = "black"),
 #'          backdrop.theme = "coastline")
 #' 
@@ -93,7 +94,7 @@
 #' 
 #' cb.colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))
 #' skillMap(easyVeriGrid = easyVeriGrid,
-#'          stippling = list(threshold = th, condition = "GT"),
+#'          stippling = list(threshold = thresh, condition = "GT"),
 #'          stippling.point.options = list(pch = 19, cex = .2, col = "black"),
 #'          backdrop.theme = "coastline",
 #'          at = seq(-0.7, 0.7, .05),
