@@ -1,4 +1,4 @@
-#     temporalPlot.R Lattice plot methods for climatological grids
+#     tercileMap.R Tercile maps for seasonal forecasts based on C3S style
 #
 #     Copyright (C) 2017 Santander Meteorology Group (http://www.meteo.unican.es)
 #
