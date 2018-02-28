@@ -200,7 +200,7 @@ spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max =
 #'@keywords internal
 #'@author J. Bedia
 #'@export
-#'@importFrom sp GridTopology SpatialGridDataFrame
+#'@importFrom sp GridTopology SpatialGridDataFrame proj4string CRS
 #'@importFrom transformeR getShape aggregateGrid isRegular
 #'@examples 
 #' data("CFS_Iberia_tas")
@@ -270,9 +270,10 @@ clim2sgdf <- function(clim, set.min, set.max) {
     vname <- gsub("\\s", "_", vname)
     vname <- make.names(vname, unique = TRUE)
   } else {
-    vname <- paste0("Member_", 1:n.mem)
+    # vname <- paste0("Member_", 1:n.mem)
+    vname <- grid$Members[1:n.mem]
   }
-  names(aux) <- vname
+  if (!is.null(vname)) names(aux) <- vname
   # Defining grid topology -----------------
   aux.grid <- getGrid(grid)
   if (!isRegular(grid)) {
@@ -284,6 +285,11 @@ clim2sgdf <- function(clim, set.min, set.max) {
     cells.dim <- vapply(aux.grid, FUN.VALUE = integer(1L), FUN = "length")
     grd <- sp::GridTopology(c(cellcentre.offset[["x"]], cellcentre.offset[["y"]]), cellsize, c(cells.dim[["x"]], cells.dim[["y"]]))
     df <- sp::SpatialGridDataFrame(grd, aux)
+  }
+  prj <- attr(grid$xyCoords, "projection")
+  if (!is.null(prj)) {
+    testprj <- tryCatch({CRS(prj)}, error = function(e) {NULL})
+    if (!is.null(testprj)) proj4string(df) <- prj
   }
   return(df)
 }
