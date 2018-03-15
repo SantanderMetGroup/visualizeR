@@ -142,6 +142,7 @@ temporalPlot <- function(...,
   colors2 <- colors2[sample(1:length(colors2), size = length(colors2))]
   if (is.null(cols)) cols <- c("black","red", "blue", "green", colors2)
   if (length(cols) < length(obj.list)) stop("Please, add ", length(obj.list) - length(cols), " more color/s to 'cols', or keep the default option.")
+  if (length(lty)) == 1) lty <- rep(lty, length(obj.list))
   if (is.null(xyplot.custom[["x"]])) xyplot.custom[["x"]] <- Value ~ Dates
   if (is.null(xyplot.custom[["type"]])) xyplot.custom[["type"]] = "l"
   if (is.null(xyplot.custom[["ylim"]])) xyplot.custom[["ylim"]] <- ylim
