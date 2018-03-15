@@ -69,7 +69,7 @@
 #' # Combine grids with members (CFS) and without members (EOBS)
 #' a <- subsetGrid(CFS_Iberia_tas, years = 1985:1992)
 #' b <- subsetGrid(EOBS_Iberia_tas, years = 1985:1992)
-#' temporalPlot("EOBS" = b, "CFS" = a,
+#' temporalPlot("EOBS" = b, "CFS" = a, 
 #'              xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
 #' # Station and grid data can be combined, also different temporal ranges
 #' v <- subsetGrid(VALUE_Iberia_tas, years = 1988:1990)
@@ -81,7 +81,7 @@
 #' a1 <- subsetGrid(a, lonLim = 2, latLim = 42)
 #' b1 <- subsetGrid(b, lonLim = 2, latLim = 42)
 #' 
-#' temporalPlot("EOBS" = b1, "CFS" = a1, 
+#' temporalPlot("EOBS" = b1, "CFS" = a1,
 #'              cols = c("green", "deeppink"), show.na = TRUE,
 #'              xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
 
@@ -161,6 +161,7 @@ temporalPlot <- function(...,
   # crate trellis objects
   xy <- lapply(1:length(df), function(i){
     col <- cols[i]
+    ltyi <- lty[i]
     colsrgb <- do.call("rgb", as.list(c(col2rgb(col)/255, 0.15)))
     xyplot.custom[["data"]] <- df[[i]]
     xyplot.custom[["col"]] <- col
@@ -176,7 +177,7 @@ temporalPlot <- function(...,
                       border = NA, col = "gray90")
         }
       }
-      panel.xyplot(df[[i]]$Dates, df[[i]]$Value, type = "l", lwd = lwd, lty = lty, col = col)
+      panel.xyplot(df[[i]]$Dates, df[[i]]$Value, type = "l", lwd = lwd, lty = ltyi, col = col)
       panel.abline(h = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10)), 
                    v = seq(xlim[1], xlim[2],(xlim[2] - xlim[1])/10), 
                    col = "gray65", lwd = 0.5, lty = 2)
