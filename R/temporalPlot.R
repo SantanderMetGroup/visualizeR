@@ -61,6 +61,7 @@
 #'@importFrom grDevices col2rgb rgb colors
 #'@importFrom padr pad
 #'@importFrom data.table rleid
+#'@importFrom transformeR gridDepth
 #'@import latticeExtra
 #' @examples
 #' data("CFS_Iberia_pr")
@@ -69,8 +70,9 @@
 #' # Combine grids with members (CFS) and without members (EOBS)
 #' a <- subsetGrid(CFS_Iberia_tas, years = 1985:1992)
 #' b <- subsetGrid(EOBS_Iberia_tas, years = 1985:1992)
-#' temporalPlot("EOBS" = b, "CFS" = a, 
+#' temporalPlot("EOBS" = b, "CFS" = a,
 #'              xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
+#' temporalPlot(list("EOBS" = b, "CFS" = a))
 #' # Station and grid data can be combined, also different temporal ranges
 #' v <- subsetGrid(VALUE_Iberia_tas, years = 1988:1990)
 #' temporalPlot("VALUE" = v, "EOBS" = b, "CFS" = a, lwd = 0.9,
@@ -94,10 +96,13 @@ temporalPlot <- function(...,
                          missing.dates = TRUE,
                          show.na = FALSE,
                          xyplot.custom = list()) {
+  
   obj.list <- list(...)
+  if (gridDepth(obj.list) > 3) obj.list <- unlist(obj.list, recursive = FALSE)
   if (is.null(names(obj.list))) {
-    nmes <- as.list(substitute(list(...)))[-1L]
-    names(obj.list) <- as.character(nmes)
+    nmes <- as.character(as.list(substitute(list(...)))[-1L])
+    if (length(nmes) < length(obj.list)) nmes <- paste0(nmes, 1:length(obj.list))
+    names(obj.list) <- nmes
   }
   obj.list <- lapply(obj.list, FUN = redim)
   # spatial aggregation
@@ -142,7 +147,7 @@ temporalPlot <- function(...,
   colors2 <- colors2[sample(1:length(colors2), size = length(colors2))]
   if (is.null(cols)) cols <- c("black","red", "blue", "green", colors2)
   if (length(cols) < length(obj.list)) stop("Please, add ", length(obj.list) - length(cols), " more color/s to 'cols', or keep the default option.")
-  if (length(lty)) == 1) lty <- rep(lty, length(obj.list))
+  if (length(lty) == 1) lty <- rep(lty, length(obj.list))
   if (is.null(xyplot.custom[["x"]])) xyplot.custom[["x"]] <- Value ~ Dates
   if (is.null(xyplot.custom[["type"]])) xyplot.custom[["type"]] = "l"
   if (is.null(xyplot.custom[["ylim"]])) xyplot.custom[["ylim"]] <- ylim

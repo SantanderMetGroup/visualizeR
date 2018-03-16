@@ -200,7 +200,7 @@ spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max =
 #'@keywords internal
 #'@author J. Bedia
 #'@export
-#'@importFrom sp GridTopology SpatialGridDataFrame proj4string CRS
+#'@importFrom sp GridTopology SpatialGridDataFrame is.projected CRS
 #'@importFrom transformeR getShape aggregateGrid isRegular
 #'@examples 
 #' data("CFS_Iberia_tas")
@@ -289,7 +289,7 @@ clim2sgdf <- function(clim, set.min, set.max) {
   prj <- attr(grid$xyCoords, "projection")
   if (!is.null(prj)) {
     testprj <- tryCatch({CRS(prj)}, error = function(e) {NULL})
-    if (!is.null(testprj)) proj4string(df) <- prj
+    if (!is.null(testprj)) sp::proj4string(df) <- prj
   }
   return(df)
 }
