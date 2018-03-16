@@ -138,13 +138,16 @@
 #' spatialPlot(climatology(VALUE_Iberia_pr), backdrop.theme = "countries")
 
 
+
 spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL, lonCenter = NULL, ...) {
   arg.list <- list(...)
   bt <- match.arg(backdrop.theme, choices = c("none", "coastline", "countries"))
   if (!is.null(set.min) && !is.numeric(set.min)) stop("Invalid 'set.min' value")
   if (!is.null(set.min) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
   ## add climatology:fun attribute if getShape(grid, "time") = 1
-  if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "undefined"
+  if (is.null(attr(grid$Data, "climatology:fun"))) {
+    if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "none"
+  }
   ## Change lon center
   if (!is.null(lonCenter)) {
     indcenter <- which(abs(grid$xyCoords$x - lonCenter) == min(abs(grid$xyCoords$x - lonCenter)))
