@@ -83,16 +83,20 @@ tas.cfs2 <- subsetGrid(tas.cfs, lonLim = c(-10, 35), latLim = c(35,70), years = 
 #interpolate
 tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
 #calculate reliability
-rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,  
-                                 n.bins = 5, n.boot = 10, 
+rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
+                                 n.bins = 5, n.boot = 10,
                                  regions = PRUDENCEregions,
                                  return.diagrams = TRUE)
-rel.reg
-                                 
-rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2, 
+rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
                              n.bins = 5, n.boot = 10)
+# Irregular grids
+data("VALUE_Iberia_tas")
+data("CFS_Iberia_tas")
+obs <- aggregateGrid(VALUE_Iberia_tas, aggr.y = list(FUN= mean))
+hind <- aggregateGrid(interpGrid(NCEP_Iberia_tas, getGrid(obs)), aggr.y = list(FUN= mean))
+rel <- reliabilityCategories(hindcast = hind, obs = obs,
+                             n.bins = 7, n.boot = 10)
 }
-
 }
 \references{
 Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162

@@ -63,6 +63,21 @@
 #' 
 #' If \code{return.diagrams} is TRUE, a list of two objects is returned, the grid object (\code{$grid}) and a trellis class object (\code{$plot}). 
 #' 
+#' 
+#' @export
+#' @author R. Manzanas \& M.Iturbide
+# @import verification
+# @import plot3D
+#' @importFrom transformeR getGrid redim getDim bindGrid.member
+#' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
+#' @importFrom graphics plot.new abline polygon text grid title
+#' @importFrom stats na.omit
+#' @import lattice
+#' 
+#' @family visualization functions
+#' 
+#' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
+#' @references Manzanas, R., Lucero, A., Weisheimer, A., Guti\'errez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
 #' @examples \dontrun{
 #' data("tas.cfs")
 #' data("tas.ncep")
@@ -74,32 +89,20 @@
 #' #interpolate
 #' tas.cfs2.int <- interpGrid(tas.cfs2, getGrid(tas.ncep2))
 #' #calculate reliability
-#' rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,  
-#'                                  n.bins = 5, n.boot = 10, 
+#' rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
+#'                                  n.bins = 5, n.boot = 10,
 #'                                  regions = PRUDENCEregions,
 #'                                  return.diagrams = TRUE)
-#' rel.reg
-#'                                  
-#' rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2, 
+#' rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
 #'                              n.bins = 5, n.boot = 10)
+#' # Irregular grids
+#' data("VALUE_Iberia_tas")
+#' data("CFS_Iberia_tas")
+#' obs <- aggregateGrid(VALUE_Iberia_tas, aggr.y = list(FUN= mean))
+#' hind <- aggregateGrid(interpGrid(NCEP_Iberia_tas, getGrid(obs)), aggr.y = list(FUN= mean))
+#' rel <- reliabilityCategories(hindcast = hind, obs = obs,
+#'                              n.bins = 7, n.boot = 10)
 #' }
-#' 
-#' @export
-#' @author R. Manzanas \& M.Iturbide
-# @import verification
-# @import plot3D
-#' @importFrom transformeR getGrid redim getDim
-#' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
-#' @importFrom graphics plot.new abline polygon text grid title
-#' @importFrom stats na.omit
-#' @import lattice
-#' 
-#' @family visualization functions
-#' 
-#' @references Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forecasts. Journal of The Royal Society Interface 11, 20131162. doi:10.1098/rsif.2013.1162
-#' @references Manzanas, R., Lucero, A., Weisheimer, A., Guti\'errez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
-
-
 
 
 reliabilityCategories <- function(hindcast,
@@ -120,9 +123,9 @@ reliabilityCategories <- function(hindcast,
   if (!identical(getGrid(obs)$y, getGrid(hindcast)$y) | !identical(getGrid(obs)$x, getGrid(hindcast)$x)) {
     stop("obs and hindcast are not spatially consistent. Consider using function 'interpGrid' from package transformeR")
   }
-  sigboot <- 1-conf.level
+  sigboot <- 1 - conf.level
   layout <- rev(layout)
-  if(is.null(labels)) labels <- paste("Event", 1:n.events)
+  if (is.null(labels)) labels <- paste("Event", 1:n.events)
   red <- rgb(1, 0, 0, 1, names = "red", maxColorValue = 1)
   orange <- rgb(1, 0.65, 0.3, 1, names = "orange", maxColorValue = 1)
   yellow <- rgb(1, 1, 0, 1, names = "yellow", maxColorValue = 1)
@@ -131,31 +134,40 @@ reliabilityCategories <- function(hindcast,
   green <- rgb(0, 1, 0, 1, names = "green", maxColorValue = 1)
   
   regs <- regions
-  if(is.null(regs)){
+  if (is.null(regs)) {
     bbox <- getGrid(obs) 
     esquinas <- matrix(ncol = 2, nrow = 5)
-    esquinas[1,] <- c(bbox$x[1], bbox$y[1])
-    esquinas[2,] <- c(bbox$x[1], bbox$y[2])
-    esquinas[3,] <- c(bbox$x[2], bbox$y[2])
-    esquinas[4,] <- c(bbox$x[2], bbox$y[1])
-    esquinas[5,] <- c(bbox$x[1], bbox$y[1])
+    esquinas[1,] <- c(min(bbox$x), min(bbox$y))
+    esquinas[2,] <- c(min(bbox$x), max(bbox$y))
+    esquinas[3,] <- c(max(bbox$x), max(bbox$y))
+    esquinas[4,] <- c(max(bbox$x), min(bbox$y))
+    esquinas[5,] <- c(min(bbox$x), min(bbox$y))
     regs <- sp::SpatialPolygons(list(sp::Polygons(list(Polygon(list(esquinas))), ID = "region")))
   }
-  if(class(regs) == "SpatialPolygonsDataFrame"){
+  if (class(regs) == "SpatialPolygonsDataFrame") {
     regs <-  SpatialPolygons(regs@polygons)
   }
-  hindcast <- redim(hindcast)
-  memind <- which(getDim(hindcast)=="member")
-  timeind <- which(getDim(hindcast)=="time")
+  if (isRegular(obs)) {
+    hindcast <- redim(hindcast)
+  } else {
+    hindcast <- redim(hindcast, loc = TRUE)
+  }
+  memind <- which(getDim(hindcast) == "member")
+  timeind <- which(getDim(hindcast) == "time")
   nmem <- dim(hindcast$Data)[memind]
   ntime <- dim(hindcast$Data)[timeind]
-  coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
-  coords <- as.data.frame(cbind(coordinates[,2], coordinates[,1]))
+  coords <- obs$xyCoords
+  if (isRegular(obs)) {
+    coordinates <- expand.grid(obs$xyCoords$y, obs$xyCoords$x)
+    coords <- as.data.frame(cbind(coordinates[,2], coordinates[,1]))
+  }
   spoints <- SpatialPoints(coords)
   suppressMessages(
     obs.fin <- transformeR::climatology(obs)
   )
-  ob.full <- array3Dto2Dmat(obs$Data)
+  atrsobsfin <- attributes(obs.fin$Data)$dimensions
+  ob.full <- obs$Data
+  if (isRegular(obs)) ob.full <- array3Dto2Dmat(obs$Data)
   ob.clim <- array(dim = c(n.events, dim(ob.full)[-1]))
   lower <- array(dim = c(length(regs), (n.events)))
   rownames(lower) <- names(regs)
@@ -166,31 +178,33 @@ reliabilityCategories <- function(hindcast,
   ob.slope <- list("sl" = sl, "lower" = lower, "upper" = upper)
   ob.catname  <- array(dim = c(length(regs), (n.events)))
   rownames(ob.catname) <- names(regs)
-  for(l in 1:length(regs)){
+  for (l in 1:length(regs)) {
     o <- over(spoints, regs[l,])
     w <- which(!is.na(o))
     if (length(w) > 0) {
       ob <- ob.full[, w, drop = F]
       naregion <- length(which(is.na(ob)))/length(ob)
-      if(naregion <= na.rate){
+      if (naregion <= na.rate) {
         se <- array(dim = c(nmem, ntime, length(w)))
-        for(i in 1:nmem){
-          hindcastarray <- hindcast$Data[i,,,]
-          attr(hindcastarray, "dimensions") <-  attr(hindcast$Data, "dimensions")[-memind]
-          se[i,,] <- array3Dto2Dmat(hindcastarray)[, w]
+        if (isRegular(obs)) {
+          for (i in 1:nmem) {
+            se[i,,] <- array3Dto2Dmat(subsetGrid(hindcast, members = i)$Data)[,w, drop = FALSE]
+          }
+        } else {
+          se <- hindcast$Data[,,w, drop = FALSE]
         }
         #remove empty pixels
         naind.obs <- which(is.na(ob[1,]))
         naind.hindcast <- which(is.na(se[1,1,]))
         naind <- unique(c(naind.obs, naind.hindcast))
-        if(length(naind) != 0){
-          obna <- ob[,-naind]
-          sena <- se[,,-naind]
-        }else{
+        if (length(naind) != 0) {
+          obna <- ob[,-naind, drop = FALSE]
+          sena <- se[,,-naind, drop = FALSE]
+        } else {
           obna <- ob
           sena <- se
         }
-        if(!any(dim(obna) == 0)){
+        if (!any(dim(obna) == 0)) {
           message("[", Sys.time(), "] Calculating categories for region ", l, " out of ", length(regs))
           sl <- calculateReliability(obs = obna, hindcast = sena, n.events = n.events, n.bins = n.bins, n.boot = n.boot)
           
@@ -251,20 +265,26 @@ reliabilityCategories <- function(hindcast,
       }
     }}
   l.obs.fin <- list()
-  for(i in 1:n.events){
-    obs.fin$Data <- mat2Dto3Darray(as.matrix(ob.clim[i, , drop = F]), x = obs$xyCoords$x, y = obs$xyCoords$y)
+  for (i in 1:n.events) {
+    if (isRegular(obs)) {
+      obs.fin$Data <- mat2Dto3Darray(as.matrix(ob.clim[i, , drop = F]), x = obs$xyCoords$x, y = obs$xyCoords$y)
+    } else {
+      obs.fin$Data <- as.matrix(ob.clim[i, , drop = F])
+    }
+    attr(obs.fin$Data, "dimensions") <- atrsobsfin
     suppressMessages(
       cats <- transformeR::climatology(obs.fin)
     )
-    attr(cats$Variable, "longname") <- labels[i]
     l.obs.fin[[i]] <- cats
   }
-  mg <- makeMultiGrid(l.obs.fin)
+  mg <- bindGrid.member(l.obs.fin)
+  mg$Members <- gsub(pattern = " ", replacement = "_", x = labels)
   if (diagrams) {
-    if(length(regs) > 1){
-      pc <- transformeR::plotClimatology(mg,  backdrop.theme = backdrop.theme, at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
+    if (length(regs) > 1) {
+      pc <- spatialPlot(mg,  backdrop.theme = backdrop.theme, at = c(0.5,1.5,2.5,3.05,3.55,4.5,5.5), 
                                          col.regions = c(red, orange, yellow, darkyellow, cyan, green),
                                          layout = layout,
+                        sp.layout = list(list(regs, first = F, col = "gray")),
                                          colorkey = list(labels = list( 
                                            cex = 1,
                                            at = c(1, 2, 2.75, 3.25, 4, 5), 
@@ -275,8 +295,8 @@ reliabilityCategories <- function(hindcast,
       y1 <- 1/n.events
       x2 <- 1
       y2 <- (1/n.events) + (0.5*(1-(1/n.events)))
-      a <- (y2-y1)/(x2-x1)
-      b <- y1-((x1*(y2-y1))/(x2-y1))
+      a <- (y2 - y1)/(x2 - x1)
+      b <- y1 - ((x1*(y2 - y1))/(x2 - y1))
       
       y <- unlist(obsfreq)
       ylimcat <- 0.6
@@ -285,10 +305,10 @@ reliabilityCategories <- function(hindcast,
       # w <- rep(labels, each = n.bins)
       
       a_lower <- ob.slope$lower #slope_lower 
-      b_lower <-(1-ob.slope$lower)/n.events
+      b_lower <- (1 - ob.slope$lower)/n.events
       ## upper bound
       a_upper <- ob.slope$upper
-      b_upper <- (1-ob.slope$upper)/n.events
+      b_upper <- (1 - ob.slope$upper)/n.events
       
       
       # Customized Lattice Example
@@ -298,7 +318,7 @@ reliabilityCategories <- function(hindcast,
                                y = list(at = seq(0,1,round(1/n.bins, digits = 2)),
                                         labels = seq(0,1,round(1/n.bins, digits = 2))),
                                
-                               cex=.8, col="black"),
+                               cex = .8, col = "black"),
                    panel=function(x, y, z, ...) {
                      # panel.locfit(...)
                      
@@ -400,29 +420,30 @@ reliabilityCategories <- function(hindcast,
     print(pc)
   }
   result.grid <- mg
-  attr(result.grid$Data, "dimensions") <- c("cat", "var", "member", "time", "lat", "lon")
+  if (isRegular(obs)) attr(result.grid$Data, "dimensions") <- c("member", "time", "lat", "lon")
+  attr(result.grid$Data, "dimensions") <- c("member", "time", "loc")
   attr(result.grid$Data, "climatology:fun") <- NULL
   result <- list()
-  colnames(ob.catname) <- attr(mg$Variable, "longname")
+  colnames(ob.catname) <- mg$Members
   result$catname <- ob.catname
-  colnames(ob.slope$sl) <- attr(mg$Variable, "longname")
-  colnames(ob.slope$lower) <- attr(mg$Variable, "longname")
-  colnames(ob.slope$upper) <- attr(mg$Variable, "longname")
+  colnames(ob.slope$sl) <- mg$Members
+  colnames(ob.slope$lower) <- mg$Members
+  colnames(ob.slope$upper) <- mg$Members
   result$slope <- ob.slope
   message("[", Sys.time(), "] Done.")
   result.grid$ReliabilityCategories <- result
   attr(result.grid$ReliabilityCategories, "observations") <- attr(obs, "dataset")
-  result.grid$Variable$varName <- result.grid$Variable$varName[1]
-  result.grid$Variable$level <- NA
-  attr(result.grid$Variable, "units") <- attr(result.grid$Variable, "units")[1]
-  attr(result.grid$Variable, "use_dictionary") <- attr(result.grid$Variable, "use_dictionary")[1]
-  attr(result.grid$Variable, "description") <- attr(result.grid$Variable, "description")[1]
-  attr(result.grid$Variable, "daily_agg_cellfun") <- attr(result.grid$Variable, "daily_agg_cellfun")[1]
-  attr(result.grid$Variable, "monthly_agg_cellfun") <- attr(result.grid$Variable, "monthly_agg_cellfun")[1]
-  attr(result.grid$Variable, "verification_time") <- attr(result.grid$Variable, "verification_time")[1]
-  attr(result.grid$Variable, "annual_agg_cellfun") <- attr(result.grid$Variable, "annual_agg_cellfun")[1]
-  attr(result.grid$Variable, "longname") <- NULL
-  if(return.diagrams & diagrams){
+  # result.grid$Variable$varName <- result.grid$Variable$varName[1]
+  # result.grid$Variable$level <- NA
+  # attr(result.grid$Variable, "units") <- attr(result.grid$Variable, "units")[1]
+  # attr(result.grid$Variable, "use_dictionary") <- attr(result.grid$Variable, "use_dictionary")[1]
+  # attr(result.grid$Variable, "description") <- attr(result.grid$Variable, "description")[1]
+  # attr(result.grid$Variable, "daily_agg_cellfun") <- attr(result.grid$Variable, "daily_agg_cellfun")[1]
+  # attr(result.grid$Variable, "monthly_agg_cellfun") <- attr(result.grid$Variable, "monthly_agg_cellfun")[1]
+  # attr(result.grid$Variable, "verification_time") <- attr(result.grid$Variable, "verification_time")[1]
+  # attr(result.grid$Variable, "annual_agg_cellfun") <- attr(result.grid$Variable, "annual_agg_cellfun")[1]
+  # attr(result.grid$Variable, "longname") <- NULL
+  if (return.diagrams & diagrams) {
     return(list("grid" = result.grid, "plot" = pc))
   }else{
     return(result.grid)
@@ -517,10 +538,10 @@ calculateReliability <- function(obs, hindcast, n.events = n.events, n.bins = n.
     indnodperm <- sample(1:dim(obs)[2], dim(obs)[2], replace = TRUE)
     
     P.prob.boot <- array(NA, c(n.events, nyear, dim(obs)[2]))
-    Pcat.boot <- P$cat[indmembperm, indyearperm, indnodperm]
+    Pcat.boot <- P$cat[indmembperm, indyearperm, indnodperm, drop = FALSE]
     for (inod in 1:dim(obs)[2]) {
       for (ibins in 1:n.events) {
-        P.prob.boot[ibins, , inod] <- apply(Pcat.boot[, , inod] == ibins, 2, sum) / nmemb
+        P.prob.boot[ibins, , inod] <- apply(Pcat.boot[, , inod,drop = FALSE] == ibins, 2, sum) / nmemb
         # P.prob.boot[ibins, , inod] <- apply(P$cat[, , inod] == ibins, 2, sum) / nmemb
       }
     }
@@ -528,7 +549,7 @@ calculateReliability <- function(obs, hindcast, n.events = n.events, n.bins = n.
     # O <- obs2bin(obs[indyearperm, indnodperm], n.events)
     # P <- hindcast2prob(hindcast[indmembperm, indyearperm, indnodperm], n.events)
     
-    aux <- concatenateDataRelDiagram_v2(O$bin[, indyearperm, indnodperm], P.prob.boot, n.bins)  
+    aux <- concatenateDataRelDiagram_v2(O$bin[, indyearperm, indnodperm, drop = FALSE], P.prob.boot, n.bins)  
     # aux <- concatenateDataRelDiagram_v2(O$bin, P$prob, n.bins)  
     for (ibins in 1:n.events) {   
       
