@@ -27,6 +27,8 @@
 #' @param lty Numeric for line type.
 #' @param missing.dates Logical. Not implemented (see Details).
 #' @param show.na Logical. Implemented but under development (see Details). 
+#' @param x.axis Character controlling the x axis. Options are "dates" (default) or "index".
+#' The first plots the data according to the date and missing dates are filled with NAs.
 #' @param xyplot.custom List of arguments as passed to xyplot. Argument \code{panel} cannot be modified, thus,
 #' if specified, it will be ignored. 
 #' @details The function applies the \code{\link[lattice]{xyplot}} method after computing spatial aggregation 
@@ -73,6 +75,7 @@
 #' temporalPlot("EOBS" = b, "CFS" = a,
 #'              xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
 #' temporalPlot(list("EOBS" = b, "CFS" = a))
+#' temporalPlot(list("EOBS" = b, "CFS" = a), x.axis = "index" )
 #' # Station and grid data can be combined, also different temporal ranges
 #' v <- subsetGrid(VALUE_Iberia_tas, years = 1988:1990)
 #' temporalPlot("VALUE" = v, "EOBS" = b, "CFS" = a, lwd = 0.9,
@@ -95,8 +98,9 @@ temporalPlot <- function(...,
                          lty = 1,
                          missing.dates = TRUE,
                          show.na = FALSE,
+                         x.axis = c("dates", "index"),
                          xyplot.custom = list()) {
-  
+  x.axis <- match.arg(arg = x.axis, choices = c("dates", "index"))
   obj.list <- list(...)
   if (gridDepth(obj.list) > 3) obj.list <- unlist(obj.list, recursive = FALSE)
   if (is.null(names(obj.list))) {
@@ -112,9 +116,15 @@ temporalPlot <- function(...,
     do.call("apply", aggr.spatial)
   })
   # extract dates
-  dates <- lapply(1:length(obj.list), function(x){
-    as.Date(obj.list[[x]]$Dates$start)
-  })
+  dates <- if (x.axis == "dates") {
+      lapply(1:length(obj.list), function(x){
+        as.Date(obj.list[[x]]$Dates$start)
+      })
+    } else if (x.axis == "index") {
+      lapply(1:length(obj.list), function(x){
+        1:getShape(obj.list[[x]])["time"]
+      })
+    }
   # member aggregation
   mm <- lapply(data, FUN = apply, MARGIN = 2,  mean)
   mx <- lapply(data, FUN = apply, MARGIN = 2,  max)
@@ -127,7 +137,7 @@ temporalPlot <- function(...,
       return(df0)
     })
   # complete temporal series
-  df <- lapply(df, FUN = pad) # uses package padr to fill dates in the data.frame. Should we implement alternative code?
+  if (x.axis == "dates") df <- lapply(df, FUN = pad) # uses package padr to fill dates in the data.frame. Should we implement alternative code?
   # prepare inter-NA chunks for panel.polygon
   df.polys <- lapply(1:length(df), function(i){
     chunkid <- rle(!is.na(df[[i]]$Value))$values
@@ -164,6 +174,9 @@ temporalPlot <- function(...,
                                           col = cols[1:length(obj.list)],
                                           cex = .5),
                                  text = list(names(obj.list), cex = .8))
+  vseq <- seq(xlim[1], xlim[2],(xlim[2] - xlim[1])/10)
+  hseq <- seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10))
+  if (x.axis == "index") vseq <- floor(vseq)
   # crate trellis objects
   xy <- lapply(1:length(df), function(i){
     col <- cols[i]
@@ -183,10 +196,10 @@ temporalPlot <- function(...,
                       border = NA, col = "gray90")
         }
       }
-      panel.xyplot(df[[i]]$Dates, df[[i]]$Value, type = "l", lwd = lwd, lty = ltyi, col = col)
-      panel.abline(h = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10)), 
-                   v = seq(xlim[1], xlim[2],(xlim[2] - xlim[1])/10), 
-                   col = "gray65", lwd = 0.5, lty = 2)
+      panel.xyplot(df[[i]]$Dates, df[[i]]$Value, type = "l", 
+                   lwd = lwd, lty = ltyi, col = col)
+      panel.abline(h = hseq, v = vseq, 
+                     col = "gray65", lwd = 0.5, lty = 2)
     }
     
     do.call("xyplot", xyplot.custom)
