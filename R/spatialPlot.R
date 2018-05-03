@@ -146,7 +146,7 @@ spatialPlot <- function(grid, backdrop.theme = "none", set.min = NULL, set.max =
   if (!is.null(set.min) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
   ## add climatology:fun attribute if getShape(grid, "time") = 1
   if (is.null(attr(grid$Data, "climatology:fun"))) {
-    if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "none"
+    if (!"time" %in% getDim(redim(grid, drop = T))) attr(grid$Data, "climatology:fun") <- "none"
   }
   ## Change lon center
   if (!is.null(lonCenter)) {
