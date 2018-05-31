@@ -165,17 +165,23 @@ temporalPlot <- function(...,
   if (is.null(xyplot.custom[["lwd"]])) xyplot.custom[["lwd"]] <- 2
   ylim <- xyplot.custom[["ylim"]]
   xlim <- xyplot.custom[["xlim"]]
+  digs <- 0
+  if ((max(ylim) - min(ylim)) < 1) {
+        digs <- 2 
+  } else if ((max(ylim) - min(ylim)) < 5) {
+        digs <- 1
+  }
   if (is.null(xyplot.custom[["scales"]])) xyplot.custom[["scales"]] <- list(x = list(at = seq(xlim[1], xlim[2],(xlim[2] - xlim[1])/10),
                                          labels = seq(xlim[1], xlim[2],(xlim[2] - xlim[1])/10), rot = 45),
-                       y = list(at = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10)),
-                                labels = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10))),
+                       y = list(at = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs)),
+                                labels = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))),
               cex = .6, col = "black")
   if (is.null(xyplot.custom[["key"]])) xyplot.custom[["key"]] <- list(space = "right", points = list(pch = 15, 
                                           col = cols[1:length(obj.list)],
                                           cex = .5),
                                  text = list(names(obj.list), cex = .8))
   vseq <- seq(xlim[1], xlim[2],(xlim[2] - xlim[1])/10)
-  hseq <- seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10))
+  hseq <- seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))
   if (x.axis == "index") vseq <- floor(vseq)
   # crate trellis objects
   xy <- lapply(1:length(df), function(i){
