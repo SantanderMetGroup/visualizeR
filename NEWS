@@ -1,4 +1,4 @@
-visualizeR 1.1.1
+visualizeR 1.1.2
 =================
 
-* Bug fix in the example of `spatialPlot` (the drawbacks of using \dontrun{} ...) 
+* Change default color theme in `spatialPlot`, and integrate with `RColorBrewer` themes
