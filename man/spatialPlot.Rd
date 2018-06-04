@@ -20,9 +20,8 @@ spatialPlot(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL,
 
 \item{color.theme}{A character string indicating the color theme to use in the map. 
 Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
-the \code{"jet.colors"} palette can be used (the vilified rainbow colors), for backwards 
-compatibility and because despite criticisms, it is still widely used.
-Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.
+the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
+ for backwards compatibility. Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.
  NOTE: the \code{color.theme} argument will be overriden if the \code{col.regions} option from \code{spplot} is used.}
 
 \item{rev.colors}{Should the chosen color theme be reversed? (default to \code{FALSE},
