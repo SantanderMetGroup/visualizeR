@@ -104,7 +104,6 @@
 #'     tmpfile <- tempfile()
 #'     download.file(url = file.url, destfile = tmpfile)
 #'     readRDS(tmpfile)
-#'     close.
 #' }
 #' hindcast <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.cfs.enso34.rds")
 #' forecast <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.cfs.2016.enso34.rds")
