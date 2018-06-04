@@ -1,4 +1,4 @@
-visualizeR 1.1.1
-=================
+visualizeR 1.2.0
+================
 
-* Bug fix in the example of `spatialPlot` (the drawbacks of using \dontrun{} ...) 
+* Added a `climagram` implementation, with optional inclusion of (fair) RPS and CRPS info
