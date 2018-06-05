@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-visualizeR 1.1.2
-=================
-
-* Change default color theme in `spatialPlot`, and integrate with `RColorBrewer` themes
-=======
 visualizeR 1.2.0
 ================
 
-* Added a `climagram` implementation, with optional inclusion of (fair) RPS and CRPS info
->>>>>>> climagram
+* Added a `climagram` implementation, with optional inclusion of (fair) CRPS info
+

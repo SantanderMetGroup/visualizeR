@@ -39,8 +39,9 @@ normal. See Details.}
 Ignored if no \code{obs} is passed. See Details}
 }
 \value{
-Plots a climagram. Note that the number of forecast members falling within each (hindcast) terciles 
-are indicated as figures on the right of the forecast box/violins.
+Plots a climagram. The number of forecast members falling within each (hindcast) terciles 
+are indicated as figures on the right of the forecast boxes/violins. Some degree of transparency is given
+to the forecast boxes/violins to avoid a potential masking of underlying information.
 }
 \description{
 A climagram is a box plot for visualization of a seasonal forecast with added EQC information from the hindcast
@@ -51,41 +52,46 @@ A climagram is a box plot for visualization of a seasonal forecast with added EQ
 
 The product is conceived to display forecast information in an operative framework. However, for
 testing purposes, a target year from the hindcast can be extracted via the \code{year.target} argument and 
-treated as the forecast year. Note that all the hindcast statistics (including the optional detrending) 
-will be computed after extracting the target year from the hindcast.
+treated as the forecast year (see last example). Note that all the hindcast statistics 
+(including the optional detrending) will be computed after extracting the target year from the hindcast 
+(and the observations).
 
 \strong{Spatial averaging}
 
- For spatial domains encompassing multiple points/grid points, the spatial average is first computed to obtain a
- unique series for the whole domain vias \code{link[transformeR]{aggregateGrid}} (latitudial weighting is used).
+For spatial domains encompassing multiple points/grid points, the spatial average is first computed to obtain a
+unique series for the whole domain via \code{link[transformeR]{aggregateGrid}} (latitudial cosine 
+weighting is used).
 
 \strong{Forecast/Hindcast representation}
   
- In order to represent the forecast and hindcast information, \dQuote{violins} are used as default,
-  although boxplots (see \code{\link[graphics]{boxplot}}) can be obtained by setting 
-  argument \code{violin} to \code{FALSE}. For further details on violin construction see
-   the documentation of funtion \code{\link[vioplot]{vioplot}}.
+In order to represent the forecast and hindcast information, \dQuote{violins} are used as default,
+although boxplots (see \code{\link[graphics]{boxplot}}) can be obtained by setting 
+argument \code{violin} to \code{FALSE}. For further details on violin construction see
+the documentation of the function \code{\link[vioplot]{vioplot}}.
  
- Note that the hindcast climatology is calculated by considering the annual multimember averages.
-
 \strong{Using anomalies}
 
-By default, the function will compute anomalies. In this case, the forecast anomalies 
+By default, anomalies are displayed. In this case, the forecast anomalies 
 will be calculated considering the hindcast climatology (see next section for details). 
 
 \strong{Climatological reference period}
-  
+
+The hindcast climatology is calculated by considering the annual multimember averages
+ (i.e., the univariate annual time series of ensemble means).
+    
 By default, the climatology is computed for the entire seasonal slice of the forecast. For instance,
 suppose a forecast for DJF. By default, the DJF anomaly will be computed by subtracting to the 
-January forecast the DJF climatology, and so on. If set to \code{"monthly"}, the climatology
-is computed sepparately for each month, so the anomalies for January will be computed using the January
- climatology, the February anomalies using the February climatology and so on.
-  See argument \code{"time.frame"} of \code{\link[transformeR]{scaleGrid}} for more details.
+January forecast the DJF climatology, to February the same DJF climatology and so on.
+If set to \code{"monthly"}, the climatology is computed sepparately for each month, so the anomalies
+for January will be computed using the January climatology, the February anomalies using the February
+climatology and so on.
+See argument \code{"time.frame"} of \code{\link[transformeR]{scaleGrid}}, to which the \code{clim.time.frame}
+argument is passed, for more details.
 
 \strong{EQC Information}  
 
 EQC (Evaluation and Quality Control) information can be optionally added to the plot. This is the default behaviour when 
-\code{obs} is supplied. Here CRPS (bias-sensitive) and RPS (bias-insensitive) EQC measures are considered.
+\code{obs} is supplied. Here the CRPS (bias-sensitive) measure is considered.
 }
 \note{
 All inputs for this function must be at a monthly temporal resolution.
@@ -108,10 +114,12 @@ climagram(hindcast = hindcast, forecast = forecast, violin = TRUE, obs = NULL)
 climagram(hindcast = hindcast, forecast = forecast, violin = FALSE, obs = NULL)
 # Instead of anomalies, raw values can be used: 
 climagram(hindcast = hindcast, forecast = forecast, use.anomalies = FALSE)
-# Observations are depicted by the backgroud shadows (median indicated by the dotted line):
-# (RPS and CRPS are added by default when observations are included)
+# Observation quartiles are depicted by the backgroud shadows (median indicated by the dotted line):
+# CRPS is added by default when observations are included:
 obs <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.ncep.enso34.rds")
 climagram(hindcast = hindcast, forecast = forecast, obs = obs)
+# An arbitrary year can be extracted from the hindcast to be used as forecast
+climagram(hindcast = hindcast, year.target = 2001, obs = obs)
 }
 }
 \seealso{
