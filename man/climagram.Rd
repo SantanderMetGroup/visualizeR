@@ -39,8 +39,8 @@ normal. See Details.}
 Ignored if no \code{obs} is passed. See Details}
 }
 \value{
-Plots a climagram. Note that the number of forecast members falling within each (hindcast) tercile are indicated as figures on the 
-right of the forecast box/violins.
+Plots a climagram. Note that the number of forecast members falling within each (hindcast) terciles 
+are indicated as figures on the right of the forecast box/violins.
 }
 \description{
 A climagram is a box plot for visualization of a seasonal forecast with added EQC information from the hindcast
@@ -90,7 +90,7 @@ EQC (Evaluation and Quality Control) information can be optionally added to the 
 \note{
 All inputs for this function must be at a monthly temporal resolution.
 
-The computation of climatological terciles requires a representative period to obtain meaningful results.
+The computation of climatological quantiles requires a representative period to obtain meaningful results.
 }
 \examples{
 \dontrun{
@@ -98,7 +98,6 @@ my_load <- function(file.url, verbose = TRUE) {
     tmpfile <- tempfile()
     download.file(url = file.url, destfile = tmpfile)
     readRDS(tmpfile)
-    close.
 }
 hindcast <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.cfs.enso34.rds")
 forecast <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.cfs.2016.enso34.rds")
