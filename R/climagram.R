@@ -38,8 +38,8 @@
 #' 
 #' @return 
 #' 
-#' Plots a climagram. Note that the number of forecast members falling within each (hindcast) tercile are indicated as figures on the 
-#' right of the forecast box/violins.
+#' Plots a climagram. Note that the number of forecast members falling within each (hindcast) terciles 
+#' are indicated as figures on the right of the forecast box/violins.
 #' 
 #' @details 
 #' 
@@ -87,7 +87,7 @@
 #' 
 #' All inputs for this function must be at a monthly temporal resolution.
 #' 
-#' The computation of climatological terciles requires a representative period to obtain meaningful results.
+#' The computation of climatological quantiles requires a representative period to obtain meaningful results.
 #'  
 #' @author J. Bedia
 #' 
@@ -95,9 +95,9 @@
 #' @importFrom transformeR subsetGrid checkDim checkSeason aggregateGrid detrendGrid getYearsAsINDEX getTimeResolution scaleGrid getSeason
 #' @importFrom stats filter median
 #' @importFrom graphics plot axis grid boxplot box legend
-#' @importFrom magrittr %>% extract2
+#' @importFrom magrittr %>% extract2 %<>% 
 #' @importFrom vioplot vioplot
-#' @importFrom SpecsVerification FairRps FairCrps
+#' @importFrom SpecsVerification FairCrps
 #' @export
 #' @examples \dontrun{
 #' my_load <- function(file.url, verbose = TRUE) {
@@ -149,7 +149,10 @@ climagram <- function(hindcast,
         if (!year.target %in% yrs) stop("Target year outside temporal hindcast range", call. = FALSE)
         year.hind <- setdiff(yrs, year.target)
         forecast <- subsetGrid(hindcast, years = year.target, drop = FALSE)
-        hindcast <- subsetGrid(hindcast, years = year.hind, drop = FALSE)
+        hindcast  %<>%  subsetGrid(years = year.hind, drop = FALSE)
+        if (!is.null(obs)) {
+            obs %<>% subsetGrid(years = year.hind, drop = FALSE)
+        }
     } else {
         transformeR::checkDim(hindcast, forecast, dimensions = c("member", "lat", "lon"))    
         checkSeason(hindcast, forecast)
@@ -161,6 +164,8 @@ climagram <- function(hindcast,
         if (add.eqc.info) add.eqc.info <- FALSE
         message("NOTE: 'add.eqc.info' was set to FALSE, as no observations were provided")
     }
+    eastings <- getGrid(forecast)$x %>% round() %>% paste(collapse = " : ") %>% paste("E")
+    northings <- getGrid(forecast)$y %>% round() %>% paste(collapse = " : ") %>% paste("N")
     # Detrend
     if (detrend) {
         message("[", Sys.time(),"] Detrending ...")
@@ -203,9 +208,16 @@ climagram <- function(hindcast,
     ylim <- c(lowerbound, upperbound)
     sea <- getSeason(hindcast)
     # plotting ---------------------------------
-    par(bg = "white", mar = c(2.5,3,4,1.5))
+    vn <- forecast$Variable$varName
+    uds <- attr(forecast$Variable, "units")
+    ylab <- if (use.anomalies) {
+        paste(vn, "anomaly")
+    } else {
+        paste0(vn, " (", uds, ")")
+    }
+    par(bg = "white", mar = c(2.5,4,4,1.5))
     plot(1:(length(sea) + 2), seq(lowerbound, upperbound, length.out = length(sea) + 2),
-         ty = "n", axes = FALSE, xlab = "", ylab = "", ylim = ylim)
+         ty = "n", axes = FALSE, xlab = "", ylab = ylab, ylim = ylim)
     tick.pos <-  1:(length(sea) + 2) - .25
     axis(1, at = tick.pos, labels = c("", month.name[getSeason(hindcast)], ""))
     axis(2, las = 1)
@@ -215,7 +227,7 @@ climagram <- function(hindcast,
     # Observations ------------------------
     if (!is.null(obs)) {
         ref <- sapply(sea, function(x) subsetGrid(obs, season = x) %>% extract2("Data"))
-        q.obs <- apply(ref, MARGIN = 2, FUN = "quantile", prob = c(0, 1/3, 1/2, 2/3, 1), na.rm = TRUE)
+        q.obs <- apply(ref, MARGIN = 2, FUN = "quantile", prob = 0:4/4, na.rm = TRUE)
         # Climatology tercile shadows -----------
         polygon(c(x.pos, rev(x.pos)), y = c(q.obs[1, ], rev(q.obs[5, ])), border = NA, col = "grey80") 
         polygon(c(x.pos, rev(x.pos)), y = c(q.obs[2, ], rev(q.obs[4, ])), border = NA, col = "grey40") 
@@ -253,7 +265,7 @@ climagram <- function(hindcast,
     }
     # Text members per tercile ------------------
     for (i in 1:length(sea)) {
-        x.text <- x.pos[i] + .3
+        x.text <- x.pos[i] + .33
         which(fore[,i] > ter.hind[2,i]) %>% length() %>% text(x = x.text, y = max(fore[,i], na.rm = TRUE))    
         which(fore[,i] > ter.hind[1,i] & fore[,i] <= ter.hind[2,i]) %>% length() %>% text(x = x.text, y = median(fore[,i], na.rm = TRUE))    
         which(fore[,i] <= ter.hind[1,i]) %>% length() %>% text(x = x.text, y = min(fore[,i], na.rm = TRUE))
@@ -264,11 +276,11 @@ climagram <- function(hindcast,
                    pt.bg = c("white", "thistle"), bty = "n", pt.cex = 2)
         } else {
             legend("right",
-                   legend =  c("forecast", "hindcast", "obs T1/T3", "obs T2", "obs med"),
+                   legend =  c("forecast", "hindcast", "obs Q1/Q4", "obs Q2/Q3", "obs med"),
                    pch = c(rep(22,4), 0), pt.cex = c(rep(2,4),1),
                    pt.bg = c("white", "thistle", "grey80", "grey40", NULL),
                    lty = c(rep(0,4), 2),
-                   bty = "n")
+                   bty = "n", cex = .9)
         }
     }
     # EQC information ------------------------------
@@ -277,26 +289,37 @@ climagram <- function(hindcast,
         ens <- suppressMessages(aggregateGrid(hindcast, aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% t()
         ob <- suppressMessages(redim(obs, member = FALSE) %>% aggregateGrid(aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% as.matrix() %>% drop()
         crps <- FairCrps(ens, ob) %>% mean() %>% round(digits = 2)
-        rps <- FairRps(ens, ob) %>% mean() %>% round(digits = 2)
-        legend("topright", c(paste0("RPS=", rps), paste0("CRPS=", crps)), bty = "n")
+        # rps <- FairRps(ens, ob) %>% mean() %>% round(digits = 2)
+        # legend("topright", c(paste0("RPS=", rps), paste0("CRPS=", crps)), bty = "n")
+        legend("topright", paste0("CRPS=", crps), bty = "n")
     }
     # Metadata info ---------------------------------
     fsname <- attr(hindcast, "dataset")
+    ind <- attr(forecast$Variable, "initMonth")
+    if (is.null(ind)) {
+        ind <- forecast$InitializationDates %>% unlist() %>% substr(start = 6, stop = 7) %>% as.integer() %>% max()    
+    }
+    init.month <- month.name[ind]
+    fyr <- getYearsAsINDEX(forecast) %>% unique()
+    seastring <- paste(substr(month.name[getSeason(hindcast)], 1, 1), collapse = "")
+    yrs <- getYearsAsINDEX(hindcast) %>% range() %>% paste(collapse = "-")
     l1 <- paste0("Forecasting System: ", fsname, " - ", getShape(hindcast, "member"), " members")
-    ind <- forecast$InitializationDates %>% unlist() %>% substr(start = 6, stop = 7) %>% as.integer() %>% max()
-    l2 <- paste(month.name[ind], "initializations")
+    l2 <- paste0(vn , " ", seastring, " - Forecast start: ", init.month, " ", fyr)
     l3 <- if (!is.null(obs)) {
         refname <- attr(obs, "dataset")
         paste0("Observing System: ", refname)
     } else {
         NULL  
     }     
-    vn <- hindcast$Variable$varName
-    seastring <- paste(substr(month.name[getSeason(hindcast)], 1, 1), collapse = "")
-    yrs <- getYearsAsINDEX(hindcast) %>% range() %>% paste(collapse = "-")
-    l4 <- paste0(vn , " - ", seastring, " (", yrs ,")")
-    main <- ifelse(!is.null(l3), paste(l1, l2, l3, l4, sep = "\n"), paste(l1, l2, l4, sep = "\n"))
+    l4 <- if (is.null(year.target)) {
+        paste0("Reference period: ", yrs)  
+    } else {
+        paste0("Reference period: ", yrs, " (excluding ", year.target, ")")  
+    }
+    main <- ifelse(!is.null(l3), paste(l2, l1, l3, l4, sep = "\n"), paste(l2, l1, l4, sep = "\n"))
     title(main = list(main, cex = .9, col = "blue", font = 1), adj = 0)
+    geo <- paste("", northings, eastings, sep = "\n")
+    title(main = list(geo, cex = .9, col = "blue", font = 1), adj = 1)
     message("[", Sys.time(),"] Done")        
 }
 # End
