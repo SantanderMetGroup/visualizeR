@@ -192,7 +192,7 @@ climagram <- function(hindcast,
         hindcast <- suppressMessages(aggregateGrid(hindcast, aggr.lon = list(FUN = "mean", na.rm = TRUE))) %>% drop()
         forecast <- suppressMessages(aggregateGrid(forecast, aggr.lon = list(FUN = "mean", na.rm = TRUE))) %>% drop()
         if (!is.null(obs)) {
-            obs <- suppressMessages(aggregateGrid(obs, aggr.lon = list(FUN = "mean", na.rm = TRUE))) %>% drop()
+            obs <- suppressMessages(aggregateGrid(obs, aggr.lon = list(FUN = "mean", na.rm = TRUE)))# %>% drop()
         }
     }
     # Plotting part
@@ -275,7 +275,7 @@ climagram <- function(hindcast,
     if (add.eqc.info) {
         message("[", Sys.time(),"] Calculating CRPS and RPS...")
         ens <- suppressMessages(aggregateGrid(hindcast, aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% t()
-        ob <- suppressMessages(aggregateGrid(obs, aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% t() %>% drop()
+        ob <- suppressMessages(redim(obs, member = FALSE) %>% aggregateGrid(aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% as.matrix() %>% drop()
         crps <- FairCrps(ens, ob) %>% mean() %>% round(digits = 2)
         rps <- FairRps(ens, ob) %>% mean() %>% round(digits = 2)
         legend("topright", c(paste0("RPS=", rps), paste0("CRPS=", crps)), bty = "n")
@@ -283,6 +283,7 @@ climagram <- function(hindcast,
     # Metadata info ---------------------------------
     fsname <- attr(hindcast, "dataset")
     l1 <- paste0("Forecasting System: ", fsname, " - ", getShape(hindcast, "member"), " members")
+    ind <- forecast$InitializationDates %>% unlist() %>% substr(start = 6, stop = 7) %>% as.integer() %>% max()
     l2 <- paste(month.name[ind], "initializations")
     l3 <- if (!is.null(obs)) {
         refname <- attr(obs, "dataset")
@@ -294,7 +295,6 @@ climagram <- function(hindcast,
     seastring <- paste(substr(month.name[getSeason(hindcast)], 1, 1), collapse = "")
     yrs <- getYearsAsINDEX(hindcast) %>% range() %>% paste(collapse = "-")
     l4 <- paste0(vn , " - ", seastring, " (", yrs ,")")
-    ind <- forecast$InitializationDates %>% unlist() %>% substr(start = 6, stop = 7) %>% as.integer() %>% max()
     main <- ifelse(!is.null(l3), paste(l1, l2, l3, l4, sep = "\n"), paste(l1, l2, l4, sep = "\n"))
     title(main = list(main, cex = .9, col = "blue", font = 1), adj = 0)
     message("[", Sys.time(),"] Done")        
