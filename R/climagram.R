@@ -35,6 +35,8 @@
 #' normal. See Details. 
 #' @param add.eqc.info Should EQC (Evaluation and Quality Control) information be added onto the plot?.
 #' Ignored if no \code{obs} is passed. See Details
+#' @param tercile.member.counts Logical flag indicating whether the number of forecast members in each tercile
+#' category should be indicated in the plot. Default to \code{TRUE}.
 #' 
 #' @return 
 #' 
@@ -103,7 +105,9 @@
 #' @importFrom graphics plot axis grid boxplot box legend
 #' @importFrom magrittr %>% extract2 %<>% 
 #' @importFrom vioplot vioplot
-#' @importFrom SpecsVerification FairCrps
+#' @importFrom easyVerification indRef generateRef
+#' @importFrom SpecsVerification EnsCrps SkillScore
+#' @importFrom grDevices adjustcolor
 #' @export
 #' @examples \dontrun{
 #' my_load <- function(file.url, verbose = TRUE) {
@@ -138,7 +142,8 @@ climagram <- function(hindcast,
                       detrend = FALSE,
                       add.legend = TRUE,
                       clim.time.frame = "none",
-                      add.eqc.info = TRUE) {
+                      add.eqc.info = TRUE,
+                      tercile.member.counts = TRUE) {
     # Check data dimension from the original data sets
     message("[", Sys.time(),"] Checking input consistency ...")
     stopifnot(is.logical(detrend))
@@ -147,6 +152,7 @@ climagram <- function(hindcast,
     stopifnot(is.logical(add.points))
     stopifnot(is.logical(add.legend))
     stopifnot(is.logical(add.eqc.info))
+    stopifnot(is.logical(tercile.member.counts))
     if (getTimeResolution(hindcast) != "MM") {
         stop("Monthly data is required for climagram construction (use 'aggregateGrid' for submonthly data)")
     }
@@ -237,8 +243,11 @@ climagram <- function(hindcast,
         ref <- sapply(sea, function(x) subsetGrid(obs, season = x) %>% extract2("Data"))
         q.obs <- apply(ref, MARGIN = 2, FUN = "quantile", prob = 0:4/4, na.rm = TRUE)
         # Climatology tercile shadows -----------
-        polygon(c(x.pos, rev(x.pos)), y = c(q.obs[1, ], rev(q.obs[5, ])), border = NA, col = "grey80") 
-        polygon(c(x.pos, rev(x.pos)), y = c(q.obs[2, ], rev(q.obs[4, ])), border = NA, col = "grey40") 
+        obs.rng.color <- "grey80"
+        obs.iqr.color <- "grey40"
+        polygon(c(x.pos, rev(x.pos)), y = c(q.obs[1, ], rev(q.obs[5, ])), border = NA, col = obs.rng.color) 
+        polygon(c(x.pos, rev(x.pos)), y = c(q.obs[2, ], rev(q.obs[4, ])), border = NA, col = obs.iqr.color) 
+        lines(x.pos, q.obs[3,], lty = 2) # , cex = 1.5, ty = "o", pch = 0)    
     }
     # hindcast ----------------
     hindm <- suppressMessages(aggregateGrid(hindcast, aggr.mem = list(FUN = "mean", na.rm = TRUE)))
@@ -246,16 +255,16 @@ climagram <- function(hindcast,
     ter.hind <- apply(hind, MARGIN = 2, FUN = "quantile", prob = 1:2/3, na.rm = TRUE)
     # forecast ----------------
     fore <- sapply(sea, function(x) subsetGrid(forecast, season = x) %>% extract2("Data"))
-    fore.color <- adjustcolor("white", alpha.f = .55)
-    hind.color <- adjustcolor("thistle", alpha.f = 1)
+    hind.color <- adjustcolor("white", alpha.f = .65)
+    fore.color <- adjustcolor("thistle", alpha.f = .85)
     if (violin) {
         for (i in 1:length(sea)) {
             vioplot(hind[,i], wex = .55, border = "black",
                     col = hind.color, add = TRUE, axes = FALSE,
-                    at = x.pos[i], colMed = "purple4", rectCol = "purple3")
+                    at = x.pos[i], colMed = "black")
             vioplot(fore[,i], wex = .35, border = "black",
                     col = fore.color, add = TRUE, axes = FALSE,
-                    at = x.pos[i], colMed = "black")
+                    at = x.pos[i], colMed = "purple4", rectCol = "purple3")
         }
     } else {
         boxplot(hind, add = TRUE, axes = FALSE,
@@ -269,39 +278,39 @@ climagram <- function(hindcast,
             points(rep(x.pos[i], nrow(fore)), fore[,i], pch = 4)
         }
     }
-    # Obs median
-    if (!is.null(obs)) {
-        lines(x.pos, q.obs[3,], ty = "o", pch = 0, lty = 2, cex = 1.5)    
-    }
     # Text members per tercile ------------------
-    for (i in 1:length(sea)) {
-        x.text <- x.pos[i] + .33
-        which(fore[,i] > ter.hind[2,i]) %>% length() %>% text(x = x.text, y = max(fore[,i], na.rm = TRUE))    
-        which(fore[,i] > ter.hind[1,i] & fore[,i] <= ter.hind[2,i]) %>% length() %>% text(x = x.text, y = median(fore[,i], na.rm = TRUE))    
-        which(fore[,i] <= ter.hind[1,i]) %>% length() %>% text(x = x.text, y = min(fore[,i], na.rm = TRUE))
+    if (tercile.member.counts) {
+        for (i in 1:length(sea)) {
+            x.text <- x.pos[i] + .33
+            which(fore[,i] > ter.hind[2,i]) %>% length() %>% text(x = x.text, y = max(fore[,i], na.rm = TRUE))    
+            which(fore[,i] > ter.hind[1,i] & fore[,i] <= ter.hind[2,i]) %>% length() %>% text(x = x.text, y = median(fore[,i], na.rm = TRUE))    
+            which(fore[,i] <= ter.hind[1,i]) %>% length() %>% text(x = x.text, y = min(fore[,i], na.rm = TRUE))
+        }
     }
     if (add.legend) {
         if (is.null(obs)) {
             legend("right", legend = c("forecast", "hindcast"), pch = 22,
-                   pt.bg = c("white", "thistle"), bty = "n", pt.cex = 2)
+                   pt.bg = c(fore.color, hind.color), bty = "n", pt.cex = 2)
         } else {
             legend("right",
-                   legend =  c("forecast", "hindcast", "obs Q1/Q4", "obs Q2/Q3", "obs med"),
-                   pch = c(rep(22,4), 0), pt.cex = c(rep(2,4),1),
-                   pt.bg = c("white", "thistle", "grey80", "grey40", NULL),
+                   legend =  c("forecast", "hindcast", "obs IQR", "obs range", "obs med"),
+                   pch = c(rep(22,4), 0), pt.cex = c(rep(2,4), 0),
+                   pt.bg = c(fore.color, hind.color, obs.iqr.color, obs.rng.color, NULL),
                    lty = c(rep(0,4), 2),
                    bty = "n", cex = .9)
         }
     }
     # EQC information ------------------------------
+    n.mem <- getShape(hindcast, "member")
     if (add.eqc.info) {
-        message("[", Sys.time(),"] Calculating CRPS and RPS...")
+        message("[", Sys.time(),"] Calculating CRPSS...")
         ens <- suppressMessages(aggregateGrid(hindcast, aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% t()
         ob <- suppressMessages(redim(obs, member = FALSE) %>% aggregateGrid(aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% as.matrix() %>% drop()
-        crps <- FairCrps(ens, ob) %>% mean() %>% round(digits = 2)
-        # rps <- FairRps(ens, ob) %>% mean() %>% round(digits = 2)
-        # legend("topright", c(paste0("RPS=", rps), paste0("CRPS=", crps)), bty = "n")
-        legend("topright", paste0("CRPS=", crps), bty = "n")
+        ind <- indRef(nfcst = length(ob))
+        clim.ref <- generateRef(ob, ind)
+        crpss <- SkillScore(EnsCrps(ens, ob, R.new = Inf),
+                            scores.ref = EnsCrps(clim.ref, ob, R.new = Inf)) %>% round(digits = 2)
+        legend("topright", paste0("CRPSS\n", paste(crpss, collapse = "\u00B1")), bty = "n")
     }
     # Metadata info ---------------------------------
     fsname <- attr(hindcast, "dataset")
@@ -313,7 +322,7 @@ climagram <- function(hindcast,
     fyr <- getYearsAsINDEX(forecast) %>% unique()
     seastring <- paste(substr(month.name[getSeason(hindcast)], 1, 1), collapse = "")
     yrs <- getYearsAsINDEX(hindcast) %>% range() %>% paste(collapse = "-")
-    l1 <- paste0("Forecasting System: ", fsname, " - ", getShape(hindcast, "member"), " members")
+    l1 <- paste0("Forecasting System: ", fsname, " - ", n.mem, " members")
     l2 <- paste0(vn , " ", seastring, " - Forecast start: ", init.month, " ", fyr)
     l3 <- if (!is.null(obs)) {
         refname <- attr(obs, "dataset")
