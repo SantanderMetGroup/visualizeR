@@ -7,7 +7,7 @@
 climagram(hindcast, forecast = NULL, obs = NULL, year.target = NULL,
   use.anomalies = TRUE, violin = TRUE, add.points = FALSE,
   detrend = FALSE, add.legend = TRUE, clim.time.frame = "none",
-  add.eqc.info = TRUE)
+  add.eqc.info = TRUE, tercile.member.counts = TRUE)
 }
 \arguments{
 \item{hindcast}{A climate4R multi-member grid with the hindcast for verification.}
@@ -37,6 +37,9 @@ normal. See Details.}
 
 \item{add.eqc.info}{Should EQC (Evaluation and Quality Control) information be added onto the plot?.
 Ignored if no \code{obs} is passed. See Details}
+
+\item{tercile.member.counts}{Logical flag indicating whether the number of forecast members in each tercile
+category should be indicated in the plot. Default to \code{TRUE}.}
 }
 \value{
 Plots a climagram. The number of forecast members falling within each (hindcast) terciles 
