@@ -217,8 +217,9 @@ climagram <- function(hindcast,
     # Plotting part
     message("[", Sys.time(),"] Calculating plotting parameters ...")    
     # Y-axis limits
-    upperbound <- max(max(hindcast$Data, na.rm = TRUE), max(forecast$Data, na.rm = TRUE)) %>% ceiling()
-    lowerbound <- min(min(hindcast$Data, na.rm = TRUE), min(forecast$Data, na.rm = TRUE)) %>% floor()
+    hindm <- suppressMessages(aggregateGrid(hindcast, aggr.mem = list(FUN = "mean", na.rm = TRUE)))
+    upperbound <- max(max(hindm$Data, na.rm = TRUE), max(forecast$Data, na.rm = TRUE)) %>% ceiling()
+    lowerbound <- min(min(hindm$Data, na.rm = TRUE), min(forecast$Data, na.rm = TRUE)) %>% floor()
     ylim <- c(lowerbound, upperbound)
     sea <- getSeason(hindcast)
     # plotting ---------------------------------
@@ -250,7 +251,6 @@ climagram <- function(hindcast,
         lines(x.pos, q.obs[3,], lty = 2) # , cex = 1.5, ty = "o", pch = 0)    
     }
     # hindcast ----------------
-    hindm <- suppressMessages(aggregateGrid(hindcast, aggr.mem = list(FUN = "mean", na.rm = TRUE)))
     hind <- sapply(sea, function(x) subsetGrid(hindm, season = x, drop = TRUE) %>% extract2("Data"))
     ter.hind <- apply(hind, MARGIN = 2, FUN = "quantile", prob = 1:2/3, na.rm = TRUE)
     # forecast ----------------
