@@ -42,8 +42,7 @@ Ignored if no \code{obs} is passed. See Details}
 category should be indicated in the plot. Default to \code{FALSE}.}
 }
 \value{
-Plots a climagram. The number of forecast members falling within each (hindcast) terciles 
-are indicated as figures on the right of the forecast boxes/violins. Some degree of transparency is given
+Plots a climagram. Some degree of transparency is given
 to the forecast boxes/violins to avoid a potential masking of underlying information.
 }
 \description{
