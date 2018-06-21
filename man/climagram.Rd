@@ -2,12 +2,12 @@
 % Please edit documentation in R/climagram.R
 \name{climagram}
 \alias{climagram}
-\title{Climagram}
+\title{Implementation of the so-called "climagrams" for seasonal forecasts}
 \usage{
 climagram(hindcast, forecast = NULL, obs = NULL, year.target = NULL,
   use.anomalies = TRUE, violin = TRUE, add.points = FALSE,
   detrend = FALSE, add.legend = TRUE, clim.time.frame = "none",
-  add.eqc.info = TRUE, tercile.member.counts = TRUE)
+  add.eqc.info = TRUE, tercile.member.counts = FALSE)
 }
 \arguments{
 \item{hindcast}{A climate4R multi-member grid with the hindcast for verification.}
@@ -39,7 +39,7 @@ normal. See Details.}
 Ignored if no \code{obs} is passed. See Details}
 
 \item{tercile.member.counts}{Logical flag indicating whether the number of forecast members in each tercile
-category should be indicated in the plot. Default to \code{TRUE}.}
+category should be indicated in the plot. Default to \code{FALSE}.}
 }
 \value{
 Plots a climagram. The number of forecast members falling within each (hindcast) terciles 
@@ -47,7 +47,7 @@ are indicated as figures on the right of the forecast boxes/violins. Some degree
 to the forecast boxes/violins to avoid a potential masking of underlying information.
 }
 \description{
-A climagram is a box plot for visualization of a seasonal forecast with added EQC information from the hindcast
+A "climagram" is a box plot for visualization of a seasonal forecast with added EQC information from the hindcast
 (and possibly the verifying observations).
 }
 \details{

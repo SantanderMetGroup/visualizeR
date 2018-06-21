@@ -36,7 +36,7 @@
 #' @param add.eqc.info Should EQC (Evaluation and Quality Control) information be added onto the plot?.
 #' Ignored if no \code{obs} is passed. See Details
 #' @param tercile.member.counts Logical flag indicating whether the number of forecast members in each tercile
-#' category should be indicated in the plot. Default to \code{TRUE}.
+#' category should be indicated in the plot. Default to \code{FALSE}.
 #' 
 #' @return 
 #' 
@@ -143,7 +143,7 @@ climagram <- function(hindcast,
                       add.legend = TRUE,
                       clim.time.frame = "none",
                       add.eqc.info = TRUE,
-                      tercile.member.counts = TRUE) {
+                      tercile.member.counts = FALSE) {
     # Check data dimension from the original data sets
     message("[", Sys.time(),"] Checking input consistency ...")
     stopifnot(is.logical(detrend))
