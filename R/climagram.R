@@ -1,4 +1,4 @@
-##     climagram.R
+##     climagram.R Implementation of the so-called "climagrams" for seasonal forecasts
 ##
 ##     Copyright (C) 2018 Santander Meteorology Group (http://www.meteo.unican.es)
 ##
@@ -15,8 +15,8 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Climagram
-#' @description A climagram is a box plot for visualization of a seasonal forecast with added EQC information from the hindcast
+#' @title Implementation of the so-called "climagrams" for seasonal forecasts
+#' @description A "climagram" is a box plot for visualization of a seasonal forecast with added EQC information from the hindcast
 #' (and possibly the verifying observations).
 #' @param hindcast A climate4R multi-member grid with the hindcast for verification. 
 #' @param forecast A climate4R multi-member grid with the forecast. Default is \code{NULL}. See details. 

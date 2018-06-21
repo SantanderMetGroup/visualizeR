@@ -29,7 +29,7 @@ Suggests:
 Type: Package
 Title: Visualizing and Communicating Uncertainty in Seasonal Climate Prediction
 Version: 1.2.0
-Date: 2018-06-06
+Date: 2018-06-21
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
     "Maria Dolores Frias <friasmd@unican.es> [aut, cre]",
