@@ -122,6 +122,8 @@ obs <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.ncep.enso34.rds"
 climagram(hindcast = hindcast, forecast = forecast, obs = obs)
 # An arbitrary year can be extracted from the hindcast to be used as forecast
 climagram(hindcast = hindcast, year.target = 2001, obs = obs)
+# Adding tercile counts:
+climagram(hindcast = hindcast, year.target = 2001, obs = obs, tercile.member.count = TRUE)
 }
 }
 \seealso{

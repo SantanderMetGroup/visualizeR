@@ -1,5 +1,5 @@
 visualizeR 1.2.0
 ================
 
-* Added a `climagram` implementation, with optional inclusion of CRPSS relative to the observed climatology
+* Added `climagram` implementation, for (monthly) seasonal forecast data
 

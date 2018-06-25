@@ -29,23 +29,24 @@ Suggests:
 Type: Package
 Title: Visualizing and Communicating Uncertainty in Seasonal Climate Prediction
 Version: 1.2.0
-Date: 2018-06-21
+Date: 2018-06-25
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
-    "Maria Dolores Frias <friasmd@unican.es> [aut, cre]",
-    "Jesus Fernandez <fernandej@unican.es> [aut]",
+    "Maria Dolores Frías <friasmd@unican.es> [aut, cre]",
+    "Jesus Fernández <fernandej@unican.es> [aut]",
     "Maialen Iturbide <miturbide@ifca.unican.es> [aut]",
-    "Joaquin Bedia <bediaj@unican.es> [aut]",
+    "Joaquín Bedia <bediaj@unican.es> [aut]",
     "Max Tuni <max@predictia.es> [ctb]",
     "Sixto Herrera <sixto@predictia.es> [ctb]",
     "Rodrigo Manzanas <rmanzanas@ifca.unican.es> [ctb]",
-    "Antonio Cofino <antonio.cofino@unican.es> [ctb]",
-    "Jose Manuel Gutierrez <gutierjm@unican.es> [ctb]",
+    "Antonio Cofiño <antonio.cofino@unican.es> [ctb]",
+    "José Manuel Gutiérrez <gutierjm@unican.es> [ctb]",
     "Andrea Taylor <A.L.Taylor@leeds.ac.uk> [ctb]",
     "Aidan Slingsby <a.slingsby@city.ac.uk> [ctb]"))
 BugReports: https://github.com/SantanderMetGroup/visualizeR/issues
 URL: https://github.com/SantanderMetGroup/visualizeR/wiki
 Description: Implementation of seasonal climate verification plots.
 License: file LICENSE
+Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
