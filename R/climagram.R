@@ -129,6 +129,8 @@
 #' climagram(hindcast = hindcast, forecast = forecast, obs = obs)
 #' # An arbitrary year can be extracted from the hindcast to be used as forecast
 #' climagram(hindcast = hindcast, year.target = 2001, obs = obs)
+#' # Adding tercile counts:
+#' climagram(hindcast = hindcast, year.target = 2001, obs = obs, tercile.member.count = TRUE)
 #' }
 
 climagram <- function(hindcast,
@@ -280,10 +282,10 @@ climagram <- function(hindcast,
     # Text members per tercile ------------------
     if (tercile.member.counts) {
         for (i in 1:length(sea)) {
-            x.text <- x.pos[i] + .33
-            which(fore[,i] > ter.hind[2,i]) %>% length() %>% text(x = x.text, y = max(fore[,i], na.rm = TRUE))    
-            which(fore[,i] > ter.hind[1,i] & fore[,i] <= ter.hind[2,i]) %>% length() %>% text(x = x.text, y = median(fore[,i], na.rm = TRUE))    
-            which(fore[,i] <= ter.hind[1,i]) %>% length() %>% text(x = x.text, y = min(fore[,i], na.rm = TRUE))
+            x.text <- x.pos[i] - .33
+            which(fore[,i] > ter.hind[2,i]) %>% length() %>% text(x = x.text, y = quantile(hind[,i], probs = .66 + .165, na.rm = TRUE))    
+            which(fore[,i] > ter.hind[1,i] & fore[,i] <= ter.hind[2,i]) %>% length() %>% text(x = x.text, y = median(hind[,i], na.rm = TRUE))    
+            which(fore[,i] <= ter.hind[1,i]) %>% length() %>% text(x = x.text, y = quantile(hind[,i], prob = .165, na.rm = TRUE))
         }
     }
     if (add.legend) {
