@@ -177,7 +177,7 @@ spatialPlot <- function(grid,
     arg.list <- list(...)
     bt <- match.arg(backdrop.theme, choices = c("none", "coastline", "countries"))
     if (!is.null(set.min) && !is.numeric(set.min)) stop("Invalid 'set.min' value")
-    if (!is.null(set.min) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
+    if (!is.null(set.max) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
     ## add climatology:fun attribute if getShape(grid, "time") = 1
     if (is.null(attr(grid$Data, "climatology:fun"))) {
         if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "none"
