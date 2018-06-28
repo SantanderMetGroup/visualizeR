@@ -127,6 +127,9 @@ climagram(hindcast = hindcast, year.target = 2001, obs = obs, tercile.member.cou
 }
 }
 \seealso{
+Type \code{utils::RShowDoc("climagram_vignette", package = "visualizeR")} for further worked
+ examples on climagram options.
+
 Other visualization functions: \code{\link{bubblePlot}},
   \code{\link{reliabilityCategories}},
   \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
