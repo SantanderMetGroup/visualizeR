@@ -99,7 +99,7 @@
 #' @author J. Bedia
 #' 
 #' @family visualization functions
-#' @importFrom transformeR subsetGrid checkDim checkSeason aggregateGrid detrendGrid getYearsAsINDEX getTimeResolution scaleGrid getSeason
+#' @importFrom transformeR subsetGrid checkDim checkSeason aggregateGrid detrendGrid getYearsAsINDEX getTimeResolution scaleGrid getSeason getGridUnits
 #' @importFrom stats filter median
 #' @importFrom graphics plot axis grid boxplot box legend
 #' @importFrom magrittr %>% extract2 %<>% 
@@ -132,6 +132,8 @@
 #' # Adding tercile counts:
 #' climagram(hindcast = hindcast, year.target = 2001, obs = obs, tercile.member.count = TRUE)
 #' }
+#' @seealso Type \code{utils::RShowDoc("climagram_vignette", package = "visualizeR")} for further worked
+#'  examples on climagram options.
 
 climagram <- function(hindcast,
                       forecast = NULL,
@@ -225,9 +227,9 @@ climagram <- function(hindcast,
     sea <- getSeason(hindcast)
     # plotting ---------------------------------
     vn <- forecast$Variable$varName
-    uds <- attr(forecast$Variable, "units")
+    uds <- getGridUnits(forecast)
     ylab <- if (use.anomalies) {
-        paste(vn, "anomaly")
+        paste0(vn, " anomaly (", uds, ")")
     } else {
         paste0(vn, " (", uds, ")")
     }
