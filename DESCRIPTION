@@ -28,7 +28,7 @@ Suggests:
     knitr
 Type: Package
 Title: Visualizing and Communicating Uncertainty in Seasonal Climate Prediction
-Version: 1.2.0
+Version: 1.2.1
 Date: 2018-06-28
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",

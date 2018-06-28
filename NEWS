@@ -1,7 +1,11 @@
-visualizeR 1.2.0
-================
+# visualizeR changelog
 
+(For earlier version changes please visit the [GitHub releases Tab](https://github.com/SantanderMetGroup/visualizeR/releases))
+
+## v1.2.0 (28 Jun 2018)
 * Added `climagram` implementation, for (monthly) seasonal forecast data, and a companion dedicated notebook
 * Minor bug fix in set.min argument value check in `spatialPlot`
 * Other minor changes and documentation updates
 
+## v1.2.1 (in devel)
+* Other minor changes and documentation updates

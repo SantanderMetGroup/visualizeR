@@ -56,7 +56,7 @@
 #' \strong{Spatial averaging}
 #' 
 #' For spatial domains encompassing multiple points/grid points, the spatial average is first computed to obtain a
-#' unique series for the whole domain via \code{link[transformeR]{aggregateGrid}} (latitudial cosine 
+#' unique series for the whole domain via \code{\link[transformeR]{aggregateGrid}} (latitude cosine 
 #' weighting is used).
 #' 
 #' \strong{Forecast/Hindcast representation}
