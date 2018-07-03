@@ -307,7 +307,7 @@ climagram <- function(hindcast,
     n.mem <- getShape(hindcast, "member")
     if (add.eqc.info) {
         message("[", Sys.time(),"] Calculating CRPSS...")
-        ens <- suppressMessages(aggregateGrid(hindcast, aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% t()
+        ens <- suppressMessages(aggregateGrid(hindcast, aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% redim(drop = TRUE) %>% extract2("Data") %>% t()
         ob <- suppressMessages(redim(obs, member = FALSE) %>% aggregateGrid(aggr.y = list(FUN = "mean", na.rm = TRUE))) %>% extract2("Data") %>% as.matrix() %>% drop()
         ind <- indRef(nfcst = length(ob))
         clim.ref <- generateRef(ob, ind)
