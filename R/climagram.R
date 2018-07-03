@@ -31,7 +31,7 @@
 #' @param add.points Logical flag indicating whether crosses indicating the individual forecast members
 #'  should be added to the graph. Default to \code{FALSE}.
 #' @param add.legend Should legend be added to the plot. Default to \code{TRUE}
-#' @param clim.time.frame Default to \code{"none"}. Temporal frame used as reference for the calculation of the climatological
+#' @param clim.time.frame Default to \code{"monthly"}. Temporal frame used as reference for the calculation of the climatological
 #' normal. See Details. 
 #' @param add.eqc.info Should EQC (Evaluation and Quality Control) information be added onto the plot?.
 #' Ignored if no \code{obs} is passed. See Details
@@ -144,7 +144,7 @@ climagram <- function(hindcast,
                       add.points = FALSE,
                       detrend = FALSE,
                       add.legend = TRUE,
-                      clim.time.frame = "none",
+                      clim.time.frame = "monthly",
                       add.eqc.info = TRUE,
                       tercile.member.counts = FALSE) {
     # Check data dimension from the original data sets
