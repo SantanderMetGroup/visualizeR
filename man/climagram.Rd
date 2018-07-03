@@ -6,7 +6,7 @@
 \usage{
 climagram(hindcast, forecast = NULL, obs = NULL, year.target = NULL,
   use.anomalies = TRUE, violin = TRUE, add.points = FALSE,
-  detrend = FALSE, add.legend = TRUE, clim.time.frame = "none",
+  detrend = FALSE, add.legend = TRUE, clim.time.frame = "monthly",
   add.eqc.info = TRUE, tercile.member.counts = FALSE)
 }
 \arguments{
@@ -32,7 +32,7 @@ should be added to the graph. Default to \code{FALSE}.}
 
 \item{add.legend}{Should legend be added to the plot. Default to \code{TRUE}}
 
-\item{clim.time.frame}{Default to \code{"none"}. Temporal frame used as reference for the calculation of the climatological
+\item{clim.time.frame}{Default to \code{"monthly"}. Temporal frame used as reference for the calculation of the climatological
 normal. See Details.}
 
 \item{add.eqc.info}{Should EQC (Evaluation and Quality Control) information be added onto the plot?.

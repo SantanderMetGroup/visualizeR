@@ -8,4 +8,5 @@
 * Other minor changes and documentation updates
 
 ## v1.2.1 (in devel)
+* Set `clim.time.frame` default value in climagrams to `"monthly"`
 * Other minor changes and documentation updates
