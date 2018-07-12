@@ -68,10 +68,11 @@
 #' @author R. Manzanas \& M.Iturbide
 # @import verification
 # @import plot3D
-#' @importFrom transformeR getGrid redim getDim bindGrid.member
+#' @importFrom transformeR getGrid redim getDim bindGrid
 #' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
 #' @importFrom graphics plot.new abline polygon text grid title
 #' @importFrom stats na.omit
+#' @importFrom verification verify
 #' @import lattice
 #' 
 #' @family visualization functions
@@ -277,7 +278,7 @@ reliabilityCategories <- function(hindcast,
     )
     l.obs.fin[[i]] <- cats
   }
-  mg <- bindGrid.member(l.obs.fin)
+  mg <- bindGrid(l.obs.fin, dimension = "member")
   mg$Members <- gsub(pattern = " ", replacement = "_", x = labels)
   if (diagrams) {
     if (length(regs) > 1) {
