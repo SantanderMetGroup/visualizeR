@@ -81,12 +81,11 @@ will be calculated considering the hindcast climatology (see next section for de
 The hindcast climatology is calculated by considering the annual multimember averages
  (i.e., the univariate annual time series of ensemble means).
     
-By default, the climatology is computed for the entire seasonal slice of the forecast. For instance,
-suppose a forecast for DJF. By default, the DJF anomaly will be computed by subtracting to the 
-January forecast the DJF climatology, to February the same DJF climatology and so on.
-If set to \code{"monthly"}, the climatology is computed sepparately for each month, so the anomalies
-for January will be computed using the January climatology, the February anomalies using the February
-climatology and so on.
+By default, the climatology is computed on a monthly basis. For instance,
+assuming a forecast for DJF is given, the DJF anomaly will be computed by subtracting to the 
+January forecast the January climatology, to February the February climatology and so on.
+If \code{clim.time.frame} is set to \code{"monthly"}, the climatology is computed using the seasonal climatology
+, so the anomalies for January will be computed using the DJF climatology, and the same for the remaining months.
 See argument \code{"time.frame"} of \code{\link[transformeR]{scaleGrid}}, to which the \code{clim.time.frame}
 argument is passed, for more details.
 
@@ -109,7 +108,6 @@ my_load <- function(file.url, verbose = TRUE) {
 }
 hindcast <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.cfs.enso34.rds")
 forecast <- my_load("http://meteo.unican.es/work/visualizeR/data/tas.cfs.2016.enso34.rds")
-
 # A seasonal forecast product, without reference obs information
 climagram(hindcast = hindcast, forecast = forecast, violin = TRUE, obs = NULL)
 # Violins can be replaced by ordinary boxplots:
