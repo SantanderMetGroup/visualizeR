@@ -173,7 +173,7 @@ climagram <- function(hindcast,
         checkSeason(hindcast, forecast)
     }
     if (!is.null(obs)) {
-        checkSeason(hindcast, obs)
+        temporalCheck(hindcast, obs)
         transformeR::checkDim(hindcast, obs, dimensions = c("time", "lat", "lon"))
     } else {
         if (add.eqc.info) add.eqc.info <- FALSE
