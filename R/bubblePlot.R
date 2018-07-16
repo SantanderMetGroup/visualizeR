@@ -134,11 +134,13 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
         # Interpolate observations to the hindcast grid
         obs <- interpGrid(obs, new.coordinates = getGrid(hindcast), method = "nearest")
       }
-      if (!checkCoords(hindcast, forecast)){
-        message("WARNING: Data with no common grid. Interpolating forecasts to hindcast grid")
-        # Interpolate forecast to the hindcast grid
-        forecast <- interpGrid(forecast, new.coordinates = getGrid(hindcast), method = "nearest")
-      }
+      if (!is.null(forecast)){
+        if (!checkCoords(hindcast, forecast)){
+          message("WARNING: Data with no common grid. Interpolating forecasts to hindcast grid")
+          # Interpolate forecast to the hindcast grid
+          forecast <- interpGrid(forecast, new.coordinates = getGrid(hindcast), method = "nearest")
+        }
+      }      
       if (is.null(forecast)){
         if (is.null(year.target)){
           year.target <- last(yy)

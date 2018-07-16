@@ -72,6 +72,7 @@
 #' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
 #' @importFrom graphics plot.new abline polygon text grid title
 #' @importFrom stats na.omit
+#' @importFrom verification verify
 #' @import lattice
 #' 
 #' @family visualization functions

@@ -68,6 +68,7 @@ spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, violin = TR
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{climagram}},
   \code{\link{reliabilityCategories}},
   \code{\link{tercileBarplot}}, \code{\link{tercilePlot}}
 }

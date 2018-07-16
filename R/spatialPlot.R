@@ -26,9 +26,8 @@
 #' @param lonCenter Value of the longitude to be centered in the plot.
 #' @param color.theme A character string indicating the color theme to use in the map. 
 #' Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
-#' the \code{"jet.colors"} palette can be used (the vilified rainbow colors), for backwards 
-#' compatibility and because despite criticisms, it is still widely used.
-#' Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.
+#' the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
+#'  for backwards compatibility. Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.
 #'  NOTE: the \code{color.theme} argument will be overriden if the \code{col.regions} option from \code{spplot} is used.
 #' @param rev.colors Should the chosen color theme be reversed? (default to \code{FALSE},
 #'  leaving the palette \dQuote{as is}).
@@ -72,16 +71,12 @@
 #' \item Bivand, R.S., Pebesma, E.J., Gomez-Rubio, V., 2013. Applied Spatial Data Analysis with R, 2nd ed, useR! Springer, NY.
 #' \item For some graticulate customization examples, visit the \emph{sp Gallery}: \url{https://edzer.github.io/sp/}
 #' }
-#'    
 #' @importFrom abind abind asub
 #' @importFrom sp spplot SpatialGridDataFrame SpatialPointsDataFrame GridTopology SpatialPoints
 #' @importFrom grDevices colorRampPalette
 #' @importFrom utils tail head
 #' @importFrom RColorBrewer brewer.pal.info brewer.pal
-#' 
-#' 
 #' @export
-#' 
 #' @author J. Bedia
 #' @seealso \code{\link{climatology}} for details on climatology calculation.
 #'  \code{\link{map.stippling}}, for adding a custom point layer on top of the map.
@@ -182,7 +177,7 @@ spatialPlot <- function(grid,
     arg.list <- list(...)
     bt <- match.arg(backdrop.theme, choices = c("none", "coastline", "countries"))
     if (!is.null(set.min) && !is.numeric(set.min)) stop("Invalid 'set.min' value")
-    if (!is.null(set.min) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
+    if (!is.null(set.max) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
     ## add climatology:fun attribute if getShape(grid, "time") = 1
     if (is.null(attr(grid$Data, "climatology:fun"))) {
         if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "none"

@@ -76,6 +76,7 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{climagram}},
   \code{\link{reliabilityCategories}},
   \code{\link{spreadPlot}}, \code{\link{tercilePlot}}
 }

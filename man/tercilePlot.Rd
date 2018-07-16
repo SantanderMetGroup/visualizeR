@@ -84,6 +84,7 @@ Atmospheri Science, Wiley, NY
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{climagram}},
   \code{\link{reliabilityCategories}},
   \code{\link{spreadPlot}}, \code{\link{tercileBarplot}}
 }
