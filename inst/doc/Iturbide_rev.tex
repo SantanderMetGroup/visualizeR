@@ -1,0 +1,590 @@
+
+% !TeX root = RJwrapper.tex
+
+\title{Tackling Uncertainties of Species Distribution Model Projections with Package \pkg{mopa}}
+
+\author{by M. Iturbide, J. Bedia, and J.M. Guti\'errez}
+
+\maketitle
+
+\abstract{ 
+Species Distribution Models (SDMs) constitute an important tool to assist decision-making in environmental conservation and planning in the context of climate change. Nevertheless, SDM projections are affected by a wide range of uncertainty factors (related to training data, climate projections and SDM techniques), which limit their potential value and credibility. The new package \pkg{mopa} provides tools for designing comprehensive multi-factor SDM ensemble experiments, combining multiple sources of uncertainty (e.g.\ baseline climate, pseudo-absence realizations, SDM techniques, future projections) and allowing to assess their contribution to the overall spread of the ensemble projection. In addition, \pkg{mopa} is seamlessly integrated with the \href{http://www.meteo.unican.es/climate4R}{climate4R} bundle and allows straightforward retrieval and post-processing of state-of-the-art climate datasets (including observations and climate change projections), thus facilitating the proper analysis of key uncertainty factors related to climate data. 
+}
+
+
+\section{Introduction}
+
+
+\dfn{Species Distribution Models} (SDMs) are statistical tools used for
+the generation of probabilistic predictions of the presence of
+biological entities in the geographical space
+\citep{guisan_predictive_2000, elith_novel_2006}. SDMs operate through
+the establishment of an empirical link between known presence locations
+and the physical characteristics of their environment. A particular case
+is that of \dfn{Climate Envelope Models} (CEMs), where appropriate
+climatic variables are used as predictors to characterize the climatic
+conditions where a species can potentially live ---typically in the form
+of \dfn{bioclimatic} variables
+\citep{Nix_bioclim_1986,Busby_bioclim_1991}. In the context of climate change, SDMs have become a valuable tool for the vulnerability and impact assessment community, as a means of estimating distribution shifts due to climate variations, a problem of current interest in environmental conservation studies \citep[see e.g.:][]{araujo_would_2004,hamann_potential_2006,jeschke_usefulness_2008}. These studies require suitable climate products to produce models at an adequate spatial resolution and varying geographical extents --up to global--, including historical climate databases (i.e.\ high resolution gridded observations) and future climate projections for different emission scenarios. However, the intricacy of climate data retrieval and post-processing of the existing climate products \citep[e.g.\ the global and regional climate change projections available from the Earth System Grid Federation, ESGF,][]{taylor_overview_2011} has resulted in a wide use of ready-to-use products without considering their limitations for a particular case study \citep[see][]{bedia_dangers_2013}. In this paper we fill this gap with the package \CRANpkg{mopa} (Species Distribution MOdeling with Pseudo-Absences), which has been developed in the framework of the \href{http://www.meteo.unican.es/climate4R}{climate4R} bundle for climate data access and post-processing, thus facilitating the use of state-of-the-art global and regional climate data for SDM projections.
+
+Despite the increased use of future SDM projections as a support tool for decision-making in biological conservation, the communication of the inherent uncertainties of these products remains as an ongoing challenge \citep[see, e.g.\ ][]{araujo_reducing_2005, beaumont_why_2008,fronzek_evaluating_2011}. A common approach to tackle different sources of uncertainty is based on producing \dfn{ensembles} of future SDM projections that encompass a wide range of variability by considering multiple choices of each of the factors/components involved in the modeling and projection chain \citep{araujo_ensemble_2007, buisson_uncertainty_2010, bagchi_evaluating_2013}. However, there are important sources of uncertainty that are rarely quantified, yet crucial, in order to assess the credibility of the future distributions, such as the training data (including the baseline climate) used to fit the SDMs characterizing the ecological niche \citep{mateo_effects_2010,bedia_dangers_2013,baker_choice_2016}, the varying extrapolation ability outside the training period/spatial extent of the different SDM techniques  \citep[known as SDM \dfn{transferability} in time/space;][]{bedia_predicting_2011,fronzek_evaluating_2011}, the Global/Regional Climate Model (GCM/RCM)  projections and biases \citep{turco_large_2013} and others \citep[see e.g.:][for an overview]{falloon_ensembles_2014}. Moreover, the \dfn{ensemble} approach has also limitations, since it assumes that all SDMs are equally transferable to climate change conditions, thus posing the risk of diluting insightful model signals with noise and error from less useful or defective SDMs forming the ensemble \citep{thuiller_uncertainty_2004,peterson_ecological_2011}. 
+
+The package \pkg{mopa} here presented has been designed to facilitate the design and analysis of comprehensive multi-factor SDM ensemble experiments, exploring different uncertainty factors such as presence data sets, pseudo-absence realizations, baseline climate, modeling algorithms, and future climate projections. Moreover,  \pkg{mopa} provides variance partition tools to assess the contribution of the different factors to the overall uncertainty/spread of the ensemble projection. We illustrate the  functionality of the package with the case-study presented in \citet{Iturbide_2018_GPC}, focusing on the impact of the pseudo-absence data in the future distribution of a specific Oak phylogenetic group in Europe resulting from an ensemble of SDM projections considering three factors: 1) different SDMs techniques, 2) different realizations of randomly generated pseudo-absence data and 3) different climate projections produced over Europe from a ensemble of RCMs. The analyses undertaken with \pkg{mopa} reveal the sensitivity of SDMs to the pseudo-absence samples, affecting model stability and transferability to new climate conditions, with important implications for the construction of the final ensemble projections. We use and provide publicly available data to guarantee the reproducibility of the results.
+
+
+
+\subsection{\pkg{mopa} and the \href{http://www.meteo.unican.es/climate4R}{climate4R} bundle for climate data access}\label{s.c4u}
+
+
+The numerous climate databases available (both baselines and future projections) are scattered across many different repositories with various file formats, variable naming conventions, etc.\, sometimes requiring relatively complex, time-consuming data downloads and error-prone processing steps (e.g.\ bias correction) prior to SDM development. This is also a major barrier for research reproducibility and data exchange. The \href{http://www.meteo.unican.es/climate4R}{climate4R} bundle is a set of R packages specifically designed to ease climate data access, analysis and processing in a straightforward manner, tailored to the needs of the impacts and vulnerability assessment community. Further details and references to worked examples and tutorials can be found for instance in \citet{cofino_ecoms_2017}, \citet{bedia_seasonal_2017} and \citet{frias_r_2018}. With this regard, \pkg{mopa} was developed as part of the \href{http://www.meteo.unican.es/climate4R}{climate4R} ecosystem, so that typical climate data operations for SDM applications and conversion features to the data type handled by \pkg{mopa} are provided. Additionally, \pkg{mopa} includes a user guide with an end-to-end worked example of climate data retrieval, transformation and SDM development: \code{help(package = "mopa")}.
+
+
+
+\subsection{The ``niche'' of \pkg{mopa} within the ``SDM ecosystem'' in R}\label{s.mopa}
+
+The popularity of R and its excellent statistical modeling and spatial analysis support has favored the development of specific, well-established and actively maintained packages for SDM construction and analysis, such as \CRANpkg{sdm}~\citep{sdm}, \CRANpkg{biomod2}~\citep{biomod2}, \CRANpkg{dismo}~\citep{dismo} and \CRANpkg{SDMTools}~\citep{SDMTools}, some of them also implementing pseudo-absence data generation and ensemble building utilities. For instance, both \pkg{sdm} and \pkg{biomod2} implement methods for building ensemble projections based on model performance in the calibration phase ---e.g.\ by discarding or weighting the obtained results---. On the contrary, \pkg{mopa} is oriented towards the design and analysis of multi-factor ensembles of future SDM projections (considering as potential factors the presence data sets, the pseudo-absence realizations, the baseline climate, the modeling algorithms, and the future climate projections). The analysis of the resulting ensemble allows, for instance, assessing the problem of SDM transferability, which can not be properly evaluated during model calibration. 
+
+Besides, unlike previously existing packages, \pkg{mopa} allows pseudo-absence data generation as an independent step prior to model fitting, thus providing a finer control to the user for the analysis of several alternative methods and specific tuning options. In addition, the novel Three-Step method for pseudo-absence data generation is implemented \citep[TS hereafter,][]{senay_novel_2013,iturbide_framework_2015}, providing a convenient interface that allows a fine tuning of the technique with simple arguments. Furthermore, \pkg{mopa} is also seamlessly integrated with standard R packages for spatial data manipulation like \CRANpkg{raster}~\citep{raster} and \CRANpkg{sp}~\citep{sp,sp2}, allowing their usage at any stage of the modeling process (e.g.\ for data visualization and post-processing), and also extensibility to other SDM tools available in \pkg{sdm}, \pkg{biomod2}, \dots, also handling the same spatial data classes. 
+
+
+
+
+\section{Input data pre-processing}
+
+\subsection{Climate data}
+
+SDM predictor variables (in this case-study a number of bioclimatic variables, but not necessarily so) are introduced in the analysis as collections of \pkg{raster} objects of the classes \code{rasterBrick} or \code{rasterStack}, similarly as other SDM-oriented packages. For instance, here we use a set of present and future bioclimatic variables widely used in SDM applications based on precipitation and temperature climatologies \citep{Busby_bioclim_1991}, using the function \code{biovars} of package \pkg{dismo}. To this aim, we first exploit the \href{http://www.meteo.unican.es/climate4R}{climate4R} functionalities to load and post-process observed precipitation and temperature climatologies from the E-OBS gridded observational dataset \citep{haylock_european_2008} and the simulations of 7 Regional Climate Model (RCMs) of the project ENSEMBLES \citep[][\url{http://www.ensembles-eu.org}]{van_der_linden_ensembles:_2009} for the control  (20C3M, 1971-2000) and future (A1B, 2071-2100) scenarios, including the application of bias-correction \citep["delta" method, e.g.\ ][]{Winkler:1997lr, Zahn:2010}. 
+
+\begin{example}
+> install.packages("mopa")
+> library(mopa)
+\end{example}
+
+\begin{example}
+> destfile <- tempfile()
+> url <- paste0("https://raw.githubusercontent.com/SantanderMetGroup/",
++   "mopa/master/data/biostack.rda")
+> download.file(url, destfile)
+> load(destfile, verbose = TRUE)
+\end{example}
+
+
+\subsection{Species distribution data}
+
+Several impact studies indicate that species should be modeled by treating sub-specific groups of organisms independently (e.g.: distinct genetic linages) due to their differing adaptive responses to changes in their environment \citep{hernandez_effect_2006, beierkuhnlein_ecotypes_2011, serra_varela_does_2015}. Although this is not always possible, due to the rare availability of information on the distribution of sub-specific groups for most of species, \pkg{mopa} has been conceived with this idea in mind, being able to deal with several sets of presences simultaneously. This adds flexibility to the modeling process in order to carry out experiments considering different sub-collections of presences, not only for sub-specific analyses \citep{iturbide_framework_2015}, but also to address the sensitivity of the modeled distributions to different characteristics of the training sample \citep[e.g.\ the sample size,][]{hernandez_effect_2006,mateo_effects_2010}. Thus, the \code{Oak\_phylo2} \pkg{mopa} dataset contains a named list of length two, containing the geographical coordinates of presence localities for two different Oak phylogenies \citep[H01 and H11,][]{petit_chloroplast_2002}. More details about the source data are provided in the help file of the dataset.
+
+
+
+\begin{example}
+> data(Oak_phylo2)
+> help(Oak_phylo2)
+> presences <- Oak_phylo2$H11 
+	\end{example}
+	%$
+	
+	\subsection{Geographic background}
+	
+	The geographic background is often defined as the spatial extent of the area considered in the SDM calibration stage. Here, we refer to the \dfn{background} as a regular, geo-referenced grid with a specific size and resolution, in which both the environmental variables and the presence localities are located, so its grid-points are the sampling units. Function \code{backgroundGrid} provides a simple way of generating a backgroud using a \code{raster-class} object as reference. It also includes an additional argument (\code{spatial.subset}) for spatial subsetting, set by a \code{raster::extent} object or by one or several sets of bounding-box coordinates, providing great flexibility and ease of use for the analysis of SDM spatial aspects. For instance, it allows straightforward exploration of SDM geographical transferability or performing cross-validation experiments based on spatial folds \citep[e.g.:][]{randin_are_2006}. As a result, when the object \code{Oak\_phylo2} is passed to \code{backgroundGrid}, two different backgrounds are created by default, each one spatially restricted by its phylogeny distribution (H11 and H01). 
+	
+	\begin{example}
+> bg <- backgroundGrid(raster = biostack$baseline$bio1)
+	\end{example}
+	
+	A smaller domain than the previous one can be arbitrarily indicated by the user by providing a specific spatial extent:
+	
+	\begin{example}
+> bg.subdomain <- backgroundGrid(raster = biostack$baseline$bio1, 
+		spatial.subset = extent(c(-10, 35, 45, 65)))
+	\end{example}
+	
+	Similarly, the user might be interested in a background strictly constrained by the bounding box of the actual species localities, by just passing to \code{spatial.subset} their coordinates:
+	
+	\begin{example}
+> bg.species <- backgroundGrid(raster = biostack$baseline$bio1, 
+		spatial.subset = presences)
+	\end{example}
+	
+	Thus, the user has flexibility to perform further modifications of the background, so it would be also possible to discard specific areas based on expert knowledge \citep[e.g.\ ][]{serra_varela_does_2015}. In this case study, we will retain the full background (\code{bg}) for further analyses.
+	
+	
+	
+	
+	\section{Pseudo-absence generation}\label{sec:pa_generation}
+	
+
+	
+	Most of SDMs require data not only from known presences of the biological entity, but also absence data in order to model the binary response presence/absence as a function of the different environmental variables. While the sampling efforts are typically focused on recording presence localities (atlases, natural history collections, targeted samplings, \dots), in most cases there is no explicit information about the absence of the species. Therefore \dfn{pseudo-absence} generation is often required for SDM construction, by sampling the background of the study domain. Different methods have been proposed to this aim, whose choice has an important effect on the final SDM results, as highlighted in different previous studies \citep[e.g.:][]{wisz_pseudo-absence_2009,iturbide_framework_2015}. However, there is no consensus on the best sampling design for generating pseudo--absences. 
+
+	Pseudo-absence sampling in \pkg{mopa} is performed by the \code{pseudoAbsence} function. It implements a wide range of methodologies described in the literature \citep[see][for an overview and comparison of methods]{iturbide_framework_2015} for maximum user flexibility, but at the same time its arguments have been kept as simple as possible to ease its application (Table \ref{t.args_pa}). Here, three methods are described: random sampling, random sampling with environmental profiling and the three-step method. Their main characteristics are next briefly described. A more extended explanation can be found in \citep{iturbide_framework_2015} and reference therein.
+	
+
+	\begin{table}[htb]
+	\begin{center}
+	\begin{tabular}{p{3cm}p{10cm}}
+	\toprule
+	\textbf{Argument}&\textbf{Description}\\
+	\toprule
+	\code{realizations} & Number of realizations of pseudo-absence generation\\
+	\code{exclusion.buffer} & Minimum distance to be kept between presence data and pseudo-absence data\\
+	\code{prevalence}	& Proportion of presences against absences\\
+	\code{kmeans}	& Performs a k-means clustering of the background to extract the pseudo-absences instead of sampling at random\\
+	\code{varstack} & \code{RasterStack} of variables for computing the k-means clustering\\
+	\bottomrule
+	\end{tabular}
+	\caption{\label{t.args_pa}Arguments of function \code{pseudoAbsences} controlling the parameter values involved in pseudo-absence generation.}
+	\end{center}
+	\end{table} 
+	
+	\paragraph{Random Sampling (RS).} The RS method is the simplest and most frequent way of generating pseudo-absences \citep{iturbide_framework_2015}. In the next example three times more pseudo-absences than presences are generated at random, keeping a $0.249^{\circ}$ ($\simeq 30$ km) exclusion buffer around known presence localities. Ten pseudo-absence realizations are considered:
+	
+	\begin{example}
+> pa_RS <- pseudoAbsences(xy = presences, background = bg$xy, 
+		realizations = 10, exclusion.buffer = 0.249,
+		prevalence = -0.5)
+\end{example}
+%$
+As an alternative to random sampling, a stratified sampling approach can be performed, based on homogeneous environmental conditions. To this aim, a clustering of the environmental space is applied following \citet{senay_novel_2013} by setting argument \code{kmean} to \code{TRUE}:
+
+\begin{example}
+> pa_kmeans <- pseudoAbsences(xy = presences, background = bg$xy, 
+		exclusion.buffer = 0.249,
+		prevalence = -0.5, 
+		kmeans = TRUE, varstack = biostack$baseline) 
+\end{example}
+
+
+\paragraph{Random Sampling with Environmental Profiling (RSEP).} The RSEP method imposes restrictions on the environmental range of the background to be sampled for pseudo-absences. In \pkg{mopa} this is done by performing an environmental profiling of the background (function \code{OCSVMprofiling}) that, following \cite{senay_novel_2013}, applies a one-class support vector machine algorithm \citep[OCSVM, implemented in package \CRANpkg{e1071},][]{e1071} returning a binary (presence/absence) classification of the background gridboxes based solely on the presence information (\code{bg.profiled\$presence} and \code{bg.profiled\$absence} in the example below). Only the predicted absence background is then retained for pseudo-absence generation. 
+
+\begin{example}
+> bg.profiled <- OCSVMprofiling(xy = presences, varstack = biostack$baseline, 
+		background = bg$xy)
+> pa_RSEP <- pseudoAbsences(xy = presences, background = bg.profiled$absence, 
+		realizations = 10, exclusion.buffer = 0.249,
+		prevalence = -0.5)  
+	\end{example}
+
+	
+	\paragraph{Three-step method (TS).} TS is based on imposing restrictions to both the environmental range and the spatial extent of the background from which pseudo-absences are sampled. This method has been shown to outperform other common approaches in terms of resulting SDM robustness \citep{iturbide_framework_2015}. The TS method adds an additional step to the RSEP method, consisting on the partition of the background space (as yielded by RSEP) in multiple bands using different radius from presence localities. In the example below, multiple distance bands with an increasing radius of 30 km between each other are created (argument \code{by = 0.249}, in degrees). The first one (with the shortest radius from presence localities) is at 30 km from the closest presence point (\code{start = 0.249}), and the largest one (the longest radius from presences) is set by default to half the length of the diagonal of the background bounding-box \citep[see][for more details]{iturbide_framework_2015}.
+	
+	
+	\begin{example}
+>  bg.radius <- backgroundRadius(xy = presences, 
+		background = bg.profiled$absence, 
+		start = 0.249, by = 0.249, unit = "decimal degrees")
+>  pa_TS <- pseudoAbsences(xy = presences, 
+		background = bg.radius, realizations = 10, 
+		exclusion.buffer = 0.249, prevalence = -0.5)   
+\end{example}
+%$
+
+A spatial representation of the results yielded by the pseudo-absence methods described is next generated (Fig. \ref{fig:bg_maps}):
+
+
+\begin{example}
+> # Generates Fig. 1
+> par(mfrow = c(2, 2), mar = c(2, 2, 2, 1.2))
+> # Panel 1a (Presence data)
+> plot(bg$xy, pch = 18, cex = 0.4, col = "gray", asp = 1)
+> points(presences, pch = 18, cex = 0.6, col = "red")
+> # Panel 1b (RS method)
+> plot(bg$xy, pch = 18, cex = 0.4, col = "gray", asp = 1)
+> points(pa_RS$species1$PA01[[1]], pch = 18, col = "darkviolet", cex = .6)
+> points(pa_kmeans$species1$PA01[[1]], pch = 18, col = "yellow", cex = .6)
+> points(presences, pch = 18, cex = 0.6, col = "red")
+> # Panel 1c (RSEP method)
+> plot(bg.profiled$absence, pch = 18, cex = 0.4, col = "gray", asp = 1)
+> points(bg.profiled$presence, pch = 18, cex = 0.4, col = "aquamarine")
+> points(pa_RSEP$species1$PA01[[1]], pch = 18, cex = 0.6, col = "darkviolet")
+> points(presences, pch = 18, cex = 0.6, col = "red")
+> # Panel 1d (TS method)
+> plot(bg.radius[[1]]$km3120, col = "gray", asp = 1, pch = 18, cex = 0.4)
+> points(bg.profiled$presence, pch = 18, cex = 0.4, col = "aquamarine")
+> for (i in 1:10) {
+		l <- (11 - i) * 10
+		points(bg.radius[[1]][[l]], 
+		col = gray.colors(10, start = .9,end = 0.1)[i], 
+		pch = 18, cex = 0.4)
+	}
+> points(pa_TS$species1$PA01[[50]], pch = 18, cex = 0.6, col = "darkviolet")
+> points(presences, pch = 18, cex = 0.6, col = "red")
+\end{example}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=.9\textwidth]{bg_mosaico.png}
+	\caption{Pseudo-absence dataset maps, as generated by function \code{pseudoAbsences}. \textbf{(a)} Known presence locations of the Oak phylogeny H1 (red points) and initial background for pseudo-absence sampling (grey grid points). \textbf{(b)} pseudo-absences generated using the RS method randomly (purple points) and with k-means clustering (yellow points). \textbf{(c)} Pseudo-absences generated with the RSEP method (purple), where the turquoise area corresponds to the discarded suitable background space as identified by the OCSVM profiling approach. \textbf{(d)} TS approach. Environmentally stratified as RSEP (c), but also spatially stratified background, the different strata (spatial extents) identified by the different gray-scale colors. Pseudo-absences for one of the background extents (3120 km) are depicted as example (purple points).}
+	\label{fig:bg_maps}
+\end{figure}
+
+
+Thus, \pkg{mopa} allows for the generation of a wide range of combinations of environmental restriction criteria (using \code{OCSVMprofiling}) and spatial extent constraints (using \code{backgroundRadius}, see Table  \ref{t.pa_methods}), providing unrivalled functionality for the development and inter-comparison of multiple pseudo-absence setups for SDM refinement and ensemble prediction generation.
+
+
+
+
+
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{N}[1]{>{\arraybackslash}m{#1}}
+
+\begin{table}[htb]
+	\begin{center}
+		\begin{tabular}{M{3cm}M{3cm}N{6cm}}
+			\toprule
+			\code{OCSVMprofiling} & \code{backgroundRadius}  & \textbf{Method}\\
+			\toprule 
+			\texttimes & \texttimes & No restriction (RS method)\\
+			\midrule 
+			\checkmark & \texttimes & Environmental restriction (RSEP method)\\
+			\midrule
+			\checkmark & \checkmark & Environmental and spatial restriction (TS method)\\
+			\midrule 
+			\texttimes & \checkmark & Spatial restriction (Particular case of RS)\\
+			\bottomrule
+		\end{tabular}
+		\caption{\label{t.pa_methods} Combinations of functions \code{OCSVMprofiling} and \code{backgroundRadius} for background definition. These are used prior to pseudo-absence data generation with function \code{pseudoAbsences}, that controls the different sampling methods.}
+	\end{center}
+\end{table} 
+
+
+\section{SDM fitting and prediction}
+
+\subsection{Model fitting}
+
+Once the pseudo-absence dataset(s) chosen by the user is(are) built, the \code{mopaTrain} function performs SDM fitting. The function is a wrapper for different statistical method implementations commonly used in SDM applications (see summary in Table \ref{t.sdms}). Moreover, \code{mopaTrain} adds extended functionality for cross-validation for each set of presence/absence data and for each different species contained in the presence dataset, as routinely done in SDM applications \citep[see e.g.:][]{verbyla_resampling_1989}. In the next line of code, the Oak H1 phylogeny is fitted using a generalized linear model \cite[GLM,][]{guisan_generalized_2002} and multivariate adaptive regression splines \citep[MARS,][]{friedman_multivariate_1991}, applying a 10-fold cross validation approach. Moreover, equal weighting of presences and pseudo-absences is indicated with the argument \code{weighting = TRUE} \citep[see e.g.:][]{barbet-massin_selecting_2012}.
+
+\begin{example}
+> trainRS <- mopaTrain(y = pa_RS, x = biostack$baseline, weighting = TRUE, 
+		k = 10, algorithm = c("glm", "mars"))
+	\end{example}
+	%$
+	
+	\begin{table}[htb]
+	\begin{center}
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{l c c l}
+		\toprule
+		\textbf{SDM technique}& \code{algorithm} value & \textbf{\pkg{pkg}\code{::function}}& \textbf{Reference} \\
+		\toprule
+		Generalized Linear Model &  \code{"glm"} & \code{\CRANpkg{stats}::glm} & Part of R \\
+		Random Forest & \code{"rf"} &\code{\CRANpkg{ranger}::ranger} & \cite{ranger} \\
+		Multivariate Adaptive Regression Splines & \code{"mars"} &\code{\CRANpkg{earth}::earth} &  \cite{earth} \\
+		Maximum Entropy & \code{"maxent"} &\code{\pkg{dismo}::maxent}  &  \cite{dismo} \\
+		Support Vector Machine & \code{"svm"} &\code{\pkg{e1071}::best.svm} & \cite{e1071} \\
+		Classification and regression tree (tree) & \code{"cart.tree"} &\code{\CRANpkg{tree}::tree}  & \cite{tree} \\
+		Classification and regression tree (rpart) & \code{"cart.rpart"} &\code{\CRANpkg{rpart}::rpart} &  \cite{rpart}\\
+		\bottomrule
+		\end{tabular}
+	}
+	\caption{\label{t.sdms} SDM techniques available in \pkg{mopa} through the function  \code{mopaTrain}. The corresponding \code{algorithm} argument values are also indicated.}
+	\end{center}
+	\end{table} 
+	
+	
+	\subsection{The special case of model fitting with TS pseudo-absences}
+	
+	After the generation of TS pseudo-absences, multiple background extents exist as a result of the different distances defined by \code{backgroundRadius}. It has been noted that the background extent from which pseudo-absences are sampled is an important factor affecting not only model performance, but also its transferability and biological meaning \cite{jeremy_vanderwal_selecting_2009}. With this regard, \cite{iturbide_framework_2015} propose a selection criterion based on the response of model performance as a function of distance radius, that is generalizable to different SDM characteristics and spatial scales. With this regard, the performance criterion chosen is the Area Under the ROC Curve (AUC), one of the most widely used accuracy measures of binary classification systems \citep{swets_measuring_1988}. Essentially, the method performs a non-linear regression of the AUC obtained by each SDM extent against their background radius, considering three possible asymptotic models (Fig. \ref{fig:nls}):
+
+	\begin{enumerate}
+	\item Michaelis-Menten model: $v(x) = \dfrac{ax}{Km + x} $
+
+	
+	\item 2-parameter exponential model:  $v(x) = a(1 - e^{-bx})$
+	
+	
+	\item 3-parameter exponential model: $v(x) = a - be^{-cx}$
+	
+	\end{enumerate}
+	
+	\noindent , where $v$ and $x$ represent the AUC and the background extent respectively. $a$ is the asymptotic AUC value achieved by the system and $a - b$ is the intercept. $Km$ is the \dfn{Michaelis constant} (i.e.\ the extent at which the AUC is half of $a$, and $c$ is the coefficient of the point where the curve is most pronounced. The asymptotic model that better fits the AUC response to the different background extents is automatically selected to extract the AUC asymptotical value. The minimum extent at which the AUC lies above the asymptote is retained as the optimal threshold radius, being the corresponding fitted SDM returned. The asymptotic models are fitted internally by \code{mopaTrain} via the \code{nls} function from package \pkg{stats} always the TS method is used (this is automatically detected by the function). Optionally, a diagram displaying the results is also returned by setting the argument  \code{diagrams=TRUE} (Fig. \ref{fig:nls}).
+	
+
+	
+	\begin{example}
+> # Train TS model and generate Fig. 2
+> trainTS <- mopaTrain(y = pa_TS, x = biostack$baseline, weighting = TRUE, 
+		k = 10, algorithm = c("glm", "mars"), diagrams = TRUE)
+\end{example}
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=.75\textwidth]{nls.pdf}
+	\caption{Asymptotic model fitting in SDMs using the TS approach for pseudo-absence generation. The blue points are the AUC values (y-axis) obtained by the SDMs for different background radius extents (x axis). Non-linear fits to the three asymptotic models considered (Michaelis Menten, 2 and 3-parameter exponential). The vertical and horizontal lines indicate the optimal radius and resulting AUC value of the final \code{mopaTrain} SDM output.}
+	\label{fig:nls}
+\end{figure}
+
+
+
+\subsection{Model assessment}
+
+The object returned by \code{mopaTrain} is a list of several components generated in the model calibration and evaluation process. Several performance measures are included apart from the AUC, like the True Skill Statistic (TSS) and Cohen's Kappa obtained in the cross-validation, frequently use for the assessment in SDMs \citep{allouche_assessing_2006}. These and other ocmponents of the SDM fitted object can be accessed using \code{extractFromModel}. For, instance, to extract the TSS:
+
+\begin{example}
+> tss.RS <- extractFromModel(models = trainRS, value = "tss")
+\end{example}
+
+ 
+However, and for maximum user flexibility, a matrix containing the observed and predicted probability values for each calibration point is returned, allowing other types of user-tailored model performance assessments.
+
+
+\begin{example}
+> ObsPred.RS <- extractFromModel(models = trainRS, value = "ObsPred")
+\end{example}
+
+The fitted models are stored in the \code{"model"} (or \code{"fold.models"}) component, required for subsequent model prediction. 
+
+\begin{example}
+> models.RS <- extractFromModel(models = trainRS, value = "model")
+\end{example}
+
+Additionally, variable importance may be also estimated. One straightforward possibility is to pass the fitted models to function \code{varImp} from package \CRANpkg{caret} \citep{caret}.
+
+
+
+\subsection{Model predictions}
+
+SDM predictions are obtained by passing a new set of predictors (e.g.: future bioclimatic variables) to the generated models. The \code{model} component corresponds to the models fitted using all available data for model training, while the SDM predictions for the k-cross-validation setup are generated from the component \code{fold.models} --instead of \code{model}--. Thus, \pkg{mopa} allows handling both the cross-fitted models for flexible model performance assessment and the global model --fitted with all presences and pseudo-absences-- for predicting distributions, accomplished through the use of the function \code{mopaPredict}. In the following example, models corresponding to the RS method are projected to reference climate conditions (\code{biostack\$baseline}) and to 7 future climate projections (\code{biostack\$future}):
+
+
+
+\begin{example}
+> ensemble.present <- mopaPredict(models = models.RS, 
+		newClim = biostack$baseline)
+> ensemble.future <- mopaPredict(models = models.RS, 
+		newClim = biostack$future)
+\end{example}
+
+
+\section{Exploring the uncertainty in SDM projections}
+
+Projections returned by \code{mopaPredict} are structured in a nested \code{list}. Each depth or level in the \code{list} corresponds to a different component. These are: presence data sets (\code{SP}), pseudo-absence realizations (\code{PA}), modeling algorithms (\code{SDM}), baseline climate (\code{baseClim}), and the new climate (\code{newClim}) used to project models (e.g.\ future climate projections). The function used to extract components is \code{extractFromPrediction}. In the next example, projections corresponding to the first pseudo-absence realization (object \code{rcms\_run1}) and to the future climate projection from the MPI RCM (object \code{runs\_rcm1}) are extracted: 
+
+\begin{example}
+> rcms_run1 <- extractFromPrediction(ensemble.future, "PA01")
+> runs_rcm1 <- extractFromPrediction(ensemble.future, "MPI")
+\end{example}
+
+Then, the function is again applied to object \code{runs\_rcm1} to extract the SDM results for MPI and GLM. The resulting object is of S4-class \code{raster*}, thus being straightforward to apply any of the plotting/analysis methods for spatial objects. Here, we use  \code{spplot} from \pkg{sp} for output visualization (Fig. \ref{fig:runs_rcm1}).
+
+
+
+\begin{example}
+> glm_runs_rcm1 <- extractFromPrediction(runs_rcm1, "glm")
+> # Generates Fig. 3
+> data(wrld)
+> spplot(glm_runs_rcm1, layout = c(5, 2), at = seq(0, 1, 0.1),
+		col.regions = colorRampPalette(c("white",  "red3")),
+		sp.layout= list(wrld, first = FALSE, lwd = 0.5))
+\end{example}
+
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{runs_rcm1.png}
+	\caption{Future species distribution projections (2071-2100) according to the MPI RCM projections, considering 10 different pseudo-absence realizations of the RS method, as stored in the object \code{glm\_runs\_rcm1}.}
+	\label{fig:runs_rcm1}
+\end{figure}
+
+Thus, it is easy to explore the results by inspecting the different components of the \code{mopaPredict} outputs. For instance, the \pkg{raster} package can be particularly useful this aim allowing for a wide variety of map algebra operations through the function \code{stackApply} over user-defined subsets of SDM projections.
+
+
+
+\subsection{Partition of the uncertainty into components using ANOVA}
+
+
+
+The relative contribution of each component to the total ensemble spread/variability is implemented in \pkg{mopa} using an ANOVA approach, through the function \code{varianceAnalysis}, following the method in \cite{deque_spread_2012}, also applied by \cite{san-martin_reassessing_2016}. For instance, in this example, the total variance $V$ can be decomposed as the summation of the variance explained by the pseudo-absence realization $P$, the RCM $R$ and the combination of both $PR$, so $V =  P + R + PR$. Let $i$ be the index of the pseudo-absence realization $(i = 1, \dots, 10)$, $j$ the index of the RCM $(j = 1, \dots, 7)$, and $X_{ij}$ is the response (e.g.: the predicted distribution for the particular realization and climate projection). Then:
+
+\begin{equation}
+P = \frac{1}{10}\sum\limits_{i=1}^{10}(X_{i}-\bar{X})^2 \quad \text{and} \quad R = \frac{1}{7}\sum\limits_{i=1}^{7}(X_{j}- \bar{X})^2
+\label{eq:P and R}
+\end{equation}
+
+\noindent are the terms resulting from the realization alone ($P$), and RCM alone ($R$), and
+
+\begin{equation}
+PR = \frac{1}{10}\sum\limits_{i=1}^{10}\frac{1}{7}\sum\limits_{i=1}^{7}(X_{ij}-X_{i}-X_{j}+\bar{X})^2
+\label{eq:PR}
+\end{equation}
+
+\noindent is the interaction term of the realization with the RCM ($PR$). The following example shows the analysis performed for the pseudo-absence realizations (\code{component1 = "PA"}) and the climate projections (\code{component2 = "newClim"}) in GLM projections (\code{fixed = "glm"}). In order to illustrate thoroughgoing information on the spread in the projected potential distributions, variance percentage maps are returned together with the maps of the mean and standard deviation. Again, the results can be conveniently visualized with function \code{spplot} (Figs. \ref{fig:glm_mean} and \ref{fig:glm_var}).
+
+\begin{example}
+> var.glm <- varianceAnalysis(predictions = ensemble.future, 
+		component1 = "PA", component2 = "newClim", fixed = c("glm"))
+> # Generates Fig. 4              
+> spplot(var.glm$mean, 
+		at = seq(0,1,0.1), 
+		col.regions = colorRampPalette(c("white", "red3")),
+		sp.layout= list(wrld, first = FALSE, lwd = 0.5))
+> # Generates Fig. 5              
+> spplot(var.glm$variance, 
+		col.regions = rev(gray.colors(10, end = 1)), 
+		at = seq(0, 100, 10), 
+		sp.layout= list(wrld, first = FALSE, lwd = 0.5))
+\end{example}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{glm_mean.png}
+	\caption{Mean and standard deviation of the SDM ensemble projections (GLM), formed by  7 RCMs $\times$ 10 pseudo-absence realizations (RS method, object \code{var.glm\$mean}).}
+	\label{fig:glm_mean}
+\end{figure}
+
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{glm_var.png}
+	\caption{Variance percentage explained by each component: pseudo-absence realization ($PA$), RCM future climate projections ($newClim$) and their joint contribution ($PA.and.newClim$), considering GLM projections (object \code{var.glm\$var}).}
+	\label{fig:glm_var}
+\end{figure}
+
+Figures \ref{fig:glm_mean} and \ref{fig:glm_var} depict the ensemble SDM projections and the variance analysis results, applied to the set of projections that correspond to the 10 pseudo-absence realization and 7 climate projections (10 realizations x 7 RCMs). The mean suitability map and the standard deviation are shown in Figure \ref{fig:glm_mean}, while Figure \ref{fig:glm_var} are the variance fraction maps (\%), depicting the contribution of each component (realization, RCM and realization \& RCM) to the overall variance. For instance, the results displayed in Figure \ref{fig:glm_var} unveil that the RCM choice (component \code{newClim}) is by far the most important factor contributing to the ensemble spread, while pseudo-absence realization has some impact in areas that are outside the current domain of the Oak phylogeny H1 (e.g.\ Scandinavia).
+
+
+Similarly, the next lines perform the same analysis, but considering MARS instead of GLM as the statistical modeling technique (Figs. \ref{fig:mars_mean} and \ref{fig:mars_var}):
+
+\begin{example}
+> var.mars <- varianceAnalysis(predictions = ensemble.future, 
+		component1 = "PA", component2 = "newClim", fixed = c("mars"))
+> # Generates Fig. 6  
+>  spplot(var.mars$mean, 
+		at = seq(0,1,0.1), 
+		col.regions = colorRampPalette(c("white", "red3")),
+		sp.layout= list(wrld, first = FALSE, lwd = 0.5))
+> # Generates Fig. 7
+> spplot(var.mars$variance, 
+		at = seq(0, 100, 10), 
+		col.regions = rev(gray.colors(10, end = 1)), 
+		sp.layout= list(wrld, first = FALSE, lwd = 0.5))
+\end{example}
+
+
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{mars_mean.png}
+	\caption{Same as Fig. \ref{fig:glm_mean}, but considering MARS instead of GLM as statistical modeling technique for SDM production (object \code{var.mars\$mean}).}
+	\label{fig:mars_mean}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{mars_var.png}
+	\caption{Same as Fig. \ref{fig:glm_var}, but considering MARS instead of GLM as the statistical modeling technique for SDM production (object \code{var.mars\$var}).}
+	\label{fig:mars_var}
+\end{figure}
+
+Unlike GLM, in the case of MARS the ensemble spread (Fig. \ref{fig:mars_mean}) is greatly affected by the pseudo-absence realization in a wide area of the study domain (Fig. \ref{fig:mars_var}), specially in peripheral regions. This is unequivocally diagnosed after applying function \code{varianceSummary}, which provides a summary of the results, including a graph (Fig. \ref{fig:varboxplot}) and allowing the comparison of multiple results for a particular uncertainty component. This summary is based on the spatial subsetting of the study area, by specifying the number of subsets with argument \code{regions}. The output boxplot (Fig. \ref{fig:varboxplot}) shows the spatial spread of the results (variance proportion explained by a component and the total standard deviation) in each region. 
+
+As a result, in Figure \ref{fig:varboxplot}, we compare GLM and MARS (\code{var.glm} and \code{var.mars}) with regard to the variance proportion explained by the RCM choice (\code{component = 2L}), so that the percentage not explained by it, is associated to the pseudo--absence realization. From this summary, we can confirm a significantly higher sensitivity of MARS to the pseudo--absence sample across all regions.
+
+\begin{example}
+	# Generates Fig. 8
+> varianceSummary("glm" = var.glm, "mars" = var.mars, 
+		component = 2L, regions = c(6, 6), drawBoxplot = TRUE)
+\end{example}
+
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{varboxplot.pdf}
+	\caption{Summary of the variance analysis results generated with function \code{varianceSummary}, where GLM and MARS techniques (brown and blue respectively) are compared. Boxes account for the spatial spread of the results in each region. Empty boxes show the variance proportion explained by the RCM choice (component \code{newClim}) and filled boxes show the overall spread, this is, the standard deviation of the predicted probability expressed as a percentage. Thus, empty boxes show how is the total spread (filled boxes) distributed between components (\code{PA} and \code{newClim}). The x-axis corresponds to the regions shown in the map at the top.}
+	\label{fig:varboxplot}
+\end{figure}
+
+Alternatively, a \code{SpatialPolygons} object (package \pkg{sp}) can be passed to argument \code{regions} in order to focus the analysis on specific areas of interest. For illustrative purposes, in this example we use the climatic regions defined in the EU-funded PRUDENCE project \citep{christensen_summary_2007}, which is available at the  \href{http://www.meteo.unican.es/climate4R}{climate4R} package \pkg{visualizeR} \citep{frias_r_2018}:
+
+\begin{example}
+> regiondir <- tempfile()
+> download.file(paste0("https://github.com/SantanderMetGroup/",
++   "visualizeR/raw/devel/data/PRUDENCEregions.rda"), destfile = regiondir)
+> load(regiondir)
+> varianceSummary("glm" = var.glm, "mars" = var.mars, 
+		component = 2L, drawBoxplot = FALSE, regions = PRUDENCEregions)
+\end{example}
+
+Additionally, if argument \code{drawBoxplot} is set as \code{FALSE}, a simpler graph is obtained displaying the points of the spatial mean. This might be useful when multiple results are being compared in the same graph.
+
+The much higher sensitivity of MARS to the pseudo--absence sample warns about its instability, while GLM reveals much better properties in terms of model stability and transferability. These findings are possible after ANOVA analysis thanks to the utilities included in \pkg{mopa}, enabling a flexible experimental setup with a simple user interface. Model transferability is thus not apparent during the SDM calibration stage and is not coupled to model performance (even with the application of the 10-fold cross validation approach), so for instance TSS among realizations was 0.82 for GLM and 0.85 for MARS, and the mean AUC, 0.91 and 0.92 respectively. The uncertainty analysis results are extremely valuable for the construction of an ensemble of SDM projections that minimizes the risk of including unuseful realizations, thus yielding more plausible results.
+
+
+In the same vein, the contribution of pseudo--absences in front SDM techniques to the overall spread is achieved by adding a new component argument to \code{varianceAnalysis}, while the RCM projection (MPI in this example) is kept as a fixed factor:
+
+\begin{example}
+> MPI.var <- varianceAnalysis(ensemble.future, 
+		component1 = "PA", component2 = "SDM", fixed = c("MPI"))
+\end{example}
+
+In case further uncertainty components are considered for predicting distributions (named in \pkg{mopa} as \code{SP}, \code{baseClim} and \code{foldModels}), these could also be analyzed by keeping several fixed factors, each corresponding to a component that is not being analyzed. This is explained in detail in the help document of function "varianceAnalysis".
+
+\begin{example}
+> help(varianceAnalysis)
+\end{example}
+
+\section{SDM ensemble building}
+
+Finally, the ensemble forecast is built. In this particular example, we could discard those MARS projections that we consider are the result of bad transferability, e.g.\ corresponding to the pseudo-absence realizations that resulted in unrealistic predictions. Let us consider the simplified case where, after a more detailed analysis of the results, we conclude that MARS projections corresponding to pseudo--absence realization 8 along with GLM projections, are valid forecasts, then, as shown in the next example, the definitive ensemble is easily built with function \code{extractFromPrediction} and the utilities of the \pkg{raster} package. Here we calculate and plot the ensemble mean and standard deviation of the final SDM ensemble projections (Fig. \ref{fig:forecast}):
+
+\begin{example}
+> marsEns <- extractFromPrediction(ensemble.future, value = "mars")
+> marsEnsPA08 <- extractFromPrediction(marsEns, value = "PA08")
+> glmEns <- extractFromPrediction(ensemble.future, value = "glm")
+	
+> ensemble.future.def <-  stack(list(glmEns, marsEnsPA08))
+> mean.ensemble <- stackApply(ensemble.future.def, fun = mean, 
+		indices = rep(1, nlayers(ensemble.future.def)))
+> sd.ensemble <- stackApply(ensemble.future.def, fun = sd, 
+		indices = rep(1, nlayers(ensemble.future.def)))
+> forecast.future <- stack(mean.ensemble, sd.ensemble)
+> names(forecast.future) <- c("ensemble mean", "ensemble sd")
+> # Generates Fig. 9
+> spplot(forecast.future, at = seq(0,1,0.1), 
+		col.regions = colorRampPalette(c("white", "red3")),
+		sp.layout= list(wrld, first = FALSE, lwd = 0.5))
+\end{example}
+
+Basically, this is a weighting exercise that favors GLM predictions in front of those of MARS, beyond the performance shown in the calibration phase. 
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{forecast.png}
+	\caption{Future ensemble forecast (mean and standard deviation) of the suitability of the oak phylogeny H11 under climate conditions given by 7 different RCMs.}
+	\label{fig:forecast}
+\end{figure}
+
+
+
+\section{Summary}
+
+The impacts of climate change on the biological systems are of current concern worldwide, and future SDMs have become a key tool for the vulnerability and impact assessment community. Thus, the utilities in package \pkg{mopa} can help in the SDM production chain since the early stage (climate data retrieval and post-processing) to the ultimate phase in which a final set of models is retained for ensemble generation and map production. 
+
+In this case-study, we illustrate the development of a set of SDM projections considering multiple combinations of climate change projections from a set of state-of-the-art RCMs, two popular statistical modeling methods (GLM and MARS) and different pseudo-absence realizations, enabling the identification of those members of the ensemble yielding consistent and plausible future estimates for final SDM building. With this regard, the ability to quantitatively assess the individual contribution of each factor to the overall SDM spread, as implemented in function \code{varianceAnalysis} proved crucial in the evaluation. While previously existing R packages already provide functionality for SDM building and their assessment during the calibration stage, we have shown that model performance, as evaluated by ordinary cross-validation, is not coupled to model transferabilty into future climate, being therefore this essential feature specific of \pkg{mopa}. Other characteristic aspects introduced by the package consist of the novel methods for pseudo-absence generation, and the ability to perform a fine-tuning of these methods prior to model fitting. Furthermore, the inter-operability of \pkg{mopa} with other SDM-related R packages enables maximum flexibility and eases the use of R for SDM applications in the framework of complex modeling exercises, for which multiple aspects have a varying contribution to the overall uncertainty. 
+
+
+\section{Acknowledgements}
+
+
+We are grateful to the one anonymous referee for her/his valuable comments. We acknowledge the ENSEMBLES project (GOCE-CT-2003-505539), supported by the European Commission's 6th Framework Program for providing publicly the RCM simulations and observational data used in this study. We are also grateful to R\'emy Petit and François Ehrenmann for providing the distribution of Oak phylogenies.
+
+
+\bibliography{Iturbide}
+
+
+
+\address{M. Iturbide, J.M. Guti\'{e}rrez\\
+	\url{https://orcid.org/0000-0002-5048-0941}\\
+	\url{https://orcid.org/0000-0002-2766-6297}\\
+	Meteorology group. Insituto de F\'{i}sica de Cantabria (IFCA)\\
+	CSIC - Universidad de Cantabria. Avda. de los Castros, s/n\\
+	39005. Santander. Spain\\}
+\email{miturbide@ifca.unican.es}  
+
+\address{J. Bedia\\
+	\url{https://orcid.org/0000-0001-6219-4312}\\
+	Predictia Intelligent Data Solutions S.L.\\
+	\url{http://www.predictia.es/en}\\ 
+	Avda. los Castros s/n. Edificio I+D+i. S345\\
+	39005. Santander. Spain}
+
+
