@@ -7,7 +7,7 @@
 * Minor bug fix in set.min argument value check in `spatialPlot`
 * Other minor changes and documentation updates
 
-## v1.2.1 (in devel)
+## v1.2.1 (19 Jul 2018)
 * Set `clim.time.frame` default value in climagrams to `"monthly"`
 * Update climagram vignette
 * Other minor changes and documentation updates
