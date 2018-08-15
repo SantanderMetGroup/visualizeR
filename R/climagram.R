@@ -98,7 +98,7 @@
 #' @author J. Bedia
 #' 
 #' @family visualization functions
-#' @importFrom transformeR subsetGrid checkDim checkSeason aggregateGrid detrendGrid getYearsAsINDEX getTimeResolution scaleGrid getSeason getGridUnits
+#' @importFrom transformeR subsetGrid checkDim checkSeason checkTemporalConsistency aggregateGrid detrendGrid getYearsAsINDEX getTimeResolution scaleGrid getSeason getGridUnits 
 #' @importFrom stats filter median
 #' @importFrom graphics plot axis grid boxplot box legend
 #' @importFrom magrittr %>% extract2 %<>% 
@@ -173,7 +173,7 @@ climagram <- function(hindcast,
         checkSeason(hindcast, forecast)
     }
     if (!is.null(obs)) {
-        temporalCheck(hindcast, obs)
+        transformeR::checkTemporalConsistency(hindcast, obs)
         transformeR::checkDim(hindcast, obs, dimensions = c("time", "lat", "lon"))
     } else {
         if (add.eqc.info) add.eqc.info <- FALSE

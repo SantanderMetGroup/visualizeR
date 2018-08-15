@@ -29,6 +29,11 @@
 #' @param show.na Logical. Implemented but under development (see Details). 
 #' @param x.axis Character controlling the x axis. Options are "dates" (default) or "index".
 #' The first plots the data according to the date and missing dates are filled with NAs.
+#' @param lonLim Vector of length = 2, with minimum and maximum longitude coordinates, 
+#' in decimal degrees, of the bounding box selected. For single-point queries, a 
+#' numeric value with the longitude coordinate. If NULL (default), the whole 
+#' longitudinal range is selected 
+#' @param latLim Same as lonLim, but for the selection of the latitudinal range.
 #' @param xyplot.custom List of arguments as passed to xyplot. Argument \code{panel} cannot be modified, thus,
 #' if specified, it will be ignored. 
 #' @details The function applies the \code{\link[lattice]{xyplot}} method after computing spatial aggregation 
@@ -99,6 +104,8 @@ temporalPlot <- function(...,
                          missing.dates = TRUE,
                          show.na = FALSE,
                          x.axis = c("dates", "index"),
+                         lonLim = NULL,
+                         latLim = NULL,
                          xyplot.custom = list()) {
   x.axis <- match.arg(arg = x.axis, choices = c("dates", "index"))
   obj.list <- list(...)
@@ -108,6 +115,7 @@ temporalPlot <- function(...,
     if (length(nmes) < length(obj.list)) nmes <- paste0(nmes, 1:length(obj.list))
     names(obj.list) <- nmes
   }
+  obj.list <- lapply(obj.list, function(x) subsetGrid(x, lonLim = lonLim, latLim = latLim))
   obj.list <- lapply(obj.list, FUN = redim)
   # spatial aggregation
   aggr.spatial[["MARGIN"]] <- c(1,2)

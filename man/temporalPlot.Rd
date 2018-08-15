@@ -6,7 +6,8 @@
 \usage{
 temporalPlot(..., aggr.spatial = list(FUN = mean, na.rm = TRUE),
   cols = NULL, lwd = 1, lty = 1, missing.dates = TRUE,
-  show.na = FALSE, x.axis = c("dates", "index"), xyplot.custom = list())
+  show.na = FALSE, x.axis = c("dates", "index"), lonLim = NULL,
+  latLim = NULL, xyplot.custom = list())
 }
 \arguments{
 \item{...}{Input grids (or station data)}
@@ -26,6 +27,13 @@ aggregation. Default is \code{list(FUN = mean, na.rm = TRUE)}.}
 
 \item{x.axis}{Character controlling the x axis. Options are "dates" (default) or "index".
 The first plots the data according to the date and missing dates are filled with NAs.}
+
+\item{lonLim}{Vector of length = 2, with minimum and maximum longitude coordinates, 
+in decimal degrees, of the bounding box selected. For single-point queries, a 
+numeric value with the longitude coordinate. If NULL (default), the whole 
+longitudinal range is selected}
+
+\item{latLim}{Same as lonLim, but for the selection of the latitudinal range.}
 
 \item{xyplot.custom}{List of arguments as passed to xyplot. Argument \code{panel} cannot be modified, thus,
 if specified, it will be ignored.}
