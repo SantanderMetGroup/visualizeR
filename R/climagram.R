@@ -158,7 +158,7 @@ climagram <- function(hindcast,
         stop("Monthly data is required for climagram construction (use 'aggregateGrid' for submonthly data)")
     }
     if (is.null(forecast)) {
-        if (is.null(year.target)) stop("Either a year.target from the hindcast or a forecast dataset must be indicated",
+        if (is.null(year.target)) stop("Either a \'year.target\' from the hindcast or a forecast dataset must be indicated",
                                        call. = FALSE)
         yrs <- unique(getYearsAsINDEX(hindcast))
         if (!year.target %in% yrs) stop("Target year outside temporal hindcast range", call. = FALSE)
