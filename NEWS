@@ -11,3 +11,6 @@
 * Set `clim.time.frame` default value in climagrams to `"monthly"`
 * Update climagram vignette
 * Other minor changes and documentation updates
+
+## v1.2.2 (15 Aug 2018)
+* allow for spatial subsetting in temporalPlot (new args lonLim and latLim)
