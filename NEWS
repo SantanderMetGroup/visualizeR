@@ -12,6 +12,11 @@
 * Update climagram vignette
 * Other minor changes and documentation updates
 
+<<<<<<< HEAD
 ## v1.2.2 (16 Aug 2018)
 * Minor doc update
 * Release for the climate4R paper submitted to EMS
+=======
+## v1.2.2 (15 Aug 2018)
+* allow for spatial subsetting in temporalPlot (new args lonLim and latLim)
+>>>>>>> 51a8d7aa0d78acd34699172fdd47c62fdd158963
