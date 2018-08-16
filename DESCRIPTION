@@ -2,7 +2,7 @@ Package: visualizeR
 Depends:
     R(>= 3.1.0),
     sm,
-    transformeR(>= 1.4.3)
+    transformeR(>= 1.4.4)
 Imports:
     methods,
     fields,
@@ -28,8 +28,8 @@ Suggests:
     knitr
 Type: Package
 Title: Visualizing climate4R data and Communicating Uncertainty in Seasonal Climate Prediction
-Version: 1.2.1
-Date: 2018-07-19
+Version: 1.2.2
+Date: 2018-08-16
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
     "Maria Dolores Frías <friasmd@unican.es> [aut, cre]",
@@ -49,4 +49,4 @@ Description: Implementation of seasonal climate verification plots.
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

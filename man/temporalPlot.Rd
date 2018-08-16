@@ -6,7 +6,8 @@
 \usage{
 temporalPlot(..., aggr.spatial = list(FUN = mean, na.rm = TRUE),
   cols = NULL, lwd = 1, lty = 1, missing.dates = TRUE,
-  show.na = FALSE, x.axis = c("dates", "index"), xyplot.custom = list())
+  show.na = FALSE, x.axis = c("dates", "index"),
+  xyplot.custom = list())
 }
 \arguments{
 \item{...}{Input grids (or station data)}

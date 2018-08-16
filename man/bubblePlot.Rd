@@ -125,3 +125,4 @@ Other visualization functions: \code{\link{climagram}},
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
  conceived by Slingsby et al (2009).
 }
+\concept{visualization functions}

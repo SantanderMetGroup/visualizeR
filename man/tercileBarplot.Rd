@@ -83,3 +83,4 @@ Other visualization functions: \code{\link{bubblePlot}},
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
+\concept{visualization functions}
