@@ -16,3 +16,9 @@
 * Allow for spatial subsetting in temporalPlot (new args lonLim and latLim)
 * Minor doc updates
 * Release for the climate4R paper submitted to EMS
+
+## v1.2.3 (22 Aug 2018)
+* Minor internal change in `spatialPlot` to automatically handle static grids with no 'time' dimension
+* Minor doc updates
+
+
