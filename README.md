@@ -7,7 +7,7 @@ This package is part of the [climate4R bundle](http://www.meteo.unican.es/climat
 ```r
 devtools::install_github(c("SantanderMetGroup/transformeR", "SantanderMetGroup/visualizeR"))
 ```
-**IMPORTANT:** Note that `transformeR` must be previously installed on your system 
+**NOTE:** Note that `transformeR` is a dependency for `visualizeR`. Note that `transformeR` also includes illustrative datasets for the `climate4r`framework.
 
 ---
 Reference and further information: 
