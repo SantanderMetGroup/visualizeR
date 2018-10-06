@@ -14,7 +14,7 @@ Reference and further information:
 
 Frías M.D., Iturbide M., Manzanas R., Bedia J., Fernández J., Herrera S., Cofiño A.S., Gutiérrez J.M. (2018) An R package to visualize and communicate uncertainty in seasonal climate prediction. **Environmental Modelling and Software**, 99, 101-110, http://doi.org/10.1016/j.envsoft.2017.09.008
 
-**[General description of the climate4R framework]** Iturbide et al. (2018) climate4R: An R-based Open Framework for Reproducible Climate Data Access and Post-processing. **Environmental Modelling and Software**. https://doi.org/10.1016/j.envsoft.2018.09.009
+**[General description of the climate4R framework]** Iturbide et al. (2019) The R-based climate4R open framework for reproducible climate data access and post-processing. **Environmental Modelling and Software**, 111, 42-54. https://doi.org/10.1016/j.envsoft.2018.09.009
 Check out the companion notebooks for the two examples [GitHub](https://github.com/SantanderMetGroup/notebooks).
 
 **[Seasonal forecasting applications]** Cofiño et al. (2018) The ECOMS User Data Gateway: Towards seasonal forecast data provision and research reproducibility in the era of Climate Services. **Climate Services**, 9, 33-43. http://doi.org/10.1016/j.cliser.2017.07.001
