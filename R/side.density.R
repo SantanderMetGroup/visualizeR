@@ -17,7 +17,6 @@
 #' @details The function is intended for internal use only. The function adds the PDF to the cascade plot.
 #'  @author J. Fernandez and M.D. Frias 
 #'  @keywords internal
-#'  @export
 
 side.density <- function(x, horiz=TRUE, col="black", scale=0.1, alpha=0.3, 
   shades = FALSE, prob=c(0.25,0.5,0.75), density.offset=0, density.reverse=FALSE)
