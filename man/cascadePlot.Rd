@@ -57,7 +57,7 @@ cascadePlot(sdeltas, factors, multimip.stages, title=title, density.offset=2)
 \references{
 Hawkins E. 2014. Climate Lab Book. http://www.climate-lab-book.ac.uk/2014/cascade-of-uncertainty
 
-Fernandez, J., Frias, M.D., Cabos, W.D. et al. 2018. Consistency of climate change
+Fernández, J., Frías, M.D., Cabos, W.D. et al. 2018. Consistency of climate change
 projections from multiple global and regional model intercomparison projects. Clim Dyn. https://doi.org/10.1007/s00382-018-4181-8
 }
 \seealso{
@@ -68,7 +68,7 @@ Other visualization functions: \code{\link{bubblePlot}},
   \code{\link{tercilePlot}}
 }
 \author{
-J. Fernandez \email{jesus.fernandez@unican.es} and M.D. Frias based on the
+J. Fernández \email{jesus.fernandez@unican.es} and M.D. Frías based on the
 visualization proposed by Ed Hawkins on his Climate Lab Book http://www.climate-lab-book.ac.uk/2014/cascade-of-uncertainty
 }
 \concept{visualization functions}

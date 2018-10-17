@@ -37,6 +37,7 @@ The function adds an estimate of the probability density function (PDF)
 }
 \details{
 The function is intended for internal use only. The function adds the PDF to the cascade plot.
- @author J. Fernandez and M.D. Frias 
+ @author J. Fernández and M.D. Frías 
  @keywords internal
+ @importFrom stats density
 }
