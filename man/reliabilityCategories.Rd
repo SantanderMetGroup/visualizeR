@@ -105,8 +105,9 @@ Manzanas, R., Lucero, A., Weisheimer, A., Guti\'errez, J.M., 2017. Can bias corr
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
-  \code{\link{climagram}}, \code{\link{spreadPlot}},
-  \code{\link{tercileBarplot}}, \code{\link{tercilePlot}}
+  \code{\link{cascadePlot}}, \code{\link{climagram}},
+  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
+  \code{\link{tercilePlot}}
 }
 \author{
 R. Manzanas \& M.Iturbide

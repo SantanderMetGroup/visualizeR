@@ -3,6 +3,7 @@
 export(MrQuantile)
 export(QuantileProbs)
 export(bubblePlot)
+export(cascadePlot)
 export(clim2sgdf)
 export(climagram)
 export(detrend.data)

@@ -9,7 +9,7 @@
 #'   Alpha ranges from 0 (fully transparent) to 1 (opaque). Default is 0.3. 
 #' @param shades Logical (default = FALSE). If TRUE add shades for the quantiles 
 #'   defined in prob.
-#' @param prob A vector giving the quantiles to be highlithed in the PDF. 
+#' @param prob A vector giving the quantiles to be highlighted in the PDF. 
 #'   Default is the quartiles.
 #' @param density.offset A vector indicating how much the PDF should be shifted 
 #'   relative to the bottom part of the plot. Default is 0.

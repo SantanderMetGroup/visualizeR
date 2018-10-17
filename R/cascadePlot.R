@@ -29,7 +29,7 @@
 #'   If NULL (default) names are taken from x.
 #' @param colors Color vector to be used in the last aggregating step and all 
 #'   lines leading to each main branch. If NULL (default) an appropriate rainbow 
-#'   scale is used. Its length should be length(levels(factors[[rev(stages)[1]]])).
+#'   scale is used. Its length should be \code{length(levels(factors[[rev(stages)[1]]]))}.
 #' @param title Title of the plot
 #' @param line.width Width of the lines.
 #' @param plot.density Logical (default = TRUE). Add an estimate of the probability
