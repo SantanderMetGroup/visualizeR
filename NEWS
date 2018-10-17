@@ -22,5 +22,5 @@
 * Minor doc updates
 
 ## v1.3.0 (17 oct 2018)
-* New function `cascadePlot`
+* New function `cascadePlot` to visualize the climate change modelling uncertainty cascade.
 

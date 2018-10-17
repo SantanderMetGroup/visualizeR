@@ -39,14 +39,16 @@
 #' @param density.reverse Logical (default = TRUE). If TRUE plot the PDF upside down.
 
 #' @export
+#' @importFrom grDevices rainbow
+#' @importFrom graphics segments 
 
 #' @family visualization functions
 
-#' @author J. Fernandez \email{jesus.fernandez@@unican.es} and M.D. Frias based on the
+#' @author J. Fernández \email{jesus.fernandez@@unican.es} and M.D. Frías based on the
 #' visualization proposed by Ed Hawkins on his Climate Lab Book http://www.climate-lab-book.ac.uk/2014/cascade-of-uncertainty
 #'
 #' @references Hawkins E. 2014. Climate Lab Book. http://www.climate-lab-book.ac.uk/2014/cascade-of-uncertainty
-#' @references Fernandez, J., Frias, M.D., Cabos, W.D. et al. 2018. Consistency of climate change
+#' @references Fernández, J., Frías, M.D., Cabos, W.D. et al. 2018. Consistency of climate change
 #' projections from multiple global and regional model intercomparison projects. Clim Dyn. https://doi.org/10.1007/s00382-018-4181-8
 #'
 #' @examples \dontrun{
@@ -59,7 +61,6 @@
 #' title <- "Delta T (K)"
 #' cascadePlot(sdeltas, factors, multimip.stages, title=title, density.offset=2)
 #' } 
-
 
 cascadePlot <- function(x, factors, stages = NULL, labels = FALSE, label.names = NULL, colors=NULL, title = NULL, line.width = NULL, plot.density = TRUE, density.offset=0, density.reverse=TRUE){
       if (is.null(stages)) {
