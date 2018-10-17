@@ -21,4 +21,6 @@
 * Minor internal change in `spatialPlot` to automatically handle static grids with no 'time' dimension
 * Minor doc updates
 
+## v1.3.0 (17 oct 2018)
+* New function `cascadePlot`
 
