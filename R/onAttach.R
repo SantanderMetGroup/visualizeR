@@ -24,5 +24,6 @@
                   packageStartupMessage(ver.mess)
             }
       }
+      packageStartupMessage("Please see 'citation(\"", pkgname, "\")' to cite this package.")
 }
 # End
