@@ -4,8 +4,9 @@
 \alias{spreadPlot}
 \title{Box plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
-spreadPlot(hindcast, forecast = NULL, year.target = NULL, detrend = FALSE,
-  boxplot = TRUE, violin = FALSE, add.points = FALSE, pch = NULL)
+spreadPlot(hindcast, forecast = NULL, year.target = NULL,
+  detrend = FALSE, boxplot = TRUE, violin = FALSE,
+  add.points = FALSE, pch = NULL)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. Daily values. See details.}
@@ -68,10 +69,11 @@ spreadPlot(tas.cfs.dly.br, forecast = tas.cfs.operative.dly.br.2016, violin = TR
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
-  \code{\link{climagram}},
+  \code{\link{cascadePlot}}, \code{\link{climagram}},
   \code{\link{reliabilityCategories}},
   \code{\link{tercileBarplot}}, \code{\link{tercilePlot}}
 }
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
+\concept{visualization functions}

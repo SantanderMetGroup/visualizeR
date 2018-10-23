@@ -76,10 +76,11 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
 }
 \seealso{
 Other visualization functions: \code{\link{bubblePlot}},
-  \code{\link{climagram}},
+  \code{\link{cascadePlot}}, \code{\link{climagram}},
   \code{\link{reliabilityCategories}},
   \code{\link{spreadPlot}}, \code{\link{tercilePlot}}
 }
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
+\concept{visualization functions}

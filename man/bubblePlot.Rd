@@ -116,7 +116,8 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
  Durham, UK, 1-3 April 2009.
 }
 \seealso{
-Other visualization functions: \code{\link{climagram}},
+Other visualization functions: \code{\link{cascadePlot}},
+  \code{\link{climagram}},
   \code{\link{reliabilityCategories}},
   \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
   \code{\link{tercilePlot}}
@@ -125,3 +126,4 @@ Other visualization functions: \code{\link{climagram}},
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
  conceived by Slingsby et al (2009).
 }
+\concept{visualization functions}

@@ -75,6 +75,7 @@
 #' @importFrom sp spplot SpatialGridDataFrame SpatialPointsDataFrame GridTopology SpatialPoints
 #' @importFrom grDevices colorRampPalette
 #' @importFrom utils tail head
+#' @importFrom transformeR redim getDim getShape
 #' @importFrom RColorBrewer brewer.pal.info brewer.pal
 #' @export
 #' @author J. Bedia
@@ -180,6 +181,7 @@ spatialPlot <- function(grid,
     if (!is.null(set.max) && !is.numeric(set.max)) stop("Invalid 'set.max' value")
     ## add climatology:fun attribute if getShape(grid, "time") = 1
     if (is.null(attr(grid$Data, "climatology:fun"))) {
+        if (!"time" %in% getDim(grid)) grid %<>% redim()
         if (getShape(grid, "time") == 1L) attr(grid$Data, "climatology:fun") <- "none"
     }
     ## Change lon center

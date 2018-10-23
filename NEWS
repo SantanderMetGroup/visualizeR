@@ -12,5 +12,15 @@
 * Update climagram vignette
 * Other minor changes and documentation updates
 
-## v1.2.2 (15 Aug 2018)
-* allow for spatial subsetting in temporalPlot (new args lonLim and latLim)
+## v1.2.2 (16 Aug 2018)
+* Allow for spatial subsetting in temporalPlot (new args lonLim and latLim)
+* Minor doc updates
+* Release for the climate4R paper submitted to EMS
+
+## v1.2.3 (22 Aug 2018)
+* Minor internal change in `spatialPlot` to automatically handle static grids with no 'time' dimension
+* Minor doc updates
+
+## v1.3.0 (17 oct 2018)
+* New function `cascadePlot` to visualize the climate change modelling uncertainty cascade.
+

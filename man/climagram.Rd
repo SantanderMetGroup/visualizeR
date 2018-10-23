@@ -129,6 +129,7 @@ Type \code{utils::RShowDoc("climagram_vignette", package = "visualizeR")} for fu
  examples on climagram options.
 
 Other visualization functions: \code{\link{bubblePlot}},
+  \code{\link{cascadePlot}},
   \code{\link{reliabilityCategories}},
   \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
   \code{\link{tercilePlot}}
@@ -136,3 +137,4 @@ Other visualization functions: \code{\link{bubblePlot}},
 \author{
 J. Bedia
 }
+\concept{visualization functions}
