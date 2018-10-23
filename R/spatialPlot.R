@@ -23,7 +23,7 @@
 #' @param backdrop.theme Reference geographical lines to be added to the plot. See Details. 
 #' @param set.min Numeric value indicating an absolute minimum value (default to \code{NULL}). All grid values below this are mapped to \code{set.min}. See details.
 #' @param set.max Same as \code{set.min} argument, but to force a ceiling. 
-#' @param lonCenter Value of the longitude to be centered in the plot.
+#' @param lonCenter Value of the longitude to be centered in the plot (between 0 and 180).
 #' @param color.theme A character string indicating the color theme to use in the map. 
 #' Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
 #' the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
@@ -184,9 +184,9 @@ spatialPlot <- function(grid,
     }
     ## Change lon center
     if (!is.null(lonCenter)) {
-        indcenter <- which(abs(grid$xyCoords$x - lonCenter) == min(abs(grid$xyCoords$x - lonCenter)))
+        indcenter <- which(abs(grid$xyCoords$x - lonCenter) == min(abs(grid$xyCoords$x - lonCenter)))[1]
         indcenter <- abs(length(grid$xyCoords$x)/2 - indcenter)
-        newlon <- if (indcenter == 0) grid$xyCoords$x else c(tail(grid$xyCoords$x, -indcenter), 
+        newlon <- if (indcenter == 0) grid$xyCoords$x else c(tail(grid$xyCoords$x, -indcenter),
                                                              head(grid$xyCoords$x, indcenter))
         dimNames <-  attr(grid$Data, "dimensions")
         climfun <-  attr(grid$Data, "climatology:fun")
@@ -195,7 +195,7 @@ spatialPlot <- function(grid,
                           dims = which(getDim(grid) == "lon"), drop = FALSE)
         attr(grid$Data, "dimensions") <- dimNames
         attr(grid$Data, "climatology:fun") <- climfun
-        grid$xyCoords$x <- newlon
+        grid$xyCoords$x <- seq(newlon[1], by = attr(getGrid(grid), "resX"), length.out = length(newlon))
     }
     ## Convert to spatial object
     df <- clim2sgdf(clim = grid, set.min, set.max)

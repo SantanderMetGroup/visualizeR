@@ -16,7 +16,7 @@ spatialPlot(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL,
 
 \item{set.max}{Same as \code{set.min} argument, but to force a ceiling.}
 
-\item{lonCenter}{Value of the longitude to be centered in the plot.}
+\item{lonCenter}{Value of the longitude to be centered in the plot (between 0 and 180).}
 
 \item{color.theme}{A character string indicating the color theme to use in the map. 
 Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
