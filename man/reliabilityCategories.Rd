@@ -112,4 +112,3 @@ Other visualization functions: \code{\link{bubblePlot}},
 \author{
 R. Manzanas \& M.Iturbide
 }
-\concept{visualization functions}

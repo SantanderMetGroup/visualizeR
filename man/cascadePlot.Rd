@@ -4,10 +4,9 @@
 \alias{cascadePlot}
 \title{Cascade plot to visualize the climate change modelling uncertainty cascade.}
 \usage{
-cascadePlot(x, factors, stages = NULL, labels = FALSE,
-  label.names = NULL, colors = NULL, title = NULL,
-  line.width = NULL, plot.density = TRUE, density.offset = 0,
-  density.reverse = TRUE)
+cascadePlot(x, factors, stages = NULL, labels = FALSE, label.names = NULL,
+  colors = NULL, title = NULL, line.width = NULL, plot.density = TRUE,
+  density.offset = 0, density.reverse = TRUE)
 }
 \arguments{
 \item{x}{Numeric vector with the values of the individual projections.}
@@ -71,4 +70,3 @@ Other visualization functions: \code{\link{bubblePlot}},
 J. Fernández \email{jesus.fernandez@unican.es} and M.D. Frías based on the
 visualization proposed by Ed Hawkins on his Climate Lab Book http://www.climate-lab-book.ac.uk/2014/cascade-of-uncertainty
 }
-\concept{visualization functions}

@@ -4,9 +4,8 @@
 \alias{spatialPlot}
 \title{Lattice plot methods for climatological grids}
 \usage{
-spatialPlot(grid, backdrop.theme = "none", set.min = NULL,
-  set.max = NULL, lonCenter = NULL, color.theme = "RdYlBu",
-  rev.colors = FALSE, ...)
+spatialPlot(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL,
+  lonCenter = NULL, color.theme = "RdYlBu", rev.colors = FALSE, ...)
 }
 \arguments{
 \item{grid}{Input grid}
@@ -78,7 +77,7 @@ clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
 spatialPlot(clim)
 # Geographical lines can be added using the argument 'backdrop.theme':
 spatialPlot(clim, backdrop.theme = "coastline")
-spatialPlot(clim, backdrop.theme = "coastline", center = 180)
+spatialPlot(clim, backdrop.theme = "countries")
 
 # Further arguments can be passed to 'spplot'...
 
@@ -114,8 +113,8 @@ spatialPlot(clim,
 spatialPlot(clim,
             backdrop.theme = "coastline",
             zcol = 1:4,
-            color.theme = "jet.colors")            
-            
+            color.theme = "jet.colors")
+
 # Or any other custom palette via 'col.regions'
 
 spatialPlot(clim,

@@ -137,4 +137,3 @@ Other visualization functions: \code{\link{bubblePlot}},
 \author{
 J. Bedia
 }
-\concept{visualization functions}

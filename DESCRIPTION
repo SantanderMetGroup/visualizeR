@@ -21,7 +21,8 @@ Imports:
     magrittr,
     padr,
     grDevices,
-    data.table
+    data.table,
+    raster
 Suggests:
     loadeR.ECOMS,
     loadeR,

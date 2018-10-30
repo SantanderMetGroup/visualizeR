@@ -77,6 +77,7 @@
 #' @importFrom utils tail head
 #' @importFrom transformeR redim getDim getShape
 #' @importFrom RColorBrewer brewer.pal.info brewer.pal
+#' @importFrom raster extent crop
 #' @export
 #' @author J. Bedia
 #' @seealso \code{\link{climatology}} for details on climatology calculation.
@@ -91,7 +92,7 @@
 #' spatialPlot(clim)
 #' # Geographical lines can be added using the argument 'backdrop.theme':
 #' spatialPlot(clim, backdrop.theme = "coastline")
-#' spatialPlot(clim, backdrop.theme = "coastline", center = 180)
+#' spatialPlot(clim, backdrop.theme = "countries")
 #' 
 #' # Further arguments can be passed to 'spplot'...
 #' 
@@ -127,8 +128,8 @@
 #' spatialPlot(clim,
 #'             backdrop.theme = "coastline",
 #'             zcol = 1:4,
-#'             color.theme = "jet.colors")            
-#'             
+#'             color.theme = "jet.colors")
+#' 
 #' # Or any other custom palette via 'col.regions'
 #' 
 #' spatialPlot(clim,
@@ -207,11 +208,12 @@ spatialPlot <- function(grid,
                       "coastline" = system.file("coastline.rda", package = "visualizeR"),
                       "countries" = system.file("countries.rda", package = "visualizeR"))
         l1 <- get(load(uri))
+        l1[[2]] <- crop(l1[[2]], extent(df@bbox))
         if (is.null(arg.list[["sp.layout"]])) {
             arg.list[["sp.layout"]] <- list(l1)
         } else {
             arg.list[["sp.layout"]][[length(arg.list[["sp.layout"]]) + 1]] <- list(l1)
-        } 
+        }
     }
     ## Colorbar 
     if (is.null(arg.list[["col.regions"]])) {

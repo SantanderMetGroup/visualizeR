@@ -4,9 +4,9 @@
 \alias{side.density}
 \title{Add an estimate of the probability density function.}
 \usage{
-side.density(x, horiz = TRUE, col = "black", scale = 0.1,
-  alpha = 0.3, shades = FALSE, prob = c(0.25, 0.5, 0.75),
-  density.offset = 0, density.reverse = FALSE)
+side.density(x, horiz = TRUE, col = "black", scale = 0.1, alpha = 0.3,
+  shades = FALSE, prob = c(0.25, 0.5, 0.75), density.offset = 0,
+  density.reverse = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector with the values of the individual projections.}
