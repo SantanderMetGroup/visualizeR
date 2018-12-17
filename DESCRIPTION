@@ -2,7 +2,7 @@ Package: visualizeR
 Depends:
     R(>= 3.1.0),
     sm,
-    transformeR(>= 1.4.4)
+    transformeR(>= 1.4.7)
 Imports:
     methods,
     fields,
