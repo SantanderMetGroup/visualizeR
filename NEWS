@@ -24,3 +24,7 @@
 ## v1.3.0 (17 oct 2018)
 * New function `cascadePlot` to visualize the climate change modelling uncertainty cascade.
 
+## v1.3.1 (17 Dec 2018)
+* Update CITATION and pkg startup message
+* Fix lonCenter in spatialPlot and adapt backdrop.theme shapes accordingly
+* Crop backdrop theme to grid extent in spatialPlot (new dependency: raster) 
