@@ -77,7 +77,6 @@
 #' @importFrom utils tail head
 #' @importFrom transformeR redim getDim getShape
 #' @importFrom RColorBrewer brewer.pal.info brewer.pal
-#' @importFrom raster extent crop
 #' @export
 #' @author J. Bedia
 #' @seealso \code{\link{climatology}} for details on climatology calculation.
@@ -208,7 +207,7 @@ spatialPlot <- function(grid,
                       "coastline" = system.file("coastline.rda", package = "visualizeR"),
                       "countries" = system.file("countries.rda", package = "visualizeR"))
         l1 <- get(load(uri))
-        l1[[2]] <- crop(l1[[2]], extent(df@bbox))
+        l1[[2]]@bbox <- df@bbox
         if (is.null(arg.list[["sp.layout"]])) {
             arg.list[["sp.layout"]] <- list(l1)
         } else {

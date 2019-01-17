@@ -26,5 +26,5 @@
 
 ## v1.3.1 (17 Dec 2018)
 * Update CITATION and pkg startup message
-* Fix lonCenter in spatialPlot and adapt backdrop.theme shapes accordingly
-* Crop backdrop theme to grid extent in spatialPlot (new dependency: raster) 
+* Fix `lonCenter` in `spatialPlot` and adapt `backdrop.theme` shapes accordingly
+* Delimit the bbox of backdrop.theme to the bbox of the grids that are plotted
