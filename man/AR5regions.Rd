@@ -9,7 +9,8 @@ Shapefile imported with function \code{\link[rgdal]{readOGR}} (\url{http://www.i
 }
 \description{
 Spatial Polygons of the geographical regions used in the IPCC 5th Assessment Report.
-
+}
+\details{
 For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
 }
 \examples{

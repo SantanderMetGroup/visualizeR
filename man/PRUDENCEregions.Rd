@@ -6,7 +6,8 @@
 \format{A \code{\link[sp]{SpatialPolygons-class}} object}
 \description{
 Spatial Polygons of the geographical regions used in the PRUDENCE project.
-
+}
+\details{
 For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
 }
 \examples{

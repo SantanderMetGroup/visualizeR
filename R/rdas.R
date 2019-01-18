@@ -61,7 +61,7 @@ NULL
 #' @title AR5 regions from the IPCC 5th Assessment Report.
 #' @description Spatial Polygons of the geographical regions used in the IPCC 5th Assessment Report.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @description For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
+#' @details For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
 #' @source Shapefile imported with function \code{\link[rgdal]{readOGR}} (\url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html})
 #' @name AR5regions
 #' @examples \dontrun{
@@ -75,12 +75,36 @@ NULL
 #' @title PRUDENCE regions.
 #' @description Spatial Polygons of the geographical regions used in the PRUDENCE project.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @description For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
+#' @details  For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
 #' @name PRUDENCEregions
 #' @examples \dontrun{
 #' data(PRUDENCEregions)
 #' sp::plot(PRUDENCEregions, border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
 #' title("PRUDENCE European regions")
+#' }
+NULL
+
+#' @title AR6 regions organized by continents from the IPCC 6th Assessment Report.
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @name AR6continents
+#' @examples \dontrun{
+#' data(AR6continents)
+#' sp::plot(AR6continents, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World regions")
+#' }
+NULL
+
+#' @title AR6 regions from the IPCC 6th Assessment Report.
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @name AR6regions
+#' @examples \dontrun{
+#' data(AR6regions)
+#' sp::plot(AR6regions, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World regions")
 #' }
 NULL
