@@ -7,11 +7,24 @@
 \description{
 Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 }
+\details{
+Region names are: "ALA", "NEC", "GIC", "NWN", "SWN", "CNA", "ENA", "CAM", "SSA", "NWS", 
+"SAM", "SWS", "SES", "AMZ", "NEB", "MED", "SAH", "WAF", "EAF", "SWA", "SEAF", "CAF", "NEA", "NWA", 
+"WAS", "CAS", "TIB", "EAS", "SAS", "SEA", "NAU", "SAU", "NEU", "CEU", "ANT*", "ARC*", "NTP*", 
+"STP*", "ETP*", "WIO*" and "CAR*".
+}
 \examples{
 \dontrun{
 data(AR6regions)
+
+# All regions
 sp::plot(AR6regions, border = "red", axes = TRUE)
 transformeR:::draw.world.lines()
 title("AR6 World regions")
+
+# A single region
+sp::plot(AR6regions["MED"], border = "red", axes = TRUE)
+transformeR:::draw.world.lines()
+title("AR6 Mediterranean region")
 }
 }

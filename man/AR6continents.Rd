@@ -7,11 +7,21 @@
 \description{
 Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 }
+\details{
+Continent names are: "AFRICA", "ASIA", "EUROPE", "NORTH-AMERICA", "SOUTH-AMERICA" and "non-SREX".
+}
 \examples{
 \dontrun{
 data(AR6continents)
+
+#All continents (all regions)
 sp::plot(AR6continents, border = "red", axes = TRUE)
 transformeR:::draw.world.lines()
 title("AR6 World regions")
+
+#A single continent (regions of a single continent)
+sp::plot(AR6regions["SOUTH-AMERICA"], border = "red", axes = TRUE)
+transformeR:::draw.world.lines()
+title("AR6 South America regions")
 }
 }
