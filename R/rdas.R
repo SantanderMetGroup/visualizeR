@@ -99,7 +99,7 @@ NULL
 #' title("AR6 World regions")
 #' 
 #' #A single continent (regions of a single continent)
-#' sp::plot(AR6regions["SOUTH-AMERICA"], border = "red", axes = TRUE)
+#' sp::plot(AR6continents["SOUTH-AMERICA"], border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
 #' title("AR6 South America regions")
 #' }
