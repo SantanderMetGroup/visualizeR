@@ -88,7 +88,7 @@ NULL
 #' @title AR6 regions organized by continents from the IPCC 6th Assessment Report.
 #' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @details Continent names are: "AFRICA", "ASIA", "EUROPE", "NORTH-AMERICA", "SOUTH-AMERICA" and "non-SREX".
+#' @details Continent names are: "AFRICA", "ASIA", "EUROPE", "NORTH-AMERICA", "SOUTH-AMERICA", "OCEANIA" and "non-SREX".
 #' @name AR6continents
 #' @examples \dontrun{
 #' data(AR6continents)
@@ -109,7 +109,7 @@ NULL
 #' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
 #' @details Region names are: "ALA", "NEC", "GIC", "NWN", "SWN", "CNA", "ENA", "CAM", "SSA", "NWS", 
-#' "SAM", "SWS", "SES", "AMZ", "NEB", "MED", "SAH", "WAF", "EAF", "SWA", "SEAF", "CAF", "NEA", "NWA", 
+#' "SAM", "SWS", "SES", "AMZ", "NEB", "MED", "SAH", "WAF", "EAF", "SWAF", "SEAF", "CAF", "NEA", "NWA", 
 #' "WAS", "CAS", "TIB", "EAS", "SAS", "SEA", "NAU", "SAU", "NEU", "CEU", "ANT*", "ARC*", "NTP*", 
 #' "STP*", "ETP*", "WIO*" and "CAR*".
 #' @name AR6regions

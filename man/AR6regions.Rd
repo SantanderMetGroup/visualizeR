@@ -9,7 +9,7 @@ Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Rep
 }
 \details{
 Region names are: "ALA", "NEC", "GIC", "NWN", "SWN", "CNA", "ENA", "CAM", "SSA", "NWS", 
-"SAM", "SWS", "SES", "AMZ", "NEB", "MED", "SAH", "WAF", "EAF", "SWA", "SEAF", "CAF", "NEA", "NWA", 
+"SAM", "SWS", "SES", "AMZ", "NEB", "MED", "SAH", "WAF", "EAF", "SWAF", "SEAF", "CAF", "NEA", "NWA", 
 "WAS", "CAS", "TIB", "EAS", "SAS", "SEA", "NAU", "SAU", "NEU", "CEU", "ANT*", "ARC*", "NTP*", 
 "STP*", "ETP*", "WIO*" and "CAR*".
 }

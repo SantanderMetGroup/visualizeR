@@ -8,7 +8,7 @@
 Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 }
 \details{
-Continent names are: "AFRICA", "ASIA", "EUROPE", "NORTH-AMERICA", "SOUTH-AMERICA" and "non-SREX".
+Continent names are: "AFRICA", "ASIA", "EUROPE", "NORTH-AMERICA", "SOUTH-AMERICA", "OCEANIA" and "non-SREX".
 }
 \examples{
 \dontrun{
