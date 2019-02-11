@@ -166,6 +166,7 @@ temporalPlot <- function(...,
   if (is.null(cols)) cols <- c("black","red", "blue", "green", colors2)
   if (length(cols) < length(obj.list)) stop("Please, add ", length(obj.list) - length(cols), " more color/s to 'cols', or keep the default option.")
   if (length(lty) == 1) lty <- rep(lty, length(obj.list))
+  if (length(lwd) == 1) lwd <- rep(lwd, length(obj.list))
   if (is.null(xyplot.custom[["x"]])) xyplot.custom[["x"]] <- Value ~ Dates
   if (is.null(xyplot.custom[["type"]])) xyplot.custom[["type"]] = "l"
   if (is.null(xyplot.custom[["ylim"]])) xyplot.custom[["ylim"]] <- ylim
@@ -195,6 +196,7 @@ temporalPlot <- function(...,
   xy <- lapply(1:length(df), function(i){
     col <- cols[i]
     ltyi <- lty[i]
+    lwdi <- lwd[i]
     colsrgb <- do.call("rgb", as.list(c(col2rgb(col)/255, 0.15)))
     xyplot.custom[["data"]] <- df[[i]]
     xyplot.custom[["col"]] <- col
@@ -211,7 +213,7 @@ temporalPlot <- function(...,
         }
       }
       panel.xyplot(df[[i]]$Dates, df[[i]]$Value, type = "l", 
-                   lwd = lwd, lty = ltyi, col = col)
+                   lwd = lwdi, lty = ltyi, col = col)
       panel.abline(h = hseq, v = vseq, 
                      col = "gray65", lwd = 0.5, lty = 2)
     }
