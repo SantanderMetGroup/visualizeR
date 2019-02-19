@@ -85,44 +85,43 @@ NULL
 #' }
 NULL
 
-#' @title AR6 regions organized by continents from the IPCC 6th Assessment Report.
+#' @title AR6 oceanic regions from the IPCC 6th Assessment Report.
 #' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @details Continent names are: "AFRICA", "ASIA", "EUROPE", "NORTH-AMERICA", "SOUTH-AMERICA", "OCEANIA" and "non-SREX".
-#' @name AR6continents
+#' @details Continent names are: "ARCO",  "SOO",  "SAO",  "EAO",  "NAO",  "EIO",  "SIO",  "ARS",  "BOB",  "SPO",  "EPO",  "NPO", "SPO*", "EPO*", "NPO*".
+#' @name AR6regions_ocean
 #' @examples \dontrun{
-#' data(AR6continents)
+#' data(AR6regions_ocean)
 #' 
 #' #All continents (all regions)
-#' sp::plot(AR6continents, border = "red", axes = TRUE)
+#' sp::plot(AR6regions_ocean, border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
-#' title("AR6 World regions")
+#' title("AR6 oceanic regions")
 #' 
-#' #A single continent (regions of a single continent)
-#' sp::plot(AR6continents["SOUTH-AMERICA"], border = "red", axes = TRUE)
+#' #A single region
+#' sp::plot(AR6regions_ocean["SOO"], border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
-#' title("AR6 South America regions")
+#' title("AR6 SOO")
 #' }
 NULL
 
-#' @title AR6 regions from the IPCC 6th Assessment Report.
+#' @title AR6 land regions from the IPCC 6th Assessment Report.
 #' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @details Region names are: "ALA", "NEC", "GIC", "NWN", "SWN", "CNA", "ENA", "CAM", "SSA", "NWS", 
-#' "SAM", "SWS", "SES", "AMZ", "NEB", "MED", "SAH", "WAF", "EAF", "SWAF", "SEAF", "CAF", "NEA", "NWA", 
-#' "WAS", "CAS", "TIB", "EAS", "SAS", "SEA", "NAU", "SAU", "NEU", "CEU", "ANT*", "ARC*", "NTP*", 
-#' "STP*", "ETP*", "WIO*" and "CAR*".
-#' @name AR6regions
+#' @details Region names are:  "ALA",  "NEC",  "GIC",  "NWN",  "SWN",  "CNA",  "ENA",  "CAM",  "CAR",  "NWS",  
+#' "SAM",  "SSA",  "SWS",  "SES",  "AMZ",  "NEB",  "NEU",  "CEU", "MED",  "SAH",  "WAF",  "NEAF", "CEAF", "SWAF", 
+#' "SEAF", "CAF",  "NEA",  "NWA",  "WAS",  "CAS",  "TIB",  "EAS",  "SAS",  "SEA",  "NAU",  "SAU", "ANT",  "ARCO".
+#' @name AR6regions_land
 #' @examples \dontrun{
-#' data(AR6regions)
+#' data(AR6regions_land)
 #' 
 #' # All regions
-#' sp::plot(AR6regions, border = "red", axes = TRUE)
+#' sp::plot(AR6regions_land, border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
-#' title("AR6 World regions")
+#' title("AR6 World land regions")
 #' 
 #' # A single region
-#' sp::plot(AR6regions["MED"], border = "red", axes = TRUE)
+#' sp::plot(AR6regions_land["MED"], border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
 #' title("AR6 Mediterranean region")
 #' }
