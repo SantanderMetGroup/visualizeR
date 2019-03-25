@@ -322,7 +322,7 @@ clim2sgdf <- function(clim, set.min, set.max) {
     # Defining grid topology -----------------
     aux.grid <- getGrid(grid)
     if (!isRegular(grid)) {
-        df <- sp::SpatialPointsDataFrame(co[naind,], aux)
+        df <- sp::SpatialPointsDataFrame(co[naind,], aux, match.ID = FALSE)
     } else {
         cellcentre.offset <- vapply(aux.grid, FUN = "[", 1L, FUN.VALUE = numeric(1L))
         cellsize <- vapply(c("resX", "resY"), FUN.VALUE = numeric(1L), FUN = function(x) attr(aux.grid, which = x))
