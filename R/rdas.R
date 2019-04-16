@@ -126,3 +126,45 @@ NULL
 #' title("AR6 Mediterranean region")
 #' }
 NULL
+
+
+#' @title AR6 WGI regions from the IPCC 6th Assessment Report (land and ocean).
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @details Display region names : names(AR6_WGI_referenceRegions) or names(names(AR6_WGI_referenceRegions)) 
+#' to only obtain the long names.
+#' @name AR6_WGI_referenceRegions
+#' @examples \dontrun{
+#' data(AR6_WGI_referenceRegions)
+#' 
+#' # All regions
+#' sp::plot(AR6_WGI_referenceRegions, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World land regions")
+#' 
+#' # A single region (use region names for subsetting)
+#' sp::plot(AR6_WGI_referenceRegions["MED"], border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 Mediterranean region")
+#' }
+NULL
+
+#' @title AR6 WGI synthesis regions from the Atlas chapter of the IPCC 6th Assessment Report (land).
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @details Display region names : names(AR6_WGI_AtlasSynthesisRegions).
+#' @name AR6_WGI_AtlasSynthesisRegions
+#' @examples \dontrun{
+#' data(AR6_WGI_AtlasSynthesisRegions)
+#' 
+#' # All regions
+#' sp::plot(AR6_WGI_AtlasSynthesisRegions, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World land regions")
+#' 
+#' # A single region (use region names for subsetting)
+#' sp::plot(AR6_WGI_AtlasSynthesisRegions["Africa"], border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 Mediterranean region")
+#' }
+NULL
