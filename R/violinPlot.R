@@ -86,7 +86,7 @@ violinPlot <- function(...,
     if (length(nmes) < length(obj.list)) nmes <- paste0(nmes, 1:length(obj.list))
     names(obj.list) <- nmes
   }
-  timeshape <- unlist(lapply(lapply(obj.list, redim), function(x) getShape(x)[["time"]]))
+  # timeshape <- unlist(lapply(lapply(obj.list, redim), function(x) getShape(x)[["time"]]))
   # if (any(timeshape != 1L)) stop("Time dimension length > 1. Use a function that aggregates time dimension first (e.g. f climatology)")
   obj.list <- lapply(obj.list, function(x) subsetGrid(x, lonLim = lonLim, latLim = latLim))
   obj.list <- lapply(obj.list, FUN = redim)
