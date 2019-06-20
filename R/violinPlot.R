@@ -72,14 +72,15 @@
 
 
 violinPlot <- function(..., 
-                         color.fun = list(FUN = mean, na.rm = TRUE), 
-                         color.theme = "RdYlBu",
-                         color.cuts = NULL,
-                         rev.colors = FALSE,
-                         h.lines = NULL,
-                         lonLim = NULL,
-                         latLim = NULL,
-                         bwplot.custom = list()) {
+                       group.index = NULL,
+                       color.fun = list(FUN = mean, na.rm = TRUE), 
+                       color.theme = "RdYlBu",
+                       color.cuts = NULL,
+                       rev.colors = FALSE,
+                       h.lines = NULL,
+                       lonLim = NULL,
+                       latLim = NULL,
+                       bwplot.custom = list()) {
   obj.list <- list(...)
   if (gridDepth(obj.list) > 3) obj.list <- unlist(obj.list, recursive = FALSE)
   if (is.null(names(obj.list))) {
@@ -91,12 +92,14 @@ violinPlot <- function(...,
   # if (any(timeshape != 1L)) stop("Time dimension length > 1. Use a function that aggregates time dimension first (e.g. f climatology)")
   obj.list <- lapply(obj.list, function(x) subsetGrid(x, lonLim = lonLim, latLim = latLim))
   obj.list <- lapply(obj.list, FUN = redim)
+  if (is.null(group.index)) group.index <- rep(1, length(obj.list))
   data <- lapply(obj.list, "[[", "Data")
   # bind to data frames
   df <- lapply(1:length(obj.list), function(x){
     df0 <- data.frame(as.vector(data[[x]]), 
-                 rep(names(data)[x], length(as.vector(data[[x]]))))
-    colnames(df0) <- c("Value", "mini")
+                      rep(names(data)[x], length(as.vector(data[[x]]))), 
+                      rep(group.index[x], length(as.vector(data[[x]]))))
+    colnames(df0) <- c("Value", "mini", "index")
     return(df0)
   })
   dff <- do.call("rbind", df)
@@ -109,21 +112,23 @@ violinPlot <- function(...,
     color.fun[["X"]] <- obj.list[[x]]$Data
     do.call("apply", color.fun)
   }))
-    if (color.theme == "jet.colors") {
-      coltheme <- c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")
-    } else {
-      coltheme <- brewer.pal(name = color.theme, n = brewer.pal.info[color.theme, ]$maxcolors)
-    }
-    if (isTRUE(rev.colors)) coltheme <- rev(coltheme)
-    colorpal <- colorRampPalette(coltheme)
-    if (is.null(color.cuts)) color.cuts <- seq(min(color.data), max(color.data), (max(color.data) - min(color.data))/10)
+  if (color.theme == "jet.colors") {
+    coltheme <- c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")
+  } else {
+    coltheme <- brewer.pal(name = color.theme, n = brewer.pal.info[color.theme, ]$maxcolors)
+  }
+  if (isTRUE(rev.colors)) coltheme <- rev(coltheme)
+  colorpal <- colorRampPalette(coltheme)
+  if (is.null(color.cuts)) color.cuts <- seq(min(color.data), max(color.data), (max(color.data) - min(color.data))/10)
   cols.full <- colorpal(length(color.cuts))
   cols <- cols.full[sapply(color.data, function(x) which.min(abs(color.cuts - x)))]
   #bwplot.custom
-  if (is.null(bwplot.custom[["x"]])) bwplot.custom[["x"]] <- Value ~ mini
+  if (is.null(bwplot.custom[["x"]])) bwplot.custom[["x"]] <- Value ~ mini | index
   if (is.null(bwplot.custom[["ylim"]])) bwplot.custom[["ylim"]] <- ylim
   if (is.null(bwplot.custom[["horizontal"]])) bwplot.custom[["horizontal"]] <- FALSE
-  if (is.null(bwplot.custom[["lwd"]])) bwplot.custom[["lwd"]] <- 2
+  if (is.null(bwplot.custom[["lwd"]])) bwplot.custom[["lwd"]] <- 1
+  if (is.null(bwplot.custom[["ylab"]])) bwplot.custom[["ylab"]] <- ""
+  if (is.null(bwplot.custom[["layout"]])) bwplot.custom[["layout"]] <- c(1, length(unique(group.index)))
   ylim <- bwplot.custom[["ylim"]]
   digs <- 0
   if ((max(ylim) - min(ylim)) < 1) {
@@ -152,5 +157,5 @@ violinPlot <- function(...,
   output <- do.call("bwplot", bwplot.custom) 
   return(output)
 }
-  
-  
+
+
