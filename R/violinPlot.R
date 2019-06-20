@@ -121,7 +121,6 @@ violinPlot <- function(...,
   cols <- cols.full[sapply(color.data, function(x) which.min(abs(color.cuts - x)))]
   #bwplot.custom
   if (is.null(bwplot.custom[["x"]])) bwplot.custom[["x"]] <- Value ~ mini
-  if (is.null(bwplot.custom[["type"]])) bwplot.custom[["type"]] = "l"
   if (is.null(bwplot.custom[["ylim"]])) bwplot.custom[["ylim"]] <- ylim
   if (is.null(bwplot.custom[["horizontal"]])) bwplot.custom[["horizontal"]] <- FALSE
   if (is.null(bwplot.custom[["lwd"]])) bwplot.custom[["lwd"]] <- 2
