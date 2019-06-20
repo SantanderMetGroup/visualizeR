@@ -68,6 +68,22 @@
 #'             color.cuts = seq(0, 3, 0.2),
 #'             bwplot.custom = list(ylim = c(0, 20),
 #'                                  ylab = "pr and tas"))
+#'                                  
+#' ## With grouping:
+#' data("EOBS_Iberia_tas")
+#' data("EOBS_Iberia_pr")
+#' data("CORDEX_Iberia_pr")
+#' data("CORDEX_Iberia_tas")
+#' violinPlot("pr" = climatology(EOBS_Iberia_pr),
+#'            "tas" = climatology(EOBS_Iberia_tas),
+#'            "pr" = climatology(CORDEX_Iberia_pr),
+#'            "tas" = climatology(CORDEX_Iberia_tas),
+#'             group.index = c("Measure1", "Measure1", "Measure2", "Measure2"),
+#'             h.lines = seq(0, 15, 5),
+#'             color.cuts = seq(0, 3, 0.2),
+#'             bwplot.custom = list(ylim = c(0, 20),
+#'                                  ylab = "pr and tas",
+#'                                  as.table = TRUE))
 
 
 
@@ -92,7 +108,10 @@ violinPlot <- function(...,
   # if (any(timeshape != 1L)) stop("Time dimension length > 1. Use a function that aggregates time dimension first (e.g. f climatology)")
   obj.list <- lapply(obj.list, function(x) subsetGrid(x, lonLim = lonLim, latLim = latLim))
   obj.list <- lapply(obj.list, FUN = redim)
-  if (is.null(group.index)) group.index <- rep(1, length(obj.list))
+  if (is.null(group.index)) {
+    group.index <- rep("", length(obj.list))
+    bwplot.custom[["strip"]] <- FALSE
+  }
   data <- lapply(obj.list, "[[", "Data")
   # bind to data frames
   df <- lapply(1:length(obj.list), function(x){
