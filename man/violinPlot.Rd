@@ -23,6 +23,9 @@ for backwards compatibility. Default to the diverging, colorblind-friendly \code
 
 \item{color.cuts}{Numeric sequence indicating the color cuts.}
 
+\item{rev.colors}{Default to FALSE. If TRUE the reversed version of the color palette
+is used.}
+
 \item{h.lines}{Numeric sequence indicating the position of dashed horizontal lines.}
 
 \item{lonLim}{Vector of length = 2, with minimum and maximum longitude coordinates, 
@@ -31,27 +34,20 @@ longitudinal range is selected}
 
 \item{latLim}{Same as lonLim, but for the selection of the latitudinal range.}
 
-\item{bwplot.custom}{List of arguments as passed to \link{\code{bwplot}}. Argument \code{panel} cannot 
-be modified, thus, if specified, it will be ignored.}
+\item{bwplot.custom}{List of arguments as passed to \code{\link[lattice]{bwplot}}. Arguments \code{panel} cannot 
+be modified, thus, if specified, it will be ignored. 
+ 
+ \strong{Controlling graphical parameters}
+ 
+ Many different aspects of the plot can be controlled passing the relevant arguments to 
+ \code{bwplot}. Fine control of graphical parameters for the trellis display can
+ be also controlled using \code{\link[lattice]{trellis.par.set}}.}
 }
 \value{
 A lattice plot of class \dQuote{trellis}.
 }
 \description{
 A wrapper for the lattice (trellis) plot methods for grid and station data.
-}
-\details{
-The function applies the \code{\link[lattice]{xyplot}} method after computing spatial aggregation 
-(parameter \code{aggr.spatial}) and member aggregation (mean and range) to the imput grids (or station data).
- 
-In case of multimember grids, the function will internally compute the ensemble mean 
-and the range for plotting. The range is used to plot the shadow of the multimember spread.
- 
- \strong{Controlling graphical parameters}
- 
- Many different aspects of the plot can be controlled passing the relevant arguments to 
- \code{bwplot}. Fine control of graphical parameters for the trellis display can
- be also controlled using \code{\link[lattice]{trellis.par.set}}.
 }
 \examples{
 data("EOBS_Iberia_tas")

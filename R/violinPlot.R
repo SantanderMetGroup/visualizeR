@@ -28,18 +28,15 @@
 #' the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
 #' for backwards compatibility. Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.
 #' @param color.cuts Numeric sequence indicating the color cuts.
+#' @param rev.colors Default to FALSE. If TRUE the reversed version of the color palette
+#' is used.
 #' @param h.lines Numeric sequence indicating the position of dashed horizontal lines.
 #' @param lonLim Vector of length = 2, with minimum and maximum longitude coordinates, 
 #' in decimal degrees, of the bounding box selected. If NULL (default), the whole 
 #' longitudinal range is selected 
 #' @param latLim Same as lonLim, but for the selection of the latitudinal range.
-#' @param bwplot.custom List of arguments as passed to \link{\code{bwplot}}. Argument \code{panel} cannot 
+#' @param bwplot.custom List of arguments as passed to \code{\link[lattice]{bwplot}}. Arguments \code{panel} cannot 
 #' be modified, thus, if specified, it will be ignored. 
-#' @details The function applies the \code{\link[lattice]{xyplot}} method after computing spatial aggregation 
-#' (parameter \code{aggr.spatial}) and member aggregation (mean and range) to the imput grids (or station data).
-#'  
-#' In case of multimember grids, the function will internally compute the ensemble mean 
-#' and the range for plotting. The range is used to plot the shadow of the multimember spread.
 #'  
 #'  \strong{Controlling graphical parameters}
 #'  
@@ -103,7 +100,7 @@ violinPlot <- function(...,
   })
   dff <- do.call("rbind", df)
   # define graphical parameters
-  ylim <- round(range(c(unlist(mm), unlist(mx)), na.rm = TRUE), digits = 2)
+  ylim <- round(range(unlist(data), na.rm = TRUE), digits = 2)
   ## Colorbar 
   # spatial aggregation
   color.fun[["MARGIN"]] <- c(1,2)
