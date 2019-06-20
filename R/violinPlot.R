@@ -20,6 +20,7 @@
 #' @title Lattice plot methods for climatological series 
 #' @description A wrapper for the lattice (trellis) plot methods for grid and station data.
 #' @param ... Input grids (or station data)
+#' @param group.index Character or numeric passed to argument group in bwplot.
 #' @param color.fun list containing the function and the related arguments to perform spatial 
 #' aggregation. The resulting values are used to fill with color the violins.
 #'  Default is \code{list(FUN = mean, na.rm = TRUE)}.
