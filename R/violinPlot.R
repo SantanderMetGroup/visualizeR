@@ -55,6 +55,7 @@
 #'@importFrom lattice bwplot panel.superpose panel.violin
 #'@importFrom RColorBrewer brewer.pal
 #'@importFrom transformeR gridDepth
+#'@importFrom stats sd
 #'@import latticeExtra
 #' @examples
 #' data("EOBS_Iberia_tas")
