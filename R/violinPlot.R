@@ -22,7 +22,7 @@
 #' @param ... Input grids (or station data)
 #' @param color.fun list containing the function and the related arguments to perform spatial 
 #' aggregation. The resulting values are used to fill with color the violins.
-#'  Default is \code{list(FUN = sd, na.rm = TRUE)}.
+#'  Default is \code{list(FUN = mean, na.rm = TRUE)}.
 #' @param color.theme A character string indicating the color theme to use in the map. 
 #' Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
 #' the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
@@ -72,7 +72,7 @@
 
 
 violinPlot <- function(..., 
-                         color.fun = list(FUN = sd, na.rm = TRUE), 
+                         color.fun = list(FUN = mean, na.rm = TRUE), 
                          color.theme = "RdYlBu",
                          color.cuts = NULL,
                          rev.colors = FALSE,
