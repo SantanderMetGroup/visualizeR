@@ -118,8 +118,9 @@ violinPlot <- function(...,
   df <- lapply(1:length(obj.list), function(x){
     df0 <- data.frame(as.vector(data[[x]]), 
                       rep(names(data)[x], length(as.vector(data[[x]]))), 
+                      rep(x, length(as.vector(data[[x]]))), 
                       rep(group.index[x], length(as.vector(data[[x]]))))
-    colnames(df0) <- c("Value", "mini", "index")
+    colnames(df0) <- c("Value", "mini", "nini", "index")
     return(df0)
   })
   dff <- do.call("rbind", df)
@@ -166,7 +167,7 @@ violinPlot <- function(...,
                                                                       text = list(as.character(rev(round(color.cuts, digits = 2))), cex = .8))
   bwplot.custom[["data"]] <- dff
   bwplot.custom[["col"]] <- cols
-  bwplot.custom[["groups"]] <- dff$mini
+  bwplot.custom[["groups"]] <- as.factor(dff$nini)
   bwplot.custom[["panel"]] <- function(...) {
     panel.superpose(...)
     panel.abline(h = h.lines,
