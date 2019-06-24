@@ -57,7 +57,7 @@
 #'    
 #'@author M. Iturbide
 #'@export
-#'@importFrom lattice xyplot panel.grid panel.polygon panel.xyplot
+#'@importFrom lattice 
 #'@importFrom grDevices col2rgb rgb colors
 #'@importFrom padr pad
 #'@importFrom data.table rleid
