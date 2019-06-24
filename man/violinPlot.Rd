@@ -4,17 +4,19 @@
 \alias{violinPlot}
 \title{Lattice plot methods for climatological series}
 \usage{
-violinPlot(..., color.fun = list(FUN = sd, na.rm = TRUE),
-  color.theme = "RdYlBu", color.cuts = NULL, rev.colors = FALSE,
-  h.lines = NULL, lonLim = NULL, latLim = NULL,
+violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
+  = TRUE), color.theme = "RdYlBu", color.cuts = NULL,
+  rev.colors = FALSE, h.lines = NULL, lonLim = NULL, latLim = NULL,
   bwplot.custom = list())
 }
 \arguments{
 \item{...}{Input grids (or station data)}
 
+\item{group.index}{Character or numeric passed to argument group in bwplot.}
+
 \item{color.fun}{list containing the function and the related arguments to perform spatial 
 aggregation. The resulting values are used to fill with color the violins.
- Default is \code{list(FUN = sd, na.rm = TRUE)}.}
+ Default is \code{list(FUN = mean, na.rm = TRUE)}.}
 
 \item{color.theme}{A character string indicating the color theme to use in the map. 
 Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
@@ -60,6 +62,22 @@ violinPlot("one" = climatology(EOBS_Iberia_pr),
             color.cuts = seq(0, 3, 0.2),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas"))
+                                 
+## With grouping:
+data("EOBS_Iberia_tas")
+data("EOBS_Iberia_pr")
+data("CORDEX_Iberia_pr")
+data("CORDEX_Iberia_tas")
+violinPlot("pr" = climatology(EOBS_Iberia_pr),
+           "tas" = climatology(EOBS_Iberia_tas),
+           "pr" = climatology(CORDEX_Iberia_pr),
+           "tas" = climatology(CORDEX_Iberia_tas),
+            group.index = c("Measure1", "Measure1", "Measure2", "Measure2"),
+            h.lines = seq(0, 15, 5),
+            color.cuts = seq(0, 3, 0.2),
+            bwplot.custom = list(ylim = c(0, 20),
+                                 ylab = "pr and tas",
+                                 as.table = TRUE))
 }
 \author{
 M. Iturbide
