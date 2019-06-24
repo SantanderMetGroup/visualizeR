@@ -3,5 +3,6 @@
 .RData
 ignore/
 .Rbuildignore
-.*
 visualizeR.Rproj
+.Rprofile
+

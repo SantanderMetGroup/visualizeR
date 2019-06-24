@@ -41,7 +41,7 @@
 #'@author M. Iturbide
 #'@export
 #'@importFrom grDevices colorRampPalette
-#'@importFrom transformeR aggregateGrid subsetGrid getShape redim climatology
+#'@importFrom transformeR aggregateGrid subsetGrid getShape redim climatology bindGrid
 #' @examples
 #' library(transformeR)
 #' hindcast <- subsetGrid(CFS_Iberia_tas, years = 1983:2001)
@@ -58,7 +58,7 @@ tercileMap <- function(hindcast, forecast, ...) {
       hind <- lapply(1:nmem, function(x){
         subsetGrid(hindyear, members = x)
       })
-      hind <- do.call("bindGrid.time", hind)
+      hind <- do.call("bindGrid", c(hind, dimension = "time"))
       hind <- redim(hind, drop = TRUE)
       message("[", Sys.time(), "] Calculating terciles...")
       a <- apply(hind$Data, MARGIN = c(2,3), FUN = quantile, probs = c(1/3, 2/3), na.rm = TRUE)

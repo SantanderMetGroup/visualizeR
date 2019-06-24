@@ -61,7 +61,7 @@ NULL
 #' @title AR5 regions from the IPCC 5th Assessment Report.
 #' @description Spatial Polygons of the geographical regions used in the IPCC 5th Assessment Report.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @description For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
+#' @details For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html}
 #' @source Shapefile imported with function \code{\link[rgdal]{readOGR}} (\url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html})
 #' @name AR5regions
 #' @examples \dontrun{
@@ -75,12 +75,96 @@ NULL
 #' @title PRUDENCE regions.
 #' @description Spatial Polygons of the geographical regions used in the PRUDENCE project.
 #' @format A \code{\link[sp]{SpatialPolygons-class}} object
-#' @description For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
+#' @details  For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
 #' @name PRUDENCEregions
 #' @examples \dontrun{
 #' data(PRUDENCEregions)
 #' sp::plot(PRUDENCEregions, border = "red", axes = TRUE)
 #' transformeR:::draw.world.lines()
 #' title("PRUDENCE European regions")
+#' }
+NULL
+
+#' @title AR6 oceanic regions from the IPCC 6th Assessment Report.
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @details Continent names are: "ARCO",  "SOO",  "SAO",  "EAO",  "NAO",  "EIO",  "SIO",  "ARS",  "BOB",  "SPO",  "EPO",  "NPO", "SPO*", "EPO*", "NPO*".
+#' @name AR6regions_ocean
+#' @examples \dontrun{
+#' data(AR6regions_ocean)
+#' 
+#' #All continents (all regions)
+#' sp::plot(AR6regions_ocean, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 oceanic regions")
+#' 
+#' #A single region
+#' sp::plot(AR6regions_ocean["SOO"], border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 SOO")
+#' }
+NULL
+
+#' @title AR6 land regions from the IPCC 6th Assessment Report.
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @details Region names are:  "ALA",  "NEC",  "GIC",  "NWN",  "SWN",  "CNA",  "ENA",  "CAM",  "CAR",  "NWS",  
+#' "SAM",  "SSA",  "SWS",  "SES",  "AMZ",  "NEB",  "NEU",  "CEU", "MED",  "SAH",  "WAF",  "NEAF", "CEAF", "SWAF", 
+#' "SEAF", "CAF",  "NEA",  "NWA",  "WAS",  "CAS",  "TIB",  "EAS",  "SAS",  "SEA",  "NAU",  "SAU", "ANT",  "ARCO".
+#' @name AR6regions_land
+#' @examples \dontrun{
+#' data(AR6regions_land)
+#' 
+#' # All regions
+#' sp::plot(AR6regions_land, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World land regions")
+#' 
+#' # A single region
+#' sp::plot(AR6regions_land["MED"], border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 Mediterranean region")
+#' }
+NULL
+
+
+#' @title AR6 WGI regions from the IPCC 6th Assessment Report (land and ocean).
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @details Display region names : names(AR6_WGI_referenceRegions) or names(names(AR6_WGI_referenceRegions)) 
+#' to only obtain the long names.
+#' @name AR6_WGI_referenceRegions
+#' @examples \dontrun{
+#' data(AR6_WGI_referenceRegions)
+#' 
+#' # All regions
+#' sp::plot(AR6_WGI_referenceRegions, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World land regions")
+#' 
+#' # A single region (use region names for subsetting)
+#' sp::plot(AR6_WGI_referenceRegions["MED"], border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 Mediterranean region")
+#' }
+NULL
+
+#' @title AR6 WGI synthesis regions from the Atlas chapter of the IPCC 6th Assessment Report (land).
+#' @description Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
+#' @format A \code{\link[sp]{SpatialPolygons-class}} object
+#' @details Display region names : names(AR6_WGI_AtlasSynthesisRegions).
+#' @name AR6_WGI_AtlasSynthesisRegions
+#' @examples \dontrun{
+#' data(AR6_WGI_AtlasSynthesisRegions)
+#' 
+#' # All regions
+#' sp::plot(AR6_WGI_AtlasSynthesisRegions, border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 World land regions")
+#' 
+#' # A single region (use region names for subsetting)
+#' sp::plot(AR6_WGI_AtlasSynthesisRegions["Africa"], border = "red", axes = TRUE)
+#' transformeR:::draw.world.lines()
+#' title("AR6 Mediterranean region")
 #' }
 NULL

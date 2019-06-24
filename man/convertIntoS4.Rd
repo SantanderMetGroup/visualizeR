@@ -28,3 +28,4 @@ For gridded data sets with just one ensemble member use as.MrGrid function.
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez
 }
+\concept{VisualizeR}

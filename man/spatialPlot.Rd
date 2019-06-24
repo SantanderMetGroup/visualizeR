@@ -4,8 +4,9 @@
 \alias{spatialPlot}
 \title{Lattice plot methods for climatological grids}
 \usage{
-spatialPlot(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL,
-  lonCenter = NULL, ...)
+spatialPlot(grid, backdrop.theme = "none", set.min = NULL,
+  set.max = NULL, lonCenter = NULL, color.theme = "RdYlBu",
+  rev.colors = FALSE, ...)
 }
 \arguments{
 \item{grid}{Input grid}
@@ -16,7 +17,16 @@ spatialPlot(grid, backdrop.theme = "none", set.min = NULL, set.max = NULL,
 
 \item{set.max}{Same as \code{set.min} argument, but to force a ceiling.}
 
-\item{lonCenter}{Value of the longitude to be centered in the plot.}
+\item{lonCenter}{Value of the longitude to be centered in the plot (between 0 and 180).}
+
+\item{color.theme}{A character string indicating the color theme to use in the map. 
+Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
+the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
+ for backwards compatibility. Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.
+ NOTE: the \code{color.theme} argument will be overriden if the \code{col.regions} option from \code{spplot} is used.}
+
+\item{rev.colors}{Should the chosen color theme be reversed? (default to \code{FALSE},
+leaving the palette \dQuote{as is}).}
 
 \item{...}{Further arguments passed to \code{spplot}}
 }
@@ -68,7 +78,7 @@ clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
 spatialPlot(clim)
 # Geographical lines can be added using the argument 'backdrop.theme':
 spatialPlot(clim, backdrop.theme = "coastline")
-spatialPlot(clim, backdrop.theme = "coastline", center = 180)
+spatialPlot(clim, backdrop.theme = "countries")
 
 # Further arguments can be passed to 'spplot'...
 
@@ -77,18 +87,41 @@ spatialPlot(clim,
             backdrop.theme = "coastline",
             zcol = 1:4)
 
-# ... regional focuses (e.g. the Iberian Peninsula).
+# ... regional focuses (e.g. Portugal).
 spatialPlot(clim,
             backdrop.theme = "countries",
-            xlim = c(-10,5), ylim = c(35,44),
+            xlim = c(-10,-6), ylim = c(36,43),
             zcol = 1:4,
             scales = list(draw = TRUE))
 
 # Changing the default color palette and ranges:
+
+# Reverse colors (so blue is colder)
+
+spatialPlot(clim,
+            backdrop.theme = "coastline",
+            zcol = 1:4, rev.colors = TRUE)
+
+# Use a different theme from RColorBrewer
+require(RColorBrewer)
+display.brewer.all()
 spatialPlot(clim,
             backdrop.theme = "coastline",
             zcol = 1:4,
-            col.regions = cm.colors(27), at = seq(10,37,1))
+            color.theme = "BrBG")
+
+# Or 'jet.colors'
+spatialPlot(clim,
+            backdrop.theme = "coastline",
+            zcol = 1:4,
+            color.theme = "jet.colors")
+
+# Or any other custom palette via 'col.regions'
+
+spatialPlot(clim,
+            backdrop.theme = "coastline",
+            zcol = 1:4,
+            col.regions = cm.colors(27), at = seq(0,17,1))
 
 # For ensemble means climatology should be called with 'by.member' set to FALSE:
 clim <- climatology(CFS_Iberia_tas, by.member = FALSE)
@@ -113,11 +146,14 @@ spatialPlot(mg,
             backdrop.theme = "coastline",
             names.attr = c("DEC","JAN","FEB"),
             main = "Mean PSL climatology 1991-2010",
-            scales = list(draw = TRUE))
+            scales = list(draw = TRUE), rev.colors = TRUE)
 
 # Station data:
 data("VALUE_Iberia_pr")
-spatialPlot(climatology(VALUE_Iberia_pr), backdrop.theme = "countries")
+spatialPlot(climatology(VALUE_Iberia_pr),
+            backdrop.theme = "countries",
+            color.theme = "BrBG",
+            rev.colors = TRUE, cex = 2.5)
 }
 \references{
 \itemize{

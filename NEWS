@@ -1,4 +1,34 @@
-visualizeR 1.1.1
-=================
+# visualizeR changelog
 
-* Bug fix in the example of `spatialPlot` (the drawbacks of using \dontrun{} ...) 
+(For earlier version changes please visit the [GitHub releases Tab](https://github.com/SantanderMetGroup/visualizeR/releases))
+
+## v1.2.0 (28 Jun 2018)
+* Added `climagram` implementation, for (monthly) seasonal forecast data, and a companion dedicated notebook
+* Minor bug fix in set.min argument value check in `spatialPlot`
+* Other minor changes and documentation updates
+
+## v1.2.1 (19 Jul 2018)
+* Set `clim.time.frame` default value in climagrams to `"monthly"`
+* Update climagram vignette
+* Other minor changes and documentation updates
+
+## v1.2.2 (16 Aug 2018)
+* Allow for spatial subsetting in temporalPlot (new args lonLim and latLim)
+* Minor doc updates
+* Release for the climate4R paper submitted to EMS
+
+## v1.2.3 (22 Aug 2018)
+* Minor internal change in `spatialPlot` to automatically handle static grids with no 'time' dimension
+* Minor doc updates
+
+## v1.3.0 (17 oct 2018)
+* New function `cascadePlot` to visualize the climate change modelling uncertainty cascade.
+
+## v1.3.1 (17 Dec 2018)
+* Update CITATION and pkg startup message
+* Fix `lonCenter` in `spatialPlot` and adapt `backdrop.theme` shapes accordingly
+* Delimit the bbox of backdrop.theme to the bbox of the grids that are plotted
+
+## v1.3.2 (16 Apr 2019)
+* Add IPCC AR6 regions (AR6_WGI_referenceRegions and AR6_WGI_AtlasSynthesisRegions)
+* Other minor changes and documentation updates
