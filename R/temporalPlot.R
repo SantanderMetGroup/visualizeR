@@ -64,7 +64,7 @@
 #'    
 #'@author M. Iturbide
 #'@export
-#'@importFrom lattice 
+#'@import lattice 
 #'@importFrom grDevices col2rgb rgb colors
 #'@importFrom padr pad
 #'@importFrom data.table rleid

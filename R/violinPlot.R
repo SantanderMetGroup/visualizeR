@@ -53,7 +53,7 @@
 #'    
 #'@author M. Iturbide
 #'@export
-#'@importFrom lattice bwplot panel.superpose panel.violin
+#'@import lattice 
 #'@importFrom RColorBrewer brewer.pal
 #'@importFrom transformeR gridDepth
 #'@importFrom stats sd
