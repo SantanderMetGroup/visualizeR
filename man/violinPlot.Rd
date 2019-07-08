@@ -4,17 +4,19 @@
 \alias{violinPlot}
 \title{Lattice plot methods for climatological series}
 \usage{
-violinPlot(..., color.fun = list(FUN = sd, na.rm = TRUE),
-  color.theme = "RdYlBu", color.cuts = NULL, rev.colors = FALSE,
-  h.lines = NULL, lonLim = NULL, latLim = NULL,
-  bwplot.custom = list())
+violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
+  = TRUE), color.theme = "RdYlBu", color.cuts = NULL,
+  rev.colors = FALSE, h.lines = NULL, v.lines = FALSE,
+  lonLim = NULL, latLim = NULL, bwplot.custom = list())
 }
 \arguments{
 \item{...}{Input grids (or station data)}
 
+\item{group.index}{Character or numeric passed to argument group in bwplot.}
+
 \item{color.fun}{list containing the function and the related arguments to perform spatial 
 aggregation. The resulting values are used to fill with color the violins.
- Default is \code{list(FUN = sd, na.rm = TRUE)}.}
+ Default is \code{list(FUN = mean, na.rm = TRUE)}.}
 
 \item{color.theme}{A character string indicating the color theme to use in the map. 
 Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
@@ -27,6 +29,8 @@ for backwards compatibility. Default to the diverging, colorblind-friendly \code
 is used.}
 
 \item{h.lines}{Numeric sequence indicating the position of dashed horizontal lines.}
+
+\item{v.lines}{Logical for drawing vertical lines (Default is FALSE).}
 
 \item{lonLim}{Vector of length = 2, with minimum and maximum longitude coordinates, 
 in decimal degrees, of the bounding box selected. If NULL (default), the whole 
@@ -53,13 +57,30 @@ A wrapper for the lattice (trellis) plot methods for grid and station data.
 data("EOBS_Iberia_tas")
 data("EOBS_Iberia_pr")
 data("CORDEX_Iberia_pr")
-violinPlot("one" = climatology(EOBS_Iberia_pr), 
-           "two" = climatology(EOBS_Iberia_tas), 
+violinPlot("one" = climatology(EOBS_Iberia_pr),
+           "two" = climatology(EOBS_Iberia_tas),
            "three" = climatology(CORDEX_Iberia_pr),
             h.lines = seq(0, 15, 5),
             color.cuts = seq(0, 3, 0.2),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas"))
+
+## With grouping:
+data("EOBS_Iberia_tas")
+data("EOBS_Iberia_pr")
+data("CORDEX_Iberia_pr")
+data("CORDEX_Iberia_tas")
+violinPlot("pr" = climatology(EOBS_Iberia_pr),
+           "tas" = climatology(EOBS_Iberia_tas),
+           "pr" = climatology(CORDEX_Iberia_pr),
+           "tas" = climatology(CORDEX_Iberia_tas),
+            group.index = c("Measure1", "Measure1", "Measure2", "Measure2"),
+            h.lines = seq(0, 15, 5),
+            v.lines = TRUE,
+            color.cuts = seq(0, 3, 0.2),
+            bwplot.custom = list(ylim = c(0, 20),
+                                 ylab = "pr and tas",
+                                 as.table = TRUE))
 }
 \author{
 M. Iturbide
