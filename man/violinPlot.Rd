@@ -6,8 +6,13 @@
 \usage{
 violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
   = TRUE), color.theme = "RdYlBu", color.cuts = NULL,
+<<<<<<< HEAD
   rev.colors = FALSE, h.lines = NULL, v.lines = FALSE,
   lonLim = NULL, latLim = NULL, bwplot.custom = list())
+=======
+  rev.colors = FALSE, h.lines = NULL, lonLim = NULL, latLim = NULL,
+  bwplot.custom = list())
+>>>>>>> devel
 }
 \arguments{
 \item{...}{Input grids (or station data)}
@@ -64,7 +69,11 @@ violinPlot("one" = climatology(EOBS_Iberia_pr),
             color.cuts = seq(0, 3, 0.2),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas"))
+<<<<<<< HEAD
 
+=======
+                                 
+>>>>>>> devel
 ## With grouping:
 data("EOBS_Iberia_tas")
 data("EOBS_Iberia_pr")
@@ -76,7 +85,10 @@ violinPlot("pr" = climatology(EOBS_Iberia_pr),
            "tas" = climatology(CORDEX_Iberia_tas),
             group.index = c("Measure1", "Measure1", "Measure2", "Measure2"),
             h.lines = seq(0, 15, 5),
+<<<<<<< HEAD
             v.lines = TRUE,
+=======
+>>>>>>> devel
             color.cuts = seq(0, 3, 0.2),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas",

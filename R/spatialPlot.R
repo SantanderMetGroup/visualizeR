@@ -72,6 +72,8 @@
 #' \item For some graticulate customization examples, visit the \emph{sp Gallery}: \url{https://edzer.github.io/sp/}
 #' }
 #' @importFrom abind abind asub
+#' @import lattice
+#' @import latticeExtra
 #' @importFrom sp spplot SpatialGridDataFrame SpatialPointsDataFrame GridTopology SpatialPoints
 #' @importFrom grDevices colorRampPalette
 #' @importFrom utils tail head
