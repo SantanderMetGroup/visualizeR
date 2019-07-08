@@ -64,11 +64,7 @@ violinPlot("one" = climatology(EOBS_Iberia_pr),
             color.cuts = seq(0, 3, 0.2),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas"))
-<<<<<<< HEAD
 
-=======
-                                 
->>>>>>> devel
 ## With grouping:
 data("EOBS_Iberia_tas")
 data("EOBS_Iberia_pr")
@@ -80,10 +76,7 @@ violinPlot("pr" = climatology(EOBS_Iberia_pr),
            "tas" = climatology(CORDEX_Iberia_tas),
             group.index = c("Measure1", "Measure1", "Measure2", "Measure2"),
             h.lines = seq(0, 15, 5),
-<<<<<<< HEAD
             v.lines = TRUE,
-=======
->>>>>>> devel
             color.cuts = seq(0, 3, 0.2),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas",
