@@ -6,13 +6,8 @@
 \usage{
 violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
   = TRUE), color.theme = "RdYlBu", color.cuts = NULL,
-<<<<<<< HEAD
   rev.colors = FALSE, h.lines = NULL, v.lines = FALSE,
   lonLim = NULL, latLim = NULL, bwplot.custom = list())
-=======
-  rev.colors = FALSE, h.lines = NULL, lonLim = NULL, latLim = NULL,
-  bwplot.custom = list())
->>>>>>> devel
 }
 \arguments{
 \item{...}{Input grids (or station data)}
