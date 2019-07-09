@@ -33,5 +33,7 @@
 * Add IPCC AR6 regions (AR6_WGI_referenceRegions and AR6_WGI_AtlasSynthesisRegions)
 * Other minor changes and documentation updates
 
-## v1.4.0 (in devel)
+## v1.4.0 (09 Jul 2019)
 * New `violinPlot` function for violin trellis graphics
+* Other minor documentation updates
+
