@@ -81,7 +81,6 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
                          density = 4,
                          angle = "-45",
                          ...) {
-    tol = .05
     if (!("climatology:fun" %in% names(attributes(clim$Data)))) {
         stop("Input grid was not recognized as a climatology")
     }
