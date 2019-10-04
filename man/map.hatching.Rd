@@ -21,13 +21,13 @@ so the specified map values are NOT hatched, and the other way round.}
 \item{density}{Density of the hatching pattern. This parameter is related to the spatial resolution of the input grid. Default to 4,
 so hatching lines are sepparated in the X axis by a distance of four times the X-resolution of the input grid.}
 
-\item{angle}{Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"+45"}
+\item{angle}{Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"45"}
 degrees.}
 
 \item{...}{Graphical parameters affecting the appearance of the hatching lines. See details and examples.}
 }
 \value{
-A graphical parameter list controlling the polygons to be superposed onto the climatological map
+A graphical parameter list to be superposed onto the climatological map via \code{sp.layout}
 }
 \description{
 Utility for map hatching, following IPCC convention or other user-defined specifications.
@@ -40,8 +40,8 @@ of graphical layers to be added onto a climatological map using the \pkg{lattice
 Several details on its application are illustrated in the examples below.
 }
 \note{
-The function assumes that a valid CRS is in use. See \code{\link[geoprocessoR]{projectGrid}} for details, so
-no mismatches between the hatched area and the base climatology happen.
+The function assumes that a valid CRS is in use, so no mismatches between the hatched area and
+ the base climatology happen. See \code{\link[geoprocessoR]{projectGrid}} for details
 }
 \examples{
 

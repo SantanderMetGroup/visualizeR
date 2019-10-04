@@ -37,3 +37,7 @@
 * New `violinPlot` function for violin trellis graphics
 * Other minor documentation updates
 
+## v1.5.0 (4 Oct 2019)
+* Map hatching
+* Other minor changes and documentation updates
+

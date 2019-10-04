@@ -8,12 +8,12 @@
 #' so the specified map values are NOT hatched, and the other way round.
 #' @param density Density of the hatching pattern. This parameter is related to the spatial resolution of the input grid. Default to 4,
 #'  so hatching lines are sepparated in the X axis by a distance of four times the X-resolution of the input grid.
-#' @param angle Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"+45"}
+#' @param angle Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"45"}
 #'  degrees. 
 #' @param ... Graphical parameters affecting the appearance of the hatching lines. See details and examples.
-#' @return A graphical parameter list controlling the polygons to be superposed onto the climatological map
-#' @note The function assumes that a valid CRS is in use. See \code{\link[geoprocessoR]{projectGrid}} for details, so
-#' no mismatches between the hatched area and the base climatology happen.
+#' @return A graphical parameter list to be superposed onto the climatological map via \code{sp.layout}
+#' @note The function assumes that a valid CRS is in use, so no mismatches between the hatched area and
+#'  the base climatology happen. See \code{\link[geoprocessoR]{projectGrid}} for details
 #' @details 
 #' 
 #' The function follows the same philosophy as other graphical helpers implemented in \pkg{visualizeR}, namely 
@@ -114,13 +114,13 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
                                         method = "nearest"))
     sp.polys <- as(grid2sp(clim), "SpatialPolygonsDataFrame")
     # Hatching lines
-    if (angle == -45) {
+    if (angle == "-45") {
         a <- 2
         b <- 4
-    } else {
+    } else if (angle == "45") {
         a <- 1
         b <- 3
-    }
+    } 
     coords <- lapply(sp.polys@polygons, function(x) {
         sp::Line(x@Polygons[[1]]@coords[c(a,b),])
     })
