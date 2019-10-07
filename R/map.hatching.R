@@ -103,28 +103,33 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
     arg.list <- list(...)
     # Binary data
     eval(parse(text = paste("clim$Data[which(clim$Data", ineq, "threshold)] <- NA")))
-    # Upscaling
-    refgrid <- getGrid(clim)
-    newresX <- attr(refgrid, "resX") * density
-    newresY <- attr(refgrid, "resY") * density
-    x.list <- seq(refgrid$x[1], refgrid$x[2], by = newresX)
-    y.list <- seq(refgrid$y[1], refgrid$y[2], by = newresY)
-    clim <- suppressMessages(interpGrid(clim,
-                                        new.coordinates = list(x = x.list, y = y.list),
-                                        method = "nearest"))
-    sp.polys <- as(grid2sp(clim), "SpatialPolygonsDataFrame")
-    # Hatching lines
-    if (angle == "-45") {
-        a <- 2
-        b <- 4
-    } else if (angle == "45") {
-        a <- 1
-        b <- 3
-    } 
-    coords <- lapply(sp.polys@polygons, function(x) {
-        sp::Line(x@Polygons[[1]]@coords[c(a,b),])
-    })
-    hatchlines <- sp::SpatialLines(list(sp::Lines(coords, ID = "hatch")))
-    l1 <- c(arg.list, hatchlines)
+    if (all(is.na(clim$Data))) {
+        message("NOTE: Empty selection. No hatching will be used")
+        l1 <- list("sp.points", sp::SpatialPoints(coords = matrix(c(0,0), ncol = 2)), cex = 0)
+    } else {
+        # Upscaling
+        refgrid <- getGrid(clim)
+        newresX <- attr(refgrid, "resX") * density
+        newresY <- attr(refgrid, "resY") * density
+        x.list <- seq(refgrid$x[1], refgrid$x[2], by = newresX)
+        y.list <- seq(refgrid$y[1], refgrid$y[2], by = newresY)
+        clim <- suppressMessages(interpGrid(clim,
+                                            new.coordinates = list(x = x.list, y = y.list),
+                                            method = "nearest"))
+        sp.polys <- as(grid2sp(clim), "SpatialPolygonsDataFrame")
+        # Hatching lines
+        if (angle == "-45") {
+            a <- 2
+            b <- 4
+        } else if (angle == "45") {
+            a <- 1
+            b <- 3
+        } 
+        coords <- lapply(sp.polys@polygons, function(x) {
+            sp::Line(x@Polygons[[1]]@coords[c(a,b),])
+        })
+        hatchlines <- sp::SpatialLines(list(sp::Lines(coords, ID = "hatch")))
+        l1 <- c(arg.list, hatchlines)
+    }
     return(l1)
 }
