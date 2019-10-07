@@ -413,8 +413,12 @@ map.stippling <- function(clim, threshold = 0.05, condition = "LT", ...) {
   aux <- array3Dto2Dmat(clim$Data)[1, ]
   ind <- eval(parse(text = paste("which(aux", ineq, "threshold)")))
   coords <- as.matrix(expand.grid(clim$xyCoords$y, clim$xyCoords$x)[2:1][ind, ])
-  if (nrow(coords) == 0) stop("None of the grid points is below the specified threshold")
-  do.call("list", c("sp.points", SpatialPoints(coords), arg.list))
+  if (nrow(coords) == 0) {
+    message("NOTE: Empty selection. No stippling points will be added to the map")
+    list("sp.points", SpatialPoints(matrix(c(0,0), ncol = 2)), cex = 0)
+  } else {
+    do.call("list", c("sp.points", SpatialPoints(coords), arg.list))  
+  }
 }
 
 
