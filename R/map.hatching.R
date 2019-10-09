@@ -81,55 +81,57 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
                          density = 4,
                          angle = "-45",
                          ...) {
-    if (!("climatology:fun" %in% names(attributes(clim$Data)))) {
-        stop("Input grid was not recognized as a climatology")
-    }
-    stopifnot(is.logical(invert))
-    condition <- match.arg(condition, choices = c("GT", "GE", "LT", "LE"))
-    angle <- match.arg(angle, choices = c("-45", "45"))
-    ineq <- if (isTRUE(invert)) {
-        switch(condition,
-               "GT" = ">",
-               "GE" = ">=",
-               "LT" = "<",
-               "LE" = "<=")
-    } else {
-        switch(condition,
-               "GT" = "<=",
-               "GE" = "<",
-               "LT" = ">=",
-               "LE" = ">")
-    }
-    arg.list <- list(...)
-    # Binary data
-    eval(parse(text = paste("clim$Data[which(clim$Data", ineq, "threshold)] <- NA")))
-    if (all(is.na(clim$Data))) {
-        message("NOTE: Empty selection. No hatching will be used")
-        l1 <- list("sp.points", sp::SpatialPoints(coords = matrix(c(0,0), ncol = 2)), cex = 0)
-    } else {
-        # Upscaling
-        refgrid <- getGrid(clim)
-        newresX <- attr(refgrid, "resX") * density
-        newresY <- attr(refgrid, "resY") * density
-        x.list <- seq(refgrid$x[1], refgrid$x[2], by = newresX)
-        y.list <- seq(refgrid$y[1], refgrid$y[2], by = newresY)
-        clim <- suppressMessages(interpGrid(clim,
-                                            new.coordinates = list(x = x.list, y = y.list),
-                                            method = "nearest"))
-        sp.polys <- as(grid2sp(clim), "SpatialPolygonsDataFrame")
-        # Hatching lines
-        if (angle == "-45") {
-            a <- 2
-            b <- 4
-        } else if (angle == "45") {
-            a <- 1
-            b <- 3
-        } 
-        coords <- lapply(sp.polys@polygons, function(x) {
-            sp::Line(x@Polygons[[1]]@coords[c(a,b),])
-        })
-        hatchlines <- sp::SpatialLines(list(sp::Lines(coords, ID = "hatch")))
-        l1 <- c(arg.list, hatchlines)
-    }
-    return(l1)
+  if (!("climatology:fun" %in% names(attributes(clim$Data)))) {
+    stop("Input grid was not recognized as a climatology")
+  }
+  stopifnot(is.logical(invert))
+  condition <- match.arg(condition, choices = c("GT", "GE", "LT", "LE"))
+  angle <- match.arg(angle, choices = c("-45", "45"))
+  ineq <- if (isTRUE(invert)) {
+    switch(condition,
+           "GT" = ">",
+           "GE" = ">=",
+           "LT" = "<",
+           "LE" = "<=")
+  } else {
+    switch(condition,
+           "GT" = "<=",
+           "GE" = "<",
+           "LT" = ">=",
+           "LE" = ">")
+  }
+  arg.list <- list(...)
+  # Binary data
+  eval(parse(text = paste("clim$Data[which(clim$Data", ineq, "threshold)] <- NA")))
+  
+  # Upscaling
+  refgrid <- getGrid(clim)
+  newresX <- attr(refgrid, "resX") * density
+  newresY <- attr(refgrid, "resY") * density
+  x.list <- seq(refgrid$x[1], refgrid$x[2], by = newresX)
+  y.list <- seq(refgrid$y[1], refgrid$y[2], by = newresY)
+  clim <- suppressMessages(interpGrid(clim,
+                                      new.coordinates = list(x = x.list, y = y.list),
+                                      method = "nearest"))
+  if (all(is.na(clim$Data))) {
+    message("NOTE: Empty selection. No hatching will be used")
+    l1 <- list("sp.points", sp::SpatialPoints(coords = matrix(c(0,0), ncol = 2)), cex = 0)
+  } else {
+    
+    sp.polys <- as(grid2sp(clim), "SpatialPolygonsDataFrame")
+    # Hatching lines
+    if (angle == "-45") {
+      a <- 2
+      b <- 4
+    } else if (angle == "45") {
+      a <- 1
+      b <- 3
+    } 
+    coords <- lapply(sp.polys@polygons, function(x) {
+      sp::Line(x@Polygons[[1]]@coords[c(a,b),])
+    })
+    hatchlines <- sp::SpatialLines(list(sp::Lines(coords, ID = "hatch")))
+    l1 <- c(arg.list, hatchlines)
+  }
+  return(l1)
 }
