@@ -1,7 +1,7 @@
 Package: visualizeR
 Depends:
     R(>= 3.1.0),
-    transformeR(>= 1.4.6)
+    transformeR(>= 1.6.1)
 Imports:
     methods,
     sm,
@@ -28,7 +28,7 @@ Suggests:
 Type: Package
 Title: Visualizing climate4R data and Communicating Uncertainty in Seasonal Climate Prediction
 Version: 1.5.1
-Date: 2019-10-07
+Date: 2019-11-01
 Author: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
     "María Dolores Frías <friasmd@unican.es> [aut, cre]",
@@ -36,7 +36,7 @@ Author: as.person(c(
     "Maialen Iturbide <miturbide@ifca.unican.es> [aut]",
     "Joaquín Bedia <bediaj@unican.es> [aut]",
     "Max Tuni <max@predictia.es> [ctb]",
-    "Sixto Herrera <sixto@predictia.es> [ctb]",
+    "Sixto Herrera <herreras@unican.es> [ctb]",
     "Rodrigo Manzanas <rmanzanas@ifca.unican.es> [ctb]",
     "Antonio Cofiño <antonio.cofino@unican.es> [ctb]",
     "José Manuel Gutiérrez <gutierjm@unican.es> [ctb]",
@@ -45,8 +45,9 @@ Author: as.person(c(
 Maintainer: Maialen Iturbide <miturbide@ifca.unican.es>
 BugReports: https://github.com/SantanderMetGroup/visualizeR/issues
 URL: https://github.com/SantanderMetGroup/visualizeR/wiki
-Description: Implementation of seasonal climate verification plots.
+Description: Plotting methods for climate4R data visualization. Includes the implementation of several seasonal climate verification plots (See: <https://doi.org/10.1016/j.envsoft.2017.09.008>).
 License: file LICENSE
+VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
