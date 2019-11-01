@@ -68,7 +68,7 @@
 #' @author R. Manzanas \& M.Iturbide
 # @import verification
 # @import plot3D
-#' @importFrom transformeR getGrid redim getDim bindGrid
+#' @importFrom transformeR getGrid redim getDim bindGrid isRegular
 #' @importFrom sp SpatialPoints SpatialPolygons Polygons Polygon over
 #' @importFrom graphics plot.new abline polygon text grid title
 #' @importFrom stats na.omit
