@@ -152,6 +152,10 @@ violinPlot <- function(...,
   cols.full <- colorpal(length(color.cuts))
   cols <- cols.full[sapply(color.data, function(x) which.min(abs(color.cuts - x)))]
   #bwplot.custom
+  if (is.null(box.cols)) box.cols <- "black"
+  bwplot.custom[["par.settings"]][["box.umbrella"]] <-  list(col = box.cols)
+  bwplot.custom[["par.settings"]][["box.dot"]] <-  list(col = box.cols) 
+  bwplot.custom[["par.settings"]][["box.rectangle"]] <-  list(col = box.cols) 
   if (is.null(bwplot.custom[["x"]])) bwplot.custom[["x"]] <- Value ~ mini | index
   if (is.null(bwplot.custom[["ylim"]])) bwplot.custom[["ylim"]] <- ylim
   if (is.null(bwplot.custom[["horizontal"]])) bwplot.custom[["horizontal"]] <- FALSE
@@ -171,8 +175,7 @@ violinPlot <- function(...,
   #                                                                                    labels = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))),
   #                                                                           cex = .6, col = "black")
   if (is.null(h.lines)) h.lines <- seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))
-  if (is.null(box.cols)) box.cols <- "black"
-  if (is.null(bwplot.custom[["key"]])) bwplot.custom[["key"]] <- list(space = "right", rectangles = list(col = rev(cols.full), border = FALSE), 
+  if (is.null(bwplot.custom[["key"]]) & isTRUE(violin)) bwplot.custom[["key"]] <- list(space = "right", rectangles = list(col = rev(cols.full), border = FALSE), 
                                                                       text = list(as.character(rev(round(color.cuts, digits = 2))), cex = .8))
   bwplot.custom[["data"]] <- dff
   bwplot.custom[["groups"]] <- as.factor(dff$nini)
@@ -182,23 +185,19 @@ violinPlot <- function(...,
     cols <- fill
   }
   if (violin) {
-  bwplot.custom[["col"]] <- cols
-  bwplot.custom[["panel"]] <- function(...) {
-    panel.superpose(...)
-    panel.abline(h = h.lines,
-                 col = "gray65", lwd = 0.5, lty = 2)
-    if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
-                 col = "gray65", lwd = 0.5, lty = 2)
-    
-  }
-  bwplot.custom[["panel.groups"]] <- panel.violin
+    bwplot.custom[["col"]] <- cols
+    bwplot.custom[["panel"]] <- function(...) {
+      panel.superpose(...)
+      panel.abline(h = h.lines,
+                   col = "gray65", lwd = 0.5, lty = 2)
+      if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
+                                        col = "gray65", lwd = 0.5, lty = 2)
+      
+    }
+    bwplot.custom[["panel.groups"]] <- panel.violin
   } else {
     bwplot.custom[["fill"]] <- cols
-    if (is.null(bwplot.custom[["par.settings"]])){
-      bwplot.custom[["par.settings"]] <- list(box.umbrella = list(col= box.cols), 
-                                              box.dot = list(col= box.cols), 
-                                              box.rectangle = list(col= box.cols))
-    }
+    bwplot.custom[["col"]] <- box.cols
     bwplot.custom[["panel"]] <- function(...) {
       panel.superpose(..., panel.groups = function(...) {
         panel.bwplot(..., stats = nboxplot.stats)}
@@ -209,7 +208,7 @@ violinPlot <- function(...,
                                         col = "gray65", lwd = 0.5, lty = 2)
       # panel.bwplot(..., stats = nboxplot.stats)
     }
-    }
+  }
   # crate trellis object
   output <- do.call("bwplot", bwplot.custom) 
   return(output)
@@ -252,7 +251,7 @@ nboxplot.stats <- function (x, coef = 1.5, do.conf = TRUE, do.out = FALSE, probs
   conf <- if (do.conf) 
     stats[3L] + c(-1.58, 1.58) * iqr/sqrt(n)
   l <- list(stats = stats, n = n, conf = conf, out = if (do.out) x[out & 
-                                                                nna] else numeric())
+                                                                     nna] else numeric())
   l[["out"]] <- as.integer(l[["out"]])
   l
 }
