@@ -54,12 +54,12 @@
 #' @return A lattice plot of class \dQuote{trellis}. 
 #' 
 #'    
-#'@author M. Iturbide
-#'@export
-#'@import lattice 
-#'@importFrom RColorBrewer brewer.pal
-#'@importFrom transformeR gridDepth
-#'@importFrom stats sd
+#' @author M. Iturbide
+#' @export
+#' @import lattice 
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom transformeR gridDepth
+#' @importFrom stats sd
 #' @import latticeExtra
 #' @examples
 #' data("EOBS_Iberia_tas")
@@ -96,6 +96,7 @@ violinPlot <- function(...,
                        group.index = NULL,
                        color.fun = list(FUN = mean, na.rm = TRUE),
                        violin = TRUE,
+                       fill = TRUE,
                        color.theme = "RdYlBu",
                        color.cuts = NULL,
                        rev.colors = FALSE,
@@ -170,12 +171,18 @@ violinPlot <- function(...,
   #                                                                                    labels = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))),
   #                                                                           cex = .6, col = "black")
   if (is.null(h.lines)) h.lines <- seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))
+  if (is.null(box.cols)) box.cols <- "black"
   if (is.null(bwplot.custom[["key"]])) bwplot.custom[["key"]] <- list(space = "right", rectangles = list(col = rev(cols.full), border = FALSE), 
                                                                       text = list(as.character(rev(round(color.cuts, digits = 2))), cex = .8))
   bwplot.custom[["data"]] <- dff
-  bwplot.custom[["col"]] <- cols
   bwplot.custom[["groups"]] <- as.factor(dff$nini)
+  if (is.logical(fill)) {
+    if (isFALSE(fill)) cols <- rgb(0,0,0,0) 
+  } else {
+    cols <- fill
+  }
   if (violin) {
+  bwplot.custom[["col"]] <- cols
   bwplot.custom[["panel"]] <- function(...) {
     panel.superpose(...)
     panel.abline(h = h.lines,
@@ -186,20 +193,23 @@ violinPlot <- function(...,
   }
   bwplot.custom[["panel.groups"]] <- panel.violin
   } else {
+    bwplot.custom[["fill"]] <- cols
     if (is.null(bwplot.custom[["par.settings"]])){
-      bwplot.custom[["par.settings"]] <- list(box.umbrella = list(col= c("black")), 
-                                              box.dot = list(col= c("black")), 
-                                              box.rectangle = list(col= c("black")),
-                                              plot.symbol   = list(cex = 0.5, col = "black", pch= "."))
+      bwplot.custom[["par.settings"]] <- list(box.umbrella = list(col= box.cols), 
+                                              box.dot = list(col= box.cols), 
+                                              box.rectangle = list(col= box.cols))
     }
     bwplot.custom[["panel"]] <- function(...) {
+      panel.superpose(..., panel.groups = function(...) {
+        panel.bwplot(..., stats = nboxplot.stats)}
+      )
       panel.abline(h = h.lines,
                    col = "gray65", lwd = 0.5, lty = 2)
       if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
                                         col = "gray65", lwd = 0.5, lty = 2)
-      panel.bwplot(..., stats = nboxplot.stats)
+      # panel.bwplot(..., stats = nboxplot.stats)
     }
-  }
+    }
   # crate trellis object
   output <- do.call("bwplot", bwplot.custom) 
   return(output)
