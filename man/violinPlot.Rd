@@ -5,9 +5,10 @@
 \title{Lattice plot methods for climatological series}
 \usage{
 violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
-  = TRUE), color.theme = "RdYlBu", color.cuts = NULL,
-  rev.colors = FALSE, h.lines = NULL, v.lines = FALSE,
-  lonLim = NULL, latLim = NULL, bwplot.custom = list())
+  = TRUE), violin = TRUE, color.theme = "RdYlBu", color.cuts = NULL,
+  rev.colors = FALSE, box.cols = NULL, h.lines = NULL,
+  v.lines = FALSE, lonLim = NULL, latLim = NULL,
+  bwplot.custom = list())
 }
 \arguments{
 \item{...}{Input grids (or station data)}
@@ -18,6 +19,8 @@ violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
 aggregation. The resulting values are used to fill with color the violins.
  Default is \code{list(FUN = mean, na.rm = TRUE)}.}
 
+\item{violin}{(default is TRUE). If FALSE, a boxplot is returned.}
+
 \item{color.theme}{A character string indicating the color theme to use in the map. 
 Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
 the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
@@ -27,6 +30,8 @@ for backwards compatibility. Default to the diverging, colorblind-friendly \code
 
 \item{rev.colors}{Default to FALSE. If TRUE the reversed version of the color palette
 is used.}
+
+\item{box.cols}{Character string with colors.}
 
 \item{h.lines}{Numeric sequence indicating the position of dashed horizontal lines.}
 

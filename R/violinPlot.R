@@ -24,6 +24,7 @@
 #' @param color.fun list containing the function and the related arguments to perform spatial 
 #' aggregation. The resulting values are used to fill with color the violins.
 #'  Default is \code{list(FUN = mean, na.rm = TRUE)}.
+#' @param violin (default is TRUE). If FALSE, a boxplot is returned.
 #' @param color.theme A character string indicating the color theme to use in the map. 
 #' Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
 #' the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
@@ -31,6 +32,7 @@
 #' @param color.cuts Numeric sequence indicating the color cuts.
 #' @param rev.colors Default to FALSE. If TRUE the reversed version of the color palette
 #' is used.
+#' @param box.cols Character string with colors.
 #' @param h.lines Numeric sequence indicating the position of dashed horizontal lines.
 #' @param v.lines Logical for drawing vertical lines (Default is FALSE). 
 #' @param lonLim Vector of length = 2, with minimum and maximum longitude coordinates, 
@@ -92,10 +94,12 @@
 
 violinPlot <- function(..., 
                        group.index = NULL,
-                       color.fun = list(FUN = mean, na.rm = TRUE), 
+                       color.fun = list(FUN = mean, na.rm = TRUE),
+                       violin = TRUE,
                        color.theme = "RdYlBu",
                        color.cuts = NULL,
                        rev.colors = FALSE,
+                       box.cols = NULL,
                        h.lines = NULL,
                        v.lines = FALSE,
                        lonLim = NULL,
@@ -171,7 +175,7 @@ violinPlot <- function(...,
   bwplot.custom[["data"]] <- dff
   bwplot.custom[["col"]] <- cols
   bwplot.custom[["groups"]] <- as.factor(dff$nini)
-  
+  if (violin) {
   bwplot.custom[["panel"]] <- function(...) {
     panel.superpose(...)
     panel.abline(h = h.lines,
@@ -180,10 +184,65 @@ violinPlot <- function(...,
                  col = "gray65", lwd = 0.5, lty = 2)
     
   }
-  bwplot.custom[["panel.groups"]] <- panel.violin 
+  bwplot.custom[["panel.groups"]] <- panel.violin
+  } else {
+    if (is.null(bwplot.custom[["par.settings"]])){
+      bwplot.custom[["par.settings"]] <- list(box.umbrella = list(col= c("black")), 
+                                              box.dot = list(col= c("black")), 
+                                              box.rectangle = list(col= c("black")),
+                                              plot.symbol   = list(cex = 0.5, col = "black", pch= "."))
+    }
+    bwplot.custom[["panel"]] <- function(...) {
+      panel.abline(h = h.lines,
+                   col = "gray65", lwd = 0.5, lty = 2)
+      if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
+                                        col = "gray65", lwd = 0.5, lty = 2)
+      panel.bwplot(..., stats = nboxplot.stats)
+    }
+  }
   # crate trellis object
   output <- do.call("bwplot", bwplot.custom) 
   return(output)
 }
 
 
+
+
+
+#' @title boxplot.stats with set probs
+#' @description boxplot.stats with set probs
+#' @param x numeric vector
+#' @param coef see boxplot.stats
+#' @param do.conf see boxplot.stats
+#' @param do.out see boxplot.stats
+#' @param probs numeric with probabilites between 0 and 1
+#' @author M. Iturbide
+
+
+nboxplot.stats <- function (x, coef = 1.5, do.conf = TRUE, do.out = FALSE, probs = c(0.1, 0.25, 0.5, 0.75, 0.9)) 
+{
+  if (coef < 0) 
+    stop("'coef' must not be negative")
+  nna <- !is.na(x)
+  n <- sum(nna)
+  stats <- unname(quantile(x, probs=probs, na.rm = TRUE))
+  iqr <- diff(stats[c(2, 4)])
+  if (coef == 0) 
+    do.out <- FALSE
+  else {
+    out <- if (!is.na(iqr)) {
+      x < (stats[2L] - coef * iqr) | x > (stats[4L] + coef * 
+                                            iqr)
+    }
+    else !is.finite(x)
+    if (any(out[nna], na.rm = TRUE)) 
+      stats <- range(x[!out], na.rm = TRUE)
+  }
+  stats <- unname(quantile(x, probs=probs, na.rm = TRUE))
+  conf <- if (do.conf) 
+    stats[3L] + c(-1.58, 1.58) * iqr/sqrt(n)
+  l <- list(stats = stats, n = n, conf = conf, out = if (do.out) x[out & 
+                                                                nna] else numeric())
+  l[["out"]] <- as.integer(l[["out"]])
+  l
+}
