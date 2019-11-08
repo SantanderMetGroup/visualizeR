@@ -19,12 +19,16 @@
 
 #' @title Lattice plot methods for climatological series 
 #' @description A wrapper for the lattice (trellis) plot methods for grid and station data.
-#' @param ... Input grids (or station data)
+#' @param ... Input grids (or station data). It can be a list of grids too.
 #' @param group.index Character or numeric passed to argument group in bwplot.
+#' @param violin (default is TRUE). If FALSE, boxplots are returned.
+#' @param fill Logical indicating if the violins/boxes are filled with color. if TRUE, arguments
+#' \code{color.fun}, \code{color.theme}, \code{color.cuts} and \code{rev.colors} are used.
+#' Alternatively a vector with colors can be passed, in which case the mentioned arguments
+#' are ignored.
 #' @param color.fun list containing the function and the related arguments to perform spatial 
 #' aggregation. The resulting values are used to fill with color the violins.
 #'  Default is \code{list(FUN = mean, na.rm = TRUE)}.
-#' @param violin (default is TRUE). If FALSE, a boxplot is returned.
 #' @param color.theme A character string indicating the color theme to use in the map. 
 #' Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
 #' the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
@@ -32,7 +36,7 @@
 #' @param color.cuts Numeric sequence indicating the color cuts.
 #' @param rev.colors Default to FALSE. If TRUE the reversed version of the color palette
 #' is used.
-#' @param box.cols Character string with colors.
+#' @param box.col Character or numeric of the color to be given to the box borders.
 #' @param h.lines Numeric sequence indicating the position of dashed horizontal lines.
 #' @param v.lines Logical for drawing vertical lines (Default is FALSE). 
 #' @param lonLim Vector of length = 2, with minimum and maximum longitude coordinates, 
@@ -89,18 +93,46 @@
 #'             bwplot.custom = list(ylim = c(0, 20),
 #'                                  ylab = "pr and tas",
 #'                                  as.table = TRUE))
-
+#' 
+#' ## Boxplot:
+#' data("EOBS_Iberia_tas")
+#' data("EOBS_Iberia_pr")
+#' data("CORDEX_Iberia_pr")
+#' data("CORDEX_Iberia_tas")
+#' a <- violinPlot("pr" = climatology(EOBS_Iberia_pr),
+#'                 "tas" = climatology(EOBS_Iberia_tas),
+#'                 violin = FALSE,
+#'                 fill = FALSE,
+#'                 h.lines = seq(0, 15, 5),
+#'                 v.lines = TRUE,
+#'                 box.col = "blue",
+#'                 bwplot.custom = list(ylim = c(0, 20),
+#'                                      ylab = "pr and tas",
+#'                                      as.table = TRUE,
+#'                                      do.out = FALSE))
+#' b <- violinPlot("pr" = climatology(CORDEX_Iberia_pr),
+#'                 "tas" = climatology(CORDEX_Iberia_tas),
+#'                 violin = FALSE,
+#'                 fill = FALSE,
+#'                 h.lines = seq(0, 15, 5),
+#'                 v.lines = TRUE,
+#'                 box.col = "green",
+#'                 bwplot.custom = list(ylim = c(0, 20),
+#'                                      ylab = "pr and tas",
+#'                                      as.table = TRUE,
+#'                                      do.out = FALSE))
+#' a + b
 
 
 violinPlot <- function(..., 
                        group.index = NULL,
-                       color.fun = list(FUN = mean, na.rm = TRUE),
                        violin = TRUE,
                        fill = TRUE,
+                       color.fun = list(FUN = mean, na.rm = TRUE),
                        color.theme = "RdYlBu",
                        color.cuts = NULL,
                        rev.colors = FALSE,
-                       box.cols = NULL,
+                       box.col = NULL,
                        h.lines = NULL,
                        v.lines = FALSE,
                        lonLim = NULL,
@@ -152,10 +184,10 @@ violinPlot <- function(...,
   cols.full <- colorpal(length(color.cuts))
   cols <- cols.full[sapply(color.data, function(x) which.min(abs(color.cuts - x)))]
   #bwplot.custom
-  if (is.null(box.cols)) box.cols <- "black"
-  bwplot.custom[["par.settings"]][["box.umbrella"]] <-  list(col = box.cols)
-  bwplot.custom[["par.settings"]][["box.dot"]] <-  list(col = box.cols) 
-  bwplot.custom[["par.settings"]][["box.rectangle"]] <-  list(col = box.cols) 
+  if (is.null(box.col)) box.col <- "black"
+  bwplot.custom[["par.settings"]][["box.umbrella"]] <-  list(col = box.col)
+  bwplot.custom[["par.settings"]][["box.dot"]] <-  list(col = box.col) 
+  bwplot.custom[["par.settings"]][["box.rectangle"]] <-  list(col = box.col) 
   if (is.null(bwplot.custom[["x"]])) bwplot.custom[["x"]] <- Value ~ mini | index
   if (is.null(bwplot.custom[["ylim"]])) bwplot.custom[["ylim"]] <- ylim
   if (is.null(bwplot.custom[["horizontal"]])) bwplot.custom[["horizontal"]] <- FALSE
@@ -197,7 +229,7 @@ violinPlot <- function(...,
     bwplot.custom[["panel.groups"]] <- panel.violin
   } else {
     bwplot.custom[["fill"]] <- cols
-    bwplot.custom[["col"]] <- box.cols
+    bwplot.custom[["col"]] <- box.col
     bwplot.custom[["panel"]] <- function(...) {
       panel.superpose(..., panel.groups = function(...) {
         panel.bwplot(..., stats = nboxplot.stats)}
