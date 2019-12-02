@@ -32,6 +32,7 @@
 #' @param rev.colors Default to FALSE. If TRUE the reversed version of the color palette
 #' is used.
 #' @param h.lines Numeric sequence indicating the position of dashed horizontal lines.
+#' @param v.lines Logical for drawing vertical lines (Default is FALSE). 
 #' @param lonLim Vector of length = 2, with minimum and maximum longitude coordinates, 
 #' in decimal degrees, of the bounding box selected. If NULL (default), the whole 
 #' longitudinal range is selected 
@@ -57,19 +58,19 @@
 #'@importFrom RColorBrewer brewer.pal
 #'@importFrom transformeR gridDepth
 #'@importFrom stats sd
-#'@import latticeExtra
+#' @import latticeExtra
 #' @examples
 #' data("EOBS_Iberia_tas")
 #' data("EOBS_Iberia_pr")
 #' data("CORDEX_Iberia_pr")
-#' violinPlot("one" = climatology(EOBS_Iberia_pr), 
-#'            "two" = climatology(EOBS_Iberia_tas), 
+#' violinPlot("one" = climatology(EOBS_Iberia_pr),
+#'            "two" = climatology(EOBS_Iberia_tas),
 #'            "three" = climatology(CORDEX_Iberia_pr),
 #'             h.lines = seq(0, 15, 5),
 #'             color.cuts = seq(0, 3, 0.2),
 #'             bwplot.custom = list(ylim = c(0, 20),
 #'                                  ylab = "pr and tas"))
-#'                                  
+#' 
 #' ## With grouping:
 #' data("EOBS_Iberia_tas")
 #' data("EOBS_Iberia_pr")
@@ -81,6 +82,7 @@
 #'            "tas" = climatology(CORDEX_Iberia_tas),
 #'             group.index = c("Measure1", "Measure1", "Measure2", "Measure2"),
 #'             h.lines = seq(0, 15, 5),
+#'             v.lines = TRUE,
 #'             color.cuts = seq(0, 3, 0.2),
 #'             bwplot.custom = list(ylim = c(0, 20),
 #'                                  ylab = "pr and tas",
@@ -95,6 +97,7 @@ violinPlot <- function(...,
                        color.cuts = NULL,
                        rev.colors = FALSE,
                        h.lines = NULL,
+                       v.lines = FALSE,
                        lonLim = NULL,
                        latLim = NULL,
                        bwplot.custom = list()) {
@@ -168,10 +171,14 @@ violinPlot <- function(...,
   bwplot.custom[["data"]] <- dff
   bwplot.custom[["col"]] <- cols
   bwplot.custom[["groups"]] <- as.factor(dff$nini)
+  
   bwplot.custom[["panel"]] <- function(...) {
     panel.superpose(...)
     panel.abline(h = h.lines,
                  col = "gray65", lwd = 0.5, lty = 2)
+    if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
+                 col = "gray65", lwd = 0.5, lty = 2)
+    
   }
   bwplot.custom[["panel.groups"]] <- panel.violin 
   # crate trellis object
