@@ -19,8 +19,13 @@
 
 #' @title Lattice plot methods for climatological series 
 #' @description A wrapper for the lattice (trellis) plot methods for grid and station data.
-#' @param ... Input grids (or station data)
+#' @param ... Input grids (or station data). It can be a list of grids too.
 #' @param group.index Character or numeric passed to argument group in bwplot.
+#' @param violin (default is TRUE). If FALSE, boxplots are returned.
+#' @param fill Logical indicating if the violins/boxes are filled with color. if TRUE, arguments
+#' \code{color.fun}, \code{color.theme}, \code{color.cuts} and \code{rev.colors} are used.
+#' Alternatively a vector with colors can be passed, in which case the mentioned arguments
+#' are ignored.
 #' @param color.fun list containing the function and the related arguments to perform spatial 
 #' aggregation. The resulting values are used to fill with color the violins.
 #'  Default is \code{list(FUN = mean, na.rm = TRUE)}.
@@ -31,6 +36,7 @@
 #' @param color.cuts Numeric sequence indicating the color cuts.
 #' @param rev.colors Default to FALSE. If TRUE the reversed version of the color palette
 #' is used.
+#' @param box.col Character or numeric of the color to be given to the box borders.
 #' @param h.lines Numeric sequence indicating the position of dashed horizontal lines.
 #' @param v.lines Logical for drawing vertical lines (Default is FALSE). 
 #' @param lonLim Vector of length = 2, with minimum and maximum longitude coordinates, 
@@ -52,12 +58,12 @@
 #' @return A lattice plot of class \dQuote{trellis}. 
 #' 
 #'    
-#'@author M. Iturbide
-#'@export
-#'@import lattice 
-#'@importFrom RColorBrewer brewer.pal
-#'@importFrom transformeR gridDepth
-#'@importFrom stats sd
+#' @author M. Iturbide
+#' @export
+#' @import lattice 
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom transformeR gridDepth
+#' @importFrom stats sd
 #' @import latticeExtra
 #' @examples
 #' data("EOBS_Iberia_tas")
@@ -87,15 +93,46 @@
 #'             bwplot.custom = list(ylim = c(0, 20),
 #'                                  ylab = "pr and tas",
 #'                                  as.table = TRUE))
-
+#' 
+#' ## Boxplot:
+#' data("EOBS_Iberia_tas")
+#' data("EOBS_Iberia_pr")
+#' data("CORDEX_Iberia_pr")
+#' data("CORDEX_Iberia_tas")
+#' a <- violinPlot("pr" = climatology(EOBS_Iberia_pr),
+#'                 "tas" = climatology(EOBS_Iberia_tas),
+#'                 violin = FALSE,
+#'                 fill = FALSE,
+#'                 h.lines = seq(0, 15, 5),
+#'                 v.lines = TRUE,
+#'                 box.col = "blue",
+#'                 bwplot.custom = list(ylim = c(0, 20),
+#'                                      ylab = "pr and tas",
+#'                                      as.table = TRUE,
+#'                                      do.out = FALSE))
+#' b <- violinPlot("pr" = climatology(CORDEX_Iberia_pr),
+#'                 "tas" = climatology(CORDEX_Iberia_tas),
+#'                 violin = FALSE,
+#'                 fill = FALSE,
+#'                 h.lines = seq(0, 15, 5),
+#'                 v.lines = TRUE,
+#'                 box.col = "green",
+#'                 bwplot.custom = list(ylim = c(0, 20),
+#'                                      ylab = "pr and tas",
+#'                                      as.table = TRUE,
+#'                                      do.out = FALSE))
+#' a + b
 
 
 violinPlot <- function(..., 
                        group.index = NULL,
-                       color.fun = list(FUN = mean, na.rm = TRUE), 
+                       violin = TRUE,
+                       fill = TRUE,
+                       color.fun = list(FUN = mean, na.rm = TRUE),
                        color.theme = "RdYlBu",
                        color.cuts = NULL,
                        rev.colors = FALSE,
+                       box.col = NULL,
                        h.lines = NULL,
                        v.lines = FALSE,
                        lonLim = NULL,
@@ -147,6 +184,10 @@ violinPlot <- function(...,
   cols.full <- colorpal(length(color.cuts))
   cols <- cols.full[sapply(color.data, function(x) which.min(abs(color.cuts - x)))]
   #bwplot.custom
+  if (is.null(box.col)) box.col <- "black"
+  bwplot.custom[["par.settings"]][["box.umbrella"]] <-  list(col = box.col)
+  bwplot.custom[["par.settings"]][["box.dot"]] <-  list(col = box.col) 
+  bwplot.custom[["par.settings"]][["box.rectangle"]] <-  list(col = box.col) 
   if (is.null(bwplot.custom[["x"]])) bwplot.custom[["x"]] <- Value ~ mini | index
   if (is.null(bwplot.custom[["ylim"]])) bwplot.custom[["ylim"]] <- ylim
   if (is.null(bwplot.custom[["horizontal"]])) bwplot.custom[["horizontal"]] <- FALSE
@@ -166,24 +207,83 @@ violinPlot <- function(...,
   #                                                                                    labels = seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))),
   #                                                                           cex = .6, col = "black")
   if (is.null(h.lines)) h.lines <- seq(ylim[1], ylim[2],round((ylim[2] - ylim[1])/10, digits = digs))
-  if (is.null(bwplot.custom[["key"]])) bwplot.custom[["key"]] <- list(space = "right", rectangles = list(col = rev(cols.full), border = FALSE), 
+  if (is.null(bwplot.custom[["key"]]) & isTRUE(violin)) bwplot.custom[["key"]] <- list(space = "right", rectangles = list(col = rev(cols.full), border = FALSE), 
                                                                       text = list(as.character(rev(round(color.cuts, digits = 2))), cex = .8))
   bwplot.custom[["data"]] <- dff
-  bwplot.custom[["col"]] <- cols
   bwplot.custom[["groups"]] <- as.factor(dff$nini)
-  
-  bwplot.custom[["panel"]] <- function(...) {
-    panel.superpose(...)
-    panel.abline(h = h.lines,
-                 col = "gray65", lwd = 0.5, lty = 2)
-    if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
-                 col = "gray65", lwd = 0.5, lty = 2)
-    
+  if (is.logical(fill)) {
+    if (isFALSE(fill)) cols <- rgb(0,0,0,0) 
+  } else {
+    cols <- fill
   }
-  bwplot.custom[["panel.groups"]] <- panel.violin 
+  if (violin) {
+    bwplot.custom[["col"]] <- cols
+    bwplot.custom[["panel"]] <- function(...) {
+      panel.superpose(...)
+      panel.abline(h = h.lines,
+                   col = "gray65", lwd = 0.5, lty = 2)
+      if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
+                                        col = "gray65", lwd = 0.5, lty = 2)
+      
+    }
+    bwplot.custom[["panel.groups"]] <- panel.violin
+  } else {
+    bwplot.custom[["fill"]] <- cols
+    bwplot.custom[["col"]] <- box.col
+    bwplot.custom[["panel"]] <- function(...) {
+      panel.superpose(..., panel.groups = function(...) {
+        panel.bwplot(..., stats = nboxplot.stats)}
+      )
+      panel.abline(h = h.lines,
+                   col = "gray65", lwd = 0.5, lty = 2)
+      if (isTRUE(v.lines)) panel.abline(v = 1:length(obj.list),
+                                        col = "gray65", lwd = 0.5, lty = 2)
+      # panel.bwplot(..., stats = nboxplot.stats)
+    }
+  }
   # crate trellis object
   output <- do.call("bwplot", bwplot.custom) 
   return(output)
 }
 
 
+
+
+
+#' @title boxplot.stats with set probs
+#' @description boxplot.stats with set probs
+#' @param x numeric vector
+#' @param coef see boxplot.stats
+#' @param do.conf see boxplot.stats
+#' @param do.out see boxplot.stats
+#' @param probs numeric with probabilites between 0 and 1
+#' @author M. Iturbide
+
+
+nboxplot.stats <- function (x, coef = 1.5, do.conf = TRUE, do.out = FALSE, probs = c(0.1, 0.25, 0.5, 0.75, 0.9)) 
+{
+  if (coef < 0) 
+    stop("'coef' must not be negative")
+  nna <- !is.na(x)
+  n <- sum(nna)
+  stats <- unname(quantile(x, probs=probs, na.rm = TRUE))
+  iqr <- diff(stats[c(2, 4)])
+  if (coef == 0) 
+    do.out <- FALSE
+  else {
+    out <- if (!is.na(iqr)) {
+      x < (stats[2L] - coef * iqr) | x > (stats[4L] + coef * 
+                                            iqr)
+    }
+    else !is.finite(x)
+    if (any(out[nna], na.rm = TRUE)) 
+      stats <- range(x[!out], na.rm = TRUE)
+  }
+  stats <- unname(quantile(x, probs=probs, na.rm = TRUE))
+  conf <- if (do.conf) 
+    stats[3L] + c(-1.58, 1.58) * iqr/sqrt(n)
+  l <- list(stats = stats, n = n, conf = conf, out = if (do.out) x[out & 
+                                                                     nna] else numeric())
+  l[["out"]] <- as.integer(l[["out"]])
+  l
+}

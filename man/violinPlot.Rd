@@ -4,15 +4,23 @@
 \alias{violinPlot}
 \title{Lattice plot methods for climatological series}
 \usage{
-violinPlot(..., group.index = NULL, color.fun = list(FUN = mean, na.rm
-  = TRUE), color.theme = "RdYlBu", color.cuts = NULL,
-  rev.colors = FALSE, h.lines = NULL, v.lines = FALSE,
-  lonLim = NULL, latLim = NULL, bwplot.custom = list())
+violinPlot(..., group.index = NULL, violin = TRUE, fill = TRUE,
+  color.fun = list(FUN = mean, na.rm = TRUE), color.theme = "RdYlBu",
+  color.cuts = NULL, rev.colors = FALSE, box.col = NULL,
+  h.lines = NULL, v.lines = FALSE, lonLim = NULL, latLim = NULL,
+  bwplot.custom = list())
 }
 \arguments{
-\item{...}{Input grids (or station data)}
+\item{...}{Input grids (or station data). It can be a list of grids too.}
 
 \item{group.index}{Character or numeric passed to argument group in bwplot.}
+
+\item{violin}{(default is TRUE). If FALSE, boxplots are returned.}
+
+\item{fill}{Logical indicating if the violins/boxes are filled with color. if TRUE, arguments
+\code{color.fun}, \code{color.theme}, \code{color.cuts} and \code{rev.colors} are used.
+Alternatively a vector with colors can be passed, in which case the mentioned arguments
+are ignored.}
 
 \item{color.fun}{list containing the function and the related arguments to perform spatial 
 aggregation. The resulting values are used to fill with color the violins.
@@ -27,6 +35,8 @@ for backwards compatibility. Default to the diverging, colorblind-friendly \code
 
 \item{rev.colors}{Default to FALSE. If TRUE the reversed version of the color palette
 is used.}
+
+\item{box.col}{Character or numeric of the color to be given to the box borders.}
 
 \item{h.lines}{Numeric sequence indicating the position of dashed horizontal lines.}
 
@@ -81,6 +91,35 @@ violinPlot("pr" = climatology(EOBS_Iberia_pr),
             bwplot.custom = list(ylim = c(0, 20),
                                  ylab = "pr and tas",
                                  as.table = TRUE))
+
+## Boxplot:
+data("EOBS_Iberia_tas")
+data("EOBS_Iberia_pr")
+data("CORDEX_Iberia_pr")
+data("CORDEX_Iberia_tas")
+a <- violinPlot("pr" = climatology(EOBS_Iberia_pr),
+                "tas" = climatology(EOBS_Iberia_tas),
+                violin = FALSE,
+                fill = FALSE,
+                h.lines = seq(0, 15, 5),
+                v.lines = TRUE,
+                box.col = "blue",
+                bwplot.custom = list(ylim = c(0, 20),
+                                     ylab = "pr and tas",
+                                     as.table = TRUE,
+                                     do.out = FALSE))
+b <- violinPlot("pr" = climatology(CORDEX_Iberia_pr),
+                "tas" = climatology(CORDEX_Iberia_tas),
+                violin = FALSE,
+                fill = FALSE,
+                h.lines = seq(0, 15, 5),
+                v.lines = TRUE,
+                box.col = "green",
+                bwplot.custom = list(ylim = c(0, 20),
+                                     ylab = "pr and tas",
+                                     as.table = TRUE,
+                                     do.out = FALSE))
+a + b
 }
 \author{
 M. Iturbide
