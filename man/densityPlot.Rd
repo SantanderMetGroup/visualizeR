@@ -2,15 +2,20 @@
 % Please edit documentation in R/densityPlot.R
 \name{densityPlot}
 \alias{densityPlot}
-\title{Lattice plot methods for climatological series}
+\title{Density plots for climatological series}
 \usage{
-densityPlot(..., group.index = NULL, lonLim = NULL, latLim = NULL,
-  dplot.custom = list())
+densityPlot(..., h.lines = NULL, v.lines = NULL, group.index = NULL,
+  lonLim = NULL, latLim = NULL, dplot.custom = list())
 }
 \arguments{
 \item{...}{Input grids (or station data). It can be a list of grids too.}
 
-\item{group.index}{Character or numeric passed to argument group in bwplot.}
+\item{h.lines}{Numeric sequence indicating the position of dashed horizontal lines.}
+
+\item{v.lines}{Numeric sequence indicating the position of dashed vertical lines. The default (NULL),
+plots vertical lines in the mean value of the probability density function.}
+
+\item{group.index}{Character or numeric passed to argument group in density plot.}
 
 \item{lonLim}{Vector of length = 2, with minimum and maximum longitude coordinates, 
 in decimal degrees, of the bounding box selected. If NULL (default), the whole 
@@ -18,47 +23,19 @@ longitudinal range is selected}
 
 \item{latLim}{Same as lonLim, but for the selection of the latitudinal range.}
 
-\item{violin}{(default is TRUE). If FALSE, boxplots are returned.}
-
-\item{fill}{Logical indicating if the violins/boxes are filled with color. if TRUE, arguments
-\code{color.fun}, \code{color.theme}, \code{color.cuts} and \code{rev.colors} are used.
-Alternatively a vector with colors can be passed, in which case the mentioned arguments
-are ignored.}
-
-\item{color.fun}{list containing the function and the related arguments to perform spatial 
-aggregation. The resulting values are used to fill with color the violins.
- Default is \code{list(FUN = mean, na.rm = TRUE)}.}
-
-\item{color.theme}{A character string indicating the color theme to use in the map. 
-Valid values are those available in the \code{\link{RColorBrewer}} themes. Additionally,
-the \code{"jet.colors"} palette can be used (the rainbow colors, in general not advised, though),
-for backwards compatibility. Default to the diverging, colorblind-friendly \code{"RdYlBu"} palette.}
-
-\item{color.cuts}{Numeric sequence indicating the color cuts.}
-
-\item{rev.colors}{Default to FALSE. If TRUE the reversed version of the color palette
-is used.}
-
-\item{box.col}{Character or numeric of the color to be given to the box borders.}
-
-\item{h.lines}{Numeric sequence indicating the position of dashed horizontal lines.}
-
-\item{v.lines}{Logical for drawing vertical lines (Default is FALSE).}
-
-\item{bwplot.custom}{List of arguments as passed to \code{\link[lattice]{bwplot}}. Arguments \code{panel} cannot 
+\item{dplot.custom}{List of arguments as passed to \code{\link[lattice]{densityplot}}. Arguments \code{panel} cannot 
 be modified, thus, if specified, it will be ignored. 
  
  \strong{Controlling graphical parameters}
  
  Many different aspects of the plot can be controlled passing the relevant arguments to 
- \code{bwplot}. Fine control of graphical parameters for the trellis display can
- be also controlled using \code{\link[lattice]{trellis.par.set}}.}
+ \code{dplot}.}
 }
 \value{
 A lattice plot of class \dQuote{trellis}.
 }
 \description{
-A wrapper for the lattice (trellis) plot methods for grid and station data.
+A wrapper for the lattice density plot methods for grid and station data.
 }
 \author{
 M. Iturbide

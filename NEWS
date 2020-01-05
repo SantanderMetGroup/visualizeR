@@ -47,4 +47,7 @@
 * Import `clim2sgdf` from transformeR (removed from visualizeR)
 * Other minor doc updates
 
-
+## v1.5.2 (05 Jan 2020)
+* Add Density plot
+* Add boxplot option in violinPlot
+* Other minor doc updates
