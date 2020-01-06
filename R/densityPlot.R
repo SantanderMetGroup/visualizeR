@@ -40,9 +40,10 @@
 #' @author M. Iturbide
 #' @export
 #' @import lattice 
+#' @import transformeR
 #' @importFrom RColorBrewer brewer.pal
 #' @import latticeExtra
-#' @examples
+
 densityPlot <- function(...,
                         h.lines = NULL,
                         v.lines = NULL,
