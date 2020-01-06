@@ -27,7 +27,7 @@ Suggests:
     knitr
 Type: Package
 Title: Visualizing climate4R data and Communicating Uncertainty in Seasonal Climate Prediction
-Version: 1.5.2
+Version: 1.5.1
 Date: 2020-01-05
 Author: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",

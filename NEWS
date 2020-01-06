@@ -41,13 +41,10 @@
 * Map hatching
 * Other minor changes and documentation updates
 
-## v1.5.1 (01 Nov 2019)
+## v1.5.1 (05 Jan 2020)
 * Bug fix in map hatching when selection is empty
 * Modified the behaviour of map stippling and map hatching for empty selections, to avoid stopping execution
 * Import `clim2sgdf` from transformeR (removed from visualizeR)
-* Other minor doc updates
-
-## v1.5.2 (05 Jan 2020)
-* Add Density plot
+* New densityPlot function
 * Add boxplot option in violinPlot
 * Other minor doc updates
