@@ -25,7 +25,7 @@
 #' # PCA analysis, retaining the PCs that explain 90\% of the total variance:
 #' pca <- prinComp(NCEP_Iberia_hus850, v.exp = .90)
 #' # Plot of all EOFs
-#' plotEOF(pca)
+#' plotEOF(pca, backdrop.theme = "coastline")
 #' # Plot the first 4 EOFs:
 #' plotEOF(pca, n.eofs = 4, backdrop.theme = "coastline")
 #' # Plot just the second EOF (passing further arguments to spatialPlot):
@@ -75,7 +75,7 @@ plotEOF <- function(prinCompObj, var = NULL, member = 1, n.eofs = NULL, ...) {
     if (!(n.eofs %in% 1:tot.n.eofs)) {
         stop("'n.eofs' value must be between 1 and the total number of possible EOFs (", tot.n.eofs, " in this case)", call. = FALSE)
     }
-    clim <- EOF2clim(prinCompObj, ind.var, member, n.eofs) 
+    clim <- transformeR::EOF2clim(prinCompObj, ind.var, member, n.eofs) 
     arg.list[["grid"]] <- clim
     if (!"names.attr" %in% names(arg.list)) arg.list[["names.attr"]] <-  paste("EOF", 1:n.eofs, sep = "-")
     if (!"as.table" %in% names(arg.list)) arg.list[["as.table"]]  <-  TRUE
