@@ -4,8 +4,13 @@
 \alias{calculateReliability}
 \title{Generate object needed by function reliability}
 \usage{
-calculateReliability(obs, hindcast, n.events = n.events,
-  n.bins = n.bins, n.boot = n.boot)
+calculateReliability(
+  obs,
+  hindcast,
+  n.events = n.events,
+  n.bins = n.bins,
+  n.boot = n.boot
+)
 }
 \arguments{
 \item{obs}{m*n matrix of observations (m = years, n = locations)}

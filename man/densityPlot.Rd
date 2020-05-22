@@ -4,8 +4,15 @@
 \alias{densityPlot}
 \title{Density plots for climatological series}
 \usage{
-densityPlot(..., h.lines = NULL, v.lines = NULL, group.index = NULL,
-  lonLim = NULL, latLim = NULL, dplot.custom = list())
+densityPlot(
+  ...,
+  h.lines = NULL,
+  v.lines = NULL,
+  group.index = NULL,
+  lonLim = NULL,
+  latLim = NULL,
+  dplot.custom = list()
+)
 }
 \arguments{
 \item{...}{Input grids (or station data). It can be a list of grids too.}

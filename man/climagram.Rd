@@ -4,10 +4,20 @@
 \alias{climagram}
 \title{Implementation of the so-called "climagrams" for seasonal forecasts}
 \usage{
-climagram(hindcast, forecast = NULL, obs = NULL, year.target = NULL,
-  use.anomalies = TRUE, violin = TRUE, add.points = FALSE,
-  detrend = FALSE, add.legend = TRUE, clim.time.frame = "monthly",
-  add.eqc.info = TRUE, tercile.member.counts = FALSE)
+climagram(
+  hindcast,
+  forecast = NULL,
+  obs = NULL,
+  year.target = NULL,
+  use.anomalies = TRUE,
+  violin = TRUE,
+  add.points = FALSE,
+  detrend = FALSE,
+  add.legend = TRUE,
+  clim.time.frame = "monthly",
+  add.eqc.info = TRUE,
+  tercile.member.counts = FALSE
+)
 }
 \arguments{
 \item{hindcast}{A climate4R multi-member grid with the hindcast for verification.}
@@ -128,11 +138,13 @@ climagram(hindcast = hindcast, year.target = 2001, obs = obs, tercile.member.cou
 Type \code{utils::RShowDoc("climagram_vignette", package = "visualizeR")} for further worked
  examples on climagram options.
 
-Other visualization functions: \code{\link{bubblePlot}},
-  \code{\link{cascadePlot}},
-  \code{\link{reliabilityCategories}},
-  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
-  \code{\link{tercilePlot}}
+Other visualization functions: 
+\code{\link{bubblePlot}()},
+\code{\link{cascadePlot}()},
+\code{\link{reliabilityCategories}()},
+\code{\link{spreadPlot}()},
+\code{\link{tercileBarplot}()},
+\code{\link{tercilePlot}()}
 }
 \author{
 J. Bedia

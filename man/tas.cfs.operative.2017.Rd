@@ -3,7 +3,9 @@
 \name{tas.cfs.operative.2017}
 \alias{tas.cfs.operative.2017}
 \title{CFSv2 operative seasonal forecast of global DJF mean temperature (2017)}
-\format{A grid}
+\format{
+A grid
+}
 \source{
 Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 }

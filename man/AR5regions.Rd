@@ -3,7 +3,9 @@
 \name{AR5regions}
 \alias{AR5regions}
 \title{AR5 regions from the IPCC 5th Assessment Report.}
-\format{A \code{\link[sp]{SpatialPolygons-class}} object}
+\format{
+A \code{\link[sp]{SpatialPolygons-class}} object
+}
 \source{
 Shapefile imported with function \code{\link[rgdal]{readOGR}} (\url{http://www.ipcc-data.org/guidelines/pages/ar5_regions.html})
 }

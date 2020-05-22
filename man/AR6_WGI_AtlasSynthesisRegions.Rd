@@ -3,7 +3,9 @@
 \name{AR6_WGI_AtlasSynthesisRegions}
 \alias{AR6_WGI_AtlasSynthesisRegions}
 \title{AR6 WGI synthesis regions from the Atlas chapter of the IPCC 6th Assessment Report (land).}
-\format{A \code{\link[sp]{SpatialPolygons-class}} object}
+\format{
+A \code{\link[sp]{SpatialPolygons-class}} object
+}
 \description{
 Spatial Polygons of the geographical regions used in the IPCC 6th Assessment Report.
 }

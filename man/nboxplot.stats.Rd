@@ -4,8 +4,13 @@
 \alias{nboxplot.stats}
 \title{boxplot.stats with set probs}
 \usage{
-nboxplot.stats(x, coef = 1.5, do.conf = TRUE, do.out = FALSE,
-  probs = c(0.1, 0.25, 0.5, 0.75, 0.9))
+nboxplot.stats(
+  x,
+  coef = 1.5,
+  do.conf = TRUE,
+  do.out = FALSE,
+  probs = c(0.1, 0.25, 0.5, 0.75, 0.9)
+)
 }
 \arguments{
 \item{x}{numeric vector}

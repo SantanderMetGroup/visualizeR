@@ -4,10 +4,19 @@
 \alias{temporalPlot}
 \title{Lattice plot methods for climatological series}
 \usage{
-temporalPlot(..., aggr.spatial = list(FUN = mean, na.rm = TRUE),
-  cols = NULL, lwd = 1, lty = 1, missing.dates = TRUE,
-  show.na = FALSE, x.axis = c("dates", "index"), lonLim = NULL,
-  latLim = NULL, xyplot.custom = list())
+temporalPlot(
+  ...,
+  aggr.spatial = list(FUN = mean, na.rm = TRUE),
+  cols = NULL,
+  lwd = 1,
+  lty = 1,
+  missing.dates = TRUE,
+  show.na = FALSE,
+  x.axis = c("dates", "index"),
+  lonLim = NULL,
+  latLim = NULL,
+  xyplot.custom = list()
+)
 }
 \arguments{
 \item{...}{Input grids (or station data)}

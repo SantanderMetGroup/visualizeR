@@ -4,11 +4,24 @@
 \alias{bubblePlot}
 \title{Bubble plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
-bubblePlot(hindcast, obs, forecast = NULL, year.target = NULL,
-  detrend = FALSE, score = TRUE, size.as.probability = TRUE,
-  bubble.size = 1, score.range = NULL, piechart = FALSE,
-  subtitle = NULL, t.colors = NULL, pie.border = NULL,
-  pch.neg.score = NULL, pch.obs.constant = NULL, pch.data.nan = NULL)
+bubblePlot(
+  hindcast,
+  obs,
+  forecast = NULL,
+  year.target = NULL,
+  detrend = FALSE,
+  score = TRUE,
+  size.as.probability = TRUE,
+  bubble.size = 1,
+  score.range = NULL,
+  piechart = FALSE,
+  subtitle = NULL,
+  t.colors = NULL,
+  pie.border = NULL,
+  pch.neg.score = NULL,
+  pch.obs.constant = NULL,
+  pch.data.nan = NULL
+)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. See details.}
@@ -116,11 +129,13 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
  Durham, UK, 1-3 April 2009.
 }
 \seealso{
-Other visualization functions: \code{\link{cascadePlot}},
-  \code{\link{climagram}},
-  \code{\link{reliabilityCategories}},
-  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
-  \code{\link{tercilePlot}}
+Other visualization functions: 
+\code{\link{cascadePlot}()},
+\code{\link{climagram}()},
+\code{\link{reliabilityCategories}()},
+\code{\link{spreadPlot}()},
+\code{\link{tercileBarplot}()},
+\code{\link{tercilePlot}()}
 }
 \author{
 M.D. Frias \email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 

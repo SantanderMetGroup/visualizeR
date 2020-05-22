@@ -3,7 +3,9 @@
 \name{tas.ncep}
 \alias{tas.ncep}
 \title{NCEP/NCAR reanalysis DJF mean temperature for the entire globe}
-\format{A grid}
+\format{
+A grid
+}
 \source{
 Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 }

@@ -3,7 +3,9 @@
 \name{tas.cfs}
 \alias{tas.cfs}
 \title{NCEP CFSv2 hindcast of DJF mean temperature for the entire globe.}
-\format{A grid}
+\format{
+A grid
+}
 \source{
 Dowloaded from the ECOMS User Data Gateway \url{http://www.meteo.unican.es/ecoms-udg}
 }

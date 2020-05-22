@@ -4,8 +4,15 @@
 \alias{map.hatching}
 \title{Map hatching}
 \usage{
-map.hatching(clim, threshold = 0.05, condition = "LT",
-  invert = FALSE, density = 4, angle = "-45", ...)
+map.hatching(
+  clim,
+  threshold = 0.05,
+  condition = "LT",
+  invert = FALSE,
+  density = 4,
+  angle = "-45",
+  ...
+)
 }
 \arguments{
 \item{clim}{A climate4R \code{\link[transformeR]{climatology}}}

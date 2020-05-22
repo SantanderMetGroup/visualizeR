@@ -4,9 +4,16 @@
 \alias{spatialPlot}
 \title{Lattice plot methods for climatological grids}
 \usage{
-spatialPlot(grid, backdrop.theme = "none", set.min = NULL,
-  set.max = NULL, lonCenter = NULL, color.theme = "RdYlBu",
-  rev.colors = FALSE, ...)
+spatialPlot(
+  grid,
+  backdrop.theme = "none",
+  set.min = NULL,
+  set.max = NULL,
+  lonCenter = NULL,
+  color.theme = "RdYlBu",
+  rev.colors = FALSE,
+  ...
+)
 }
 \arguments{
 \item{grid}{Input grid}

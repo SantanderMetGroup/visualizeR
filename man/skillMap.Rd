@@ -4,9 +4,14 @@
 \alias{skillMap}
 \title{A wrapper of \code{spatialPlot} for the creation of verification maps for seasonal forecast systems}
 \usage{
-skillMap(easyVeriGrid, stippling = list(threshold = NULL, condition =
-  NULL), stippling.point.options = NULL, backdrop.theme = NULL,
-  title = NULL, ...)
+skillMap(
+  easyVeriGrid,
+  stippling = list(threshold = NULL, condition = NULL),
+  stippling.point.options = NULL,
+  backdrop.theme = NULL,
+  title = NULL,
+  ...
+)
 }
 \arguments{
 \item{easyVeriGrid}{A climatological grid with a verification output. See details}
@@ -97,7 +102,7 @@ skillMap(easyVeriGrid = easyVeriGrid,
                        "Forecasting System: CFSv2 - 24 members", 
                        "November Initializations",
                        "Observing System: NCEP/NCAR Reanalysis 1",
-                       "t2m DJF 1983-2010", sep = "\\n")
+                       "t2m DJF 1983-2010", sep = "\n")
 )
 }
 }

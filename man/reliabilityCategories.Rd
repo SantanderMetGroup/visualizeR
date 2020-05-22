@@ -4,11 +4,23 @@
 \alias{reliabilityCategories}
 \title{Reliability categories of a probabilistic forecast.}
 \usage{
-reliabilityCategories(hindcast, obs, regions = NULL, n.events = 3,
-  labels = NULL, n.bins = 10, n.boot = 100, conf.level = 0.75,
-  na.rate = 0.75, diagrams = TRUE, cex0 = 0.5, cex.scale = 20,
-  layout = c(1, n.events), backdrop.theme = "countries",
-  return.diagrams = FALSE)
+reliabilityCategories(
+  hindcast,
+  obs,
+  regions = NULL,
+  n.events = 3,
+  labels = NULL,
+  n.bins = 10,
+  n.boot = 100,
+  conf.level = 0.75,
+  na.rate = 0.75,
+  diagrams = TRUE,
+  cex0 = 0.5,
+  cex.scale = 20,
+  layout = c(1, n.events),
+  backdrop.theme = "countries",
+  return.diagrams = FALSE
+)
 }
 \arguments{
 \item{hindcast}{Grid of forecast data}
@@ -104,10 +116,13 @@ Weisheimer, A., Palmer, T.N., 2014. On the reliability of seasonal climate forec
 Manzanas, R., Lucero, A., Weisheimer, A., Guti\'errez, J.M., 2017. Can bias correction and statistical downscaling methods improve the skill of seasonal precipitation forecasts? Climate Dynamics, pg 1-16, doi:10.1007/s00382-017-3668-z
 }
 \seealso{
-Other visualization functions: \code{\link{bubblePlot}},
-  \code{\link{cascadePlot}}, \code{\link{climagram}},
-  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}},
-  \code{\link{tercilePlot}}
+Other visualization functions: 
+\code{\link{bubblePlot}()},
+\code{\link{cascadePlot}()},
+\code{\link{climagram}()},
+\code{\link{spreadPlot}()},
+\code{\link{tercileBarplot}()},
+\code{\link{tercilePlot}()}
 }
 \author{
 R. Manzanas \& M.Iturbide

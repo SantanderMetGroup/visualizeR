@@ -4,11 +4,22 @@
 \alias{violinPlot}
 \title{Lattice plot methods for climatological series}
 \usage{
-violinPlot(..., group.index = NULL, violin = TRUE, fill = TRUE,
-  color.fun = list(FUN = mean, na.rm = TRUE), color.theme = "RdYlBu",
-  color.cuts = NULL, rev.colors = FALSE, box.col = NULL,
-  h.lines = NULL, v.lines = FALSE, lonLim = NULL, latLim = NULL,
-  bwplot.custom = list())
+violinPlot(
+  ...,
+  group.index = NULL,
+  violin = TRUE,
+  fill = TRUE,
+  color.fun = list(FUN = mean, na.rm = TRUE),
+  color.theme = "RdYlBu",
+  color.cuts = NULL,
+  rev.colors = FALSE,
+  box.col = NULL,
+  h.lines = NULL,
+  v.lines = FALSE,
+  lonLim = NULL,
+  latLim = NULL,
+  bwplot.custom = list()
+)
 }
 \arguments{
 \item{...}{Input grids (or station data). It can be a list of grids too.}

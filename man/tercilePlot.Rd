@@ -4,9 +4,16 @@
 \alias{tercilePlot}
 \title{Tercile plot for visualization of forecast skill of seasonal climate predictions.}
 \usage{
-tercilePlot(hindcast, obs, forecast = NULL, year.target = NULL,
-  detrend = FALSE, conf.level = 0.95, color.pal = c("bw", "reds",
-  "ypb", "tcolor"), subtitle = NULL)
+tercilePlot(
+  hindcast,
+  obs,
+  forecast = NULL,
+  year.target = NULL,
+  detrend = FALSE,
+  conf.level = 0.95,
+  color.pal = c("bw", "reds", "ypb", "tcolor"),
+  subtitle = NULL
+)
 }
 \arguments{
 \item{hindcast}{A multi-member list with the hindcast for verification. See details.}
@@ -83,10 +90,13 @@ Jolliffe, I. T. and Stephenson, D. B. 2003. Forecast Verification: A Practitione
 Atmospheri Science, Wiley, NY
 }
 \seealso{
-Other visualization functions: \code{\link{bubblePlot}},
-  \code{\link{cascadePlot}}, \code{\link{climagram}},
-  \code{\link{reliabilityCategories}},
-  \code{\link{spreadPlot}}, \code{\link{tercileBarplot}}
+Other visualization functions: 
+\code{\link{bubblePlot}()},
+\code{\link{cascadePlot}()},
+\code{\link{climagram}()},
+\code{\link{reliabilityCategories}()},
+\code{\link{spreadPlot}()},
+\code{\link{tercileBarplot}()}
 }
 \author{
 M.D. Frias\email{mariadolores.frias@unican.es} and J. Fernandez based on the original diagram 
