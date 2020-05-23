@@ -18,12 +18,12 @@ data(AR6_WGI_AtlasSynthesisRegions)
 
 # All regions
 sp::plot(AR6_WGI_AtlasSynthesisRegions, border = "red", axes = TRUE)
-transformeR:::draw.world.lines()
+draw.world.lines()
 title("AR6 World land regions")
 
 # A single region (use region names for subsetting)
 sp::plot(AR6_WGI_AtlasSynthesisRegions["Africa"], border = "red", axes = TRUE)
-transformeR:::draw.world.lines()
+draw.world.lines()
 title("AR6 Mediterranean region")
 }
 }

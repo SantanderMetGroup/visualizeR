@@ -39,8 +39,8 @@
 #' are reescaled according to parameter \code{cex.scale}.
 #' @param cex.scale numeric (default is 20). Scaling factor for points sizes in the reliability diagrams (see parameter \code{cex0}) 
 #' @param layout integer (default = c(1, n.events)). Sets the layout of panels (rows,cols)
-#' @param backdrop.theme Reference geographical lines to be added to the plot. Default is "countries" 
-#' (See \code{\link[transformeR]{plotClimatology}} for options).
+#' @param backdrop.theme Reference geographical lines to be added to the plot. Default is \code{"countries"} 
+#' (See \code{\link{spatialPlot}} for other options).
 #' @param return.diagrams Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.
 # @param nod Required if diagrams = TRUE. m*2 matrix of coordinates (m=locations, column1=latitude, column2=longitude)
 # @param xlim Required if diagrams = TRUE. Limits for maps
@@ -97,7 +97,8 @@
 #' rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
 #'                              n.bins = 5, n.boot = 10)
 #' # Irregular grids
-#' data("VALUE_Iberia_tas")
+#' require(climate4R.datasets) 
+#' data("NCEP_Iberia_tas")
 #' data("CFS_Iberia_tas")
 #' obs <- aggregateGrid(VALUE_Iberia_tas, aggr.y = list(FUN= mean))
 #' hind <- aggregateGrid(interpGrid(NCEP_Iberia_tas, getGrid(obs)), aggr.y = list(FUN= mean))

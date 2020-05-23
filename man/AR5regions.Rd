@@ -18,8 +18,10 @@ For further detail, see \url{http://www.ipcc-data.org/guidelines/pages/ar5_regio
 \examples{
 \dontrun{
 data(AR5regions)
+require(sp)
+require(transformeR)
 sp::plot(AR5regions, border = "red", axes = TRUE)
-transformeR:::draw.world.lines()
+draw.world.lines()
 title("AR5 World regions")
 }
 }

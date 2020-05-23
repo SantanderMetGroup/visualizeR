@@ -33,6 +33,9 @@ The function internally transforms the inputs into \code{\link[sp]{Line}} class 
   windows, but any other shapes like for instance storm tracks can be flexibly specified using \code{coords}).
 }
 \examples{
+\donttest{
+require(climate4R.datasets)
+require(transformeR)
 data("CFS_Iberia_tas")
 # Define a rectangular window centered on the Iberian Peninsula
 iberia <- map.lines(lonLim = c(-10,3.5), latLim = c(36,43))
@@ -54,7 +57,7 @@ alps <- map.lines(lonLim = c(4,16), latLim = c(45,49),
 spatialPlot(climatology(CFS_Iberia_tas, by.member = FALSE), backdrop.theme = "coastline",
                 sp.layout = list(iberia, alps))
 
-\dontrun{
+
 # Adding a line (real data of a storm-track imported from a csv file)
 # Source: http://www.europeanwindstorms.org/
 

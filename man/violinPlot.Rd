@@ -75,6 +75,8 @@ A lattice plot of class \dQuote{trellis}.
 A wrapper for the lattice (trellis) plot methods for grid and station data.
 }
 \examples{
+\donttest{
+require(climate4R.datasets)
 data("EOBS_Iberia_tas")
 data("EOBS_Iberia_pr")
 data("CORDEX_Iberia_pr")
@@ -131,6 +133,7 @@ b <- violinPlot("pr" = climatology(CORDEX_Iberia_pr),
                                      as.table = TRUE,
                                      do.out = FALSE))
 a + b
+}
 }
 \author{
 M. Iturbide

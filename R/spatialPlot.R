@@ -85,8 +85,9 @@
 #'  \code{\link{map.stippling}}, for adding a custom point layer on top of the map.
 #'  \code{\link{map.lines}}, to add lines and polygons to climatological maps
 #' Also see \code{\link[sp]{spplot}} in package \pkg{sp} for further information on plotting capabilities and options
-#' @examples
+#' @examples \donttest{
 #' require(transformeR)
+#' require(climate4R.datasets)
 #' data("CFS_Iberia_tas")
 #' # Climatology is computed:
 #' clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
@@ -169,6 +170,7 @@
 #'             backdrop.theme = "countries",
 #'             color.theme = "BrBG",
 #'             rev.colors = TRUE, cex = 2.5)
+#' }
 
 
 spatialPlot <- function(grid,
@@ -258,7 +260,9 @@ spatialPlot <- function(grid,
 #' @seealso \code{\link{spatialPlot}}, to which its output is passed.
 #'  \code{\link{map.lines}}, for further map customizations.
 #' @author J. Bedia
-#' @examples
+#' @examples \donttest{
+#' require(climate4R.datasets)
+#' require(transformeR)
 #' data("CFS_Iberia_tas")
 #' p90clim <- climatology(CFS_Iberia_tas,
 #'                        by.member = FALSE,
@@ -289,6 +293,7 @@ spatialPlot <- function(grid,
 #' spatialPlot(climatology(CFS_Iberia_tas),
 #'                 backdrop.theme = "coastline",
 #'                 sp.layout = list(pts))
+#' }
 
 
 map.stippling <- function(clim, threshold = 0.05, condition = "LT", ...) {
@@ -336,7 +341,9 @@ map.stippling <- function(clim, threshold = 0.05, condition = "LT", ...) {
 #' @export
 #' @seealso \code{\link{spatialPlot}}, to which its output is passed.
 #'  \code{\link{map.stippling}}, for further map customizations.
-#' @examples 
+#' @examples \donttest{
+#' require(climate4R.datasets)
+#' require(transformeR)
 #' data("CFS_Iberia_tas")
 #' # Define a rectangular window centered on the Iberian Peninsula
 #' iberia <- map.lines(lonLim = c(-10,3.5), latLim = c(36,43))
@@ -358,7 +365,7 @@ map.stippling <- function(clim, threshold = 0.05, condition = "LT", ...) {
 #' spatialPlot(climatology(CFS_Iberia_tas, by.member = FALSE), backdrop.theme = "coastline",
 #'                 sp.layout = list(iberia, alps))
 #' 
-#' \dontrun{
+#' 
 #' # Adding a line (real data of a storm-track imported from a csv file)
 #' # Source: http://www.europeanwindstorms.org/
 #' 

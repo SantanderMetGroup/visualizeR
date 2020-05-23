@@ -34,6 +34,9 @@ The function generates a \code{"sp.points"} layout list. Further formatting argu
  For further details and examples see the help of \code{\link[sp]{spplot}}.
 }
 \examples{
+\donttest{
+require(climate4R.datasets)
+require(transformeR)
 data("CFS_Iberia_tas")
 p90clim <- climatology(CFS_Iberia_tas,
                        by.member = FALSE,
@@ -64,6 +67,7 @@ pts <- map.stippling(p90clim, threshold = 15.5, condition = "GT",
 spatialPlot(climatology(CFS_Iberia_tas),
                 backdrop.theme = "coastline",
                 sp.layout = list(pts))
+}
 }
 \seealso{
 \code{\link{spatialPlot}}, to which its output is passed.

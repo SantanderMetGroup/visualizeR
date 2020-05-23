@@ -39,7 +39,7 @@ data("NCEP_Iberia_hus850")
 # PCA analysis, retaining the PCs that explain 90\\% of the total variance:
 pca <- prinComp(NCEP_Iberia_hus850, v.exp = .90)
 # Plot of all EOFs
-plotEOF(pca)
+plotEOF(pca, backdrop.theme = "coastline")
 # Plot the first 4 EOFs:
 plotEOF(pca, n.eofs = 4, backdrop.theme = "coastline")
 # Plot just the second EOF (passing further arguments to spatialPlot):

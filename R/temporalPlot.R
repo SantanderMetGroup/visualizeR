@@ -70,9 +70,12 @@
 #'@importFrom data.table rleid
 #'@importFrom transformeR gridDepth
 #'@import latticeExtra
-#' @examples
+#' @examples \donttest{
+#' require(climate4R.datasets)
+#' require(transformeR)
 #' data("CFS_Iberia_pr")
 #' data("EOBS_Iberia_pr")
+#' data("EOBS_Iberia_tas")
 #' data("VALUE_Iberia_pr")
 #' # Combine grids with members (CFS) and without members (EOBS)
 #' a <- subsetGrid(CFS_Iberia_tas, years = 1985:1992)
@@ -94,6 +97,7 @@
 #' temporalPlot("EOBS" = b1, "CFS" = a1,
 #'              cols = c("green", "deeppink"), show.na = TRUE,
 #'              xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
+#' }
 
 
 temporalPlot <- function(..., 

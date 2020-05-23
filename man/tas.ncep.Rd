@@ -14,6 +14,5 @@ NCEP/NCAR reanalysis of December to February (DJF) mean temperature for the enti
 }
 \examples{
 data(tas.ncep)
-require(transformeR)
-plotClimatology(climatology(tas.ncep), backdrop.theme = "coastline")
+spatialPlot(climatology(tas.ncep), backdrop.theme = "coastline", rev.colors = TRUE)
 }

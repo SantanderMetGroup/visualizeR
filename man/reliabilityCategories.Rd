@@ -55,8 +55,8 @@ are reescaled according to parameter \code{cex.scale}.}
 
 \item{layout}{integer (default = c(1, n.events)). Sets the layout of panels (rows,cols)}
 
-\item{backdrop.theme}{Reference geographical lines to be added to the plot. Default is "countries" 
-(See \code{\link[transformeR]{plotClimatology}} for options).}
+\item{backdrop.theme}{Reference geographical lines to be added to the plot. Default is \code{"countries"} 
+(See \code{\link{spatialPlot}} for other options).}
 
 \item{return.diagrams}{Logical. Available when \code{diagrams = TRUE}. If TRUE a trellis object for plotting diagrams is returned.}
 }
@@ -102,7 +102,8 @@ rel.reg <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
 rel <- reliabilityCategories(hindcast = tas.cfs2.int, obs = tas.ncep2,
                              n.bins = 5, n.boot = 10)
 # Irregular grids
-data("VALUE_Iberia_tas")
+require(climate4R.datasets) 
+data("NCEP_Iberia_tas")
 data("CFS_Iberia_tas")
 obs <- aggregateGrid(VALUE_Iberia_tas, aggr.y = list(FUN= mean))
 hind <- aggregateGrid(interpGrid(NCEP_Iberia_tas, getGrid(obs)), aggr.y = list(FUN= mean))

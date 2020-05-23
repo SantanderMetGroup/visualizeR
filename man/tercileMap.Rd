@@ -32,10 +32,14 @@ C3S seasonal forecasts (\url{http://climate.copernicus.eu/s/charts/c3s_seasonal/
  \code{\link[sp]{spplot}}.
 }
 \examples{
+\donttest{
+require(climate4R.datasets)
+data(CFS_Iberia_tas)
 library(transformeR)
 hindcast <- subsetGrid(CFS_Iberia_tas, years = 1983:2001)
 forecast <- subsetGrid(CFS_Iberia_tas, years = 2002)
 tercileMap(hindcast, forecast)
+}
 }
 \author{
 M. Iturbide

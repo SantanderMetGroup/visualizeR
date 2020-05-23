@@ -50,7 +50,7 @@
 #' 
 #' @importFrom scales alpha
 #' @importFrom mapplots draw.pie add.pie
-#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray draw.world.lines interpGrid subsetGrid
+#' @importFrom transformeR array3Dto2Dmat mat2Dto3Darray interpGrid subsetGrid
 #' @importFrom abind abind
 #' @importFrom grDevices gray
 #' @importFrom graphics par plot mtext points legend
@@ -359,7 +359,7 @@ bubblePlot <- function(hindcast, obs, forecast=NULL, year.target=NULL, detrend=F
         }        
       } 
       # Add borders
-      draw.world.lines(lwd=1)
+      draw.world.lines(lwd = 1)
       #world(add = TRUE, interior = T)      
       #world(add = TRUE, interior = F, lwd=3)    
       par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)

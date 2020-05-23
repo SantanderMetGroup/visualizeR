@@ -15,8 +15,10 @@ For further detail, see \url{http://ensemblesrt3.dmi.dk/quicklook/regions.html}
 \examples{
 \dontrun{
 data(PRUDENCEregions)
+require(sp)
+require(transformeR)
 sp::plot(PRUDENCEregions, border = "red", axes = TRUE)
-transformeR:::draw.world.lines()
+draw.world.lines()
 title("PRUDENCE European regions")
 }
 }

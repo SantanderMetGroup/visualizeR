@@ -42,11 +42,14 @@
 #'@export
 #'@importFrom grDevices colorRampPalette
 #'@importFrom transformeR aggregateGrid subsetGrid getShape redim climatology bindGrid
-#' @examples
+#' @examples \donttest{
+#' require(climate4R.datasets)
+#' data(CFS_Iberia_tas)
 #' library(transformeR)
 #' hindcast <- subsetGrid(CFS_Iberia_tas, years = 1983:2001)
 #' forecast <- subsetGrid(CFS_Iberia_tas, years = 2002)
 #' tercileMap(hindcast, forecast)
+#' }
 
 tercileMap <- function(hindcast, forecast, ...) {
       custom <- list(...)

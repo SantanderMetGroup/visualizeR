@@ -78,7 +78,9 @@ Some examples of specific map graphical options are available in the help of fun
  an overview, see the help of function \code{\link[lattice]{xyplot}}.
 }
 \examples{
+\donttest{
 require(transformeR)
+require(climate4R.datasets)
 data("CFS_Iberia_tas")
 # Climatology is computed:
 clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
@@ -161,6 +163,7 @@ spatialPlot(climatology(VALUE_Iberia_pr),
             backdrop.theme = "countries",
             color.theme = "BrBG",
             rev.colors = TRUE, cex = 2.5)
+}
 }
 \references{
 \itemize{

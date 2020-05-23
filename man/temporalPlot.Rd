@@ -76,8 +76,12 @@ and the range for plotting. The range is used to plot the shadow of the multimem
  imports packages \code{data.table}, \code{padr} and \code{grDevices}.
 }
 \examples{
+\donttest{
+require(climate4R.datasets)
+require(transformeR)
 data("CFS_Iberia_pr")
 data("EOBS_Iberia_pr")
+data("EOBS_Iberia_tas")
 data("VALUE_Iberia_pr")
 # Combine grids with members (CFS) and without members (EOBS)
 a <- subsetGrid(CFS_Iberia_tas, years = 1985:1992)
@@ -99,6 +103,7 @@ b1 <- subsetGrid(b, lonLim = 2, latLim = 42)
 temporalPlot("EOBS" = b1, "CFS" = a1,
              cols = c("green", "deeppink"), show.na = TRUE,
              xyplot.custom = list(main = "winter temperature", ylab = "Celsius"))
+}
 }
 \author{
 M. Iturbide

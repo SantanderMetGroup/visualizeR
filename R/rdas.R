@@ -5,8 +5,7 @@
 #' @name tas.ncep
 #' @examples
 #' data(tas.ncep)
-#' require(transformeR)
-#' plotClimatology(climatology(tas.ncep), backdrop.theme = "coastline")
+#' spatialPlot(climatology(tas.ncep), backdrop.theme = "coastline", rev.colors = TRUE)
 NULL
 
 
@@ -20,8 +19,7 @@ NULL
 #' @references Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 #' @examples \dontrun{
 #' data(tas.cfs)
-#' require(transformeR)
-#' plotClimatology(climatology(tas.cfs), backdrop.theme = "coastline")
+#' spatialPlot(climatology(tas.cfs), backdrop.theme = "coastline", rev.colors = TRUE)
 #' }
 NULL
 
@@ -37,8 +35,7 @@ NULL
 #' @references Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 #' @examples \dontrun{
 #' data(tas.cfs.operative.2016)
-#' require(transformeR)
-#' plotClimatology(climatology(tas.cfs.operative.2016, parallel = TRUE), backdrop.theme = "coastline")
+#' spatialPlot(climatology(tas.cfs.operative.2016, parallel = TRUE), backdrop.theme = "coastline", rev.colors = TRUE)
 #' }
 NULL
 
@@ -53,8 +50,7 @@ NULL
 #' @references Saha, S. et al. 2014. The NCEP Climate Forecast System Version 2. J Clim 130925135638001. doi:10.1175/JCLI-D-12-00823.1
 #' @examples \dontrun{
 #' data(tas.cfs.operative.2017)
-#' require(transformeR)
-#' plotClimatology(climatology(tas.cfs.operative.2017, parallel = TRUE), backdrop.theme = "coastline")
+#' spatialPlot(climatology(tas.cfs.operative.2017, parallel = TRUE), backdrop.theme = "coastline", rev.colors = TRUE)
 #' }
 NULL
 
@@ -66,8 +62,10 @@ NULL
 #' @name AR5regions
 #' @examples \dontrun{
 #' data(AR5regions)
+#' require(sp)
+#' require(transformeR)
 #' sp::plot(AR5regions, border = "red", axes = TRUE)
-#' transformeR:::draw.world.lines()
+#' draw.world.lines()
 #' title("AR5 World regions")
 #' }
 NULL
@@ -79,8 +77,10 @@ NULL
 #' @name PRUDENCEregions
 #' @examples \dontrun{
 #' data(PRUDENCEregions)
+#' require(sp)
+#' require(transformeR)
 #' sp::plot(PRUDENCEregions, border = "red", axes = TRUE)
-#' transformeR:::draw.world.lines()
+#' draw.world.lines()
 #' title("PRUDENCE European regions")
 #' }
 NULL
@@ -106,12 +106,12 @@ NULL
 #' 
 #' # All regions
 #' sp::plot(AR6_WGI_AtlasSynthesisRegions, border = "red", axes = TRUE)
-#' transformeR:::draw.world.lines()
+#' draw.world.lines()
 #' title("AR6 World land regions")
 #' 
 #' # A single region (use region names for subsetting)
 #' sp::plot(AR6_WGI_AtlasSynthesisRegions["Africa"], border = "red", axes = TRUE)
-#' transformeR:::draw.world.lines()
+#' draw.world.lines()
 #' title("AR6 Mediterranean region")
 #' }
 NULL

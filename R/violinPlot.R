@@ -65,7 +65,8 @@
 #' @importFrom transformeR gridDepth
 #' @importFrom stats sd
 #' @import latticeExtra
-#' @examples
+#' @examples \donttest{
+#' require(climate4R.datasets)
 #' data("EOBS_Iberia_tas")
 #' data("EOBS_Iberia_pr")
 #' data("CORDEX_Iberia_pr")
@@ -122,6 +123,7 @@
 #'                                      as.table = TRUE,
 #'                                      do.out = FALSE))
 #' a + b
+#' }
 
 
 violinPlot <- function(..., 

@@ -19,8 +19,7 @@ For further detail on ensemble member definition, see \url{http://www.meteo.unic
 \examples{
 \dontrun{
 data(tas.cfs.operative.2016)
-require(transformeR)
-plotClimatology(climatology(tas.cfs.operative.2016, parallel = TRUE), backdrop.theme = "coastline")
+spatialPlot(climatology(tas.cfs.operative.2016, parallel = TRUE), backdrop.theme = "coastline", rev.colors = TRUE)
 }
 }
 \references{
