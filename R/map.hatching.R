@@ -117,7 +117,7 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
   # clim <- suppressMessages(interpGrid(clim,
   #                                     new.coordinates = list(x = x.list, y = y.list),
   #                                     method = "nearest"))
-  if (density > 1) clim1 <- upscaleGrid(clim, times = density, aggr.fun = upscaling.aggr.fun)
+  if (density > 1) clim <- upscaleGrid(clim, times = density, aggr.fun = upscaling.aggr.fun)
   if (all(is.na(clim$Data))) {
     message("NOTE: Empty selection. No hatching will be used")
     l1 <- list("sp.points", sp::SpatialPoints(coords = matrix(c(0,0), ncol = 2)), cex = 0)
@@ -139,11 +139,11 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
     }
     coords <- lapply(sp.polys@polygons, function(x) {
       if (angle == "0" | angle == "90") {
-          bat <- x@Polygons[[1]]@coords[c(floor(a), floor(b)),]
-          bi <- x@Polygons[[1]]@coords[c(ceiling(a), ceiling(b)),]
-          k <- (bat + bi)/2
-        } else {
-          k <- x@Polygons[[1]]@coords[c(a, b),]
+        bat <- x@Polygons[[1]]@coords[c(floor(a), floor(b)),]
+        bi <- x@Polygons[[1]]@coords[c(ceiling(a), ceiling(b)),]
+        k <- (bat + bi)/2
+      } else {
+        k <- x@Polygons[[1]]@coords[c(a, b),]
       }
       sp::Line(k)
     })
