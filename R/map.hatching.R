@@ -7,7 +7,10 @@
 #' @param invert Default to \code{FALSE} and unused. For convenience, this flag inverts the selection
 #' so the specified map values are NOT hatched, and the other way round.
 #' @param density Density of the hatching pattern. This parameter is related to the spatial resolution of the input grid. Default to 4,
-#'  so hatching lines are sepparated in the X axis by a distance of four times the X-resolution of the input grid.
+#'  so hatching lines are sepparated in the X axis by a distance of four times the X-resolution of the input grid. Passed to \code{times}
+#'  argument in function \code{\link[transformeR]{upscaleGrid}}.
+#' @param upscaling.aggr.fun Function performing the spatial aggregation when upscaling according to parameter \code{density}. 
+#' The default uses the average value.
 #' @param angle Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"45"}
 #'  degrees. 
 #' @param ... Graphical parameters affecting the appearance of the hatching lines. See details and examples.
@@ -70,7 +73,7 @@
 #' spatialPlot(clim, backdrop.theme = "coastline", rev.colors = TRUE, sp.layout = list(l5))
 #' 
 #' @importFrom sp SpatialLines SpatialPolygonsDataFrame Lines Line
-#' @importFrom transformeR interpGrid grid2sp getGrid
+#' @importFrom transformeR upscaleGrid grid2sp getGrid
 #' 
 #' @export
 #'
@@ -80,13 +83,14 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
                          invert = FALSE,
                          density = 4,
                          angle = "-45",
+                         upscaling.aggr.fun = list(FUN = "mean", na.rm = TRUE),
                          ...) {
   if (!("climatology:fun" %in% names(attributes(clim$Data)))) {
     stop("Input grid was not recognized as a climatology")
   }
   stopifnot(is.logical(invert))
   condition <- match.arg(condition, choices = c("GT", "GE", "LT", "LE"))
-  angle <- match.arg(angle, choices = c("-45", "45"))
+  angle <- match.arg(angle, choices = c("-45", "45", "90", "0"))
   ineq <- if (isTRUE(invert)) {
     switch(condition,
            "GT" = ">",
@@ -105,19 +109,19 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
   eval(parse(text = paste("clim$Data[which(clim$Data", ineq, "threshold)] <- NA")))
   
   # Upscaling
-  refgrid <- getGrid(clim)
-  newresX <- attr(refgrid, "resX") * density
-  newresY <- attr(refgrid, "resY") * density
-  x.list <- seq(refgrid$x[1], refgrid$x[2], by = newresX)
-  y.list <- seq(refgrid$y[1], refgrid$y[2], by = newresY)
-  clim <- suppressMessages(interpGrid(clim,
-                                      new.coordinates = list(x = x.list, y = y.list),
-                                      method = "nearest"))
+  # refgrid <- getGrid(clim)
+  # newresX <- attr(refgrid, "resX") * density
+  # newresY <- attr(refgrid, "resY") * density
+  # x.list <- seq(refgrid$x[1], refgrid$x[2], by = newresX)
+  # y.list <- seq(refgrid$y[1], refgrid$y[2], by = newresY)
+  # clim <- suppressMessages(interpGrid(clim,
+  #                                     new.coordinates = list(x = x.list, y = y.list),
+  #                                     method = "nearest"))
+  if (density > 1) clim1 <- upscaleGrid(clim, times = density, aggr.fun = upscaling.aggr.fun)
   if (all(is.na(clim$Data))) {
     message("NOTE: Empty selection. No hatching will be used")
     l1 <- list("sp.points", sp::SpatialPoints(coords = matrix(c(0,0), ncol = 2)), cex = 0)
   } else {
-    
     sp.polys <- as(grid2sp(clim), "SpatialPolygonsDataFrame")
     # Hatching lines
     if (angle == "-45") {
@@ -126,9 +130,22 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
     } else if (angle == "45") {
       a <- 1
       b <- 3
-    } 
+    } else if (angle == "90") {
+      a <- 1.5
+      b <- 3.5
+    } else if (angle == "0") {
+      a <- 2.5
+      b <- 4.5
+    }
     coords <- lapply(sp.polys@polygons, function(x) {
-      sp::Line(x@Polygons[[1]]@coords[c(a,b),])
+      if (angle == "0" | angle == "90") {
+          bat <- x@Polygons[[1]]@coords[c(floor(a), floor(b)),]
+          bi <- x@Polygons[[1]]@coords[c(ceiling(a), ceiling(b)),]
+          k <- (bat + bi)/2
+        } else {
+          k <- x@Polygons[[1]]@coords[c(a, b),]
+      }
+      sp::Line(k)
     })
     hatchlines <- sp::SpatialLines(list(sp::Lines(coords, ID = "hatch")))
     l1 <- c(arg.list, hatchlines)

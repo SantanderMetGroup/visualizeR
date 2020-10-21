@@ -11,6 +11,7 @@ map.hatching(
   invert = FALSE,
   density = 4,
   angle = "-45",
+  upscaling.aggr.fun = list(FUN = "mean", na.rm = TRUE),
   ...
 )
 }
@@ -26,10 +27,14 @@ map.hatching(
 so the specified map values are NOT hatched, and the other way round.}
 
 \item{density}{Density of the hatching pattern. This parameter is related to the spatial resolution of the input grid. Default to 4,
-so hatching lines are sepparated in the X axis by a distance of four times the X-resolution of the input grid.}
+so hatching lines are sepparated in the X axis by a distance of four times the X-resolution of the input grid. Passed to \code{times}
+argument in function \code{\link[transformeR]{upscaleGrid}}.}
 
 \item{angle}{Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"45"}
 degrees.}
+
+\item{upscaling.aggr.fun}{Function performing the spatial aggregation when upscaling according to parameter \code{density}. 
+The default uses the average value.}
 
 \item{...}{Graphical parameters affecting the appearance of the hatching lines. See details and examples.}
 }
