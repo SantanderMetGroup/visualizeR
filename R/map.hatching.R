@@ -84,6 +84,7 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
                          density = 4,
                          angle = "-45",
                          upscaling.aggr.fun = list(FUN = "mean", na.rm = TRUE),
+                         coverage.percent = 100,
                          ...) {
   if (!("climatology:fun" %in% names(attributes(clim$Data)))) {
     stop("Input grid was not recognized as a climatology")
@@ -145,6 +146,20 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
       } else {
         k <- x@Polygons[[1]]@coords[c(a, b),]
       }
+      dify <- (k[1,2]-k[2,2])*((100- coverage.percent)/2)/100
+      difx <- (k[1,1]-k[2,1])*((100- coverage.percent)/2)/100
+      # if (angle == "0" | angle == "90") {
+      k[,2] <- k[,2] + c(-dify, dify)
+      k[,1] <- k[,1] + c(-difx, difx)
+      # } else {
+      #   k <- data.frame(k)
+      #   model <- lm(y~x, data = k)
+      #   predict(model, newdata = data.frame("x"= k[,1]))
+      # }
+      # #y = ax + b
+      # a <- (k[1,2]-k[2,2])/(k[1,1] - k[2,1])
+      # k[1,2] = ak[1,1] + b
+      
       sp::Line(k)
     })
     hatchlines <- sp::SpatialLines(list(sp::Lines(coords, ID = "hatch")))
