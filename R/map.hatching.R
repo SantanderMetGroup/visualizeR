@@ -107,6 +107,7 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
   }
   arg.list <- list(...)
   # Binary data
+  if (density > 1) clim <- upscaleGrid(clim, times = density, aggr.fun = upscaling.aggr.fun)
   eval(parse(text = paste("clim$Data[which(clim$Data", ineq, "threshold)] <- NA")))
   
   # Upscaling
@@ -118,7 +119,6 @@ map.hatching <- function(clim, threshold = 0.05, condition = "LT",
   # clim <- suppressMessages(interpGrid(clim,
   #                                     new.coordinates = list(x = x.list, y = y.list),
   #                                     method = "nearest"))
-  if (density > 1) clim <- upscaleGrid(clim, times = density, aggr.fun = upscaling.aggr.fun)
   if (all(is.na(clim$Data))) {
     message("NOTE: Empty selection. No hatching will be used")
     l1 <- list("sp.points", sp::SpatialPoints(coords = matrix(c(0,0), ncol = 2)), cex = 0)
