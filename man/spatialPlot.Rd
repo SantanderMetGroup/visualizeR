@@ -81,6 +81,7 @@ Some examples of specific map graphical options are available in the help of fun
 \donttest{
 require(transformeR)
 require(climate4R.datasets)
+require(sp)
 data("CFS_Iberia_tas")
 # Climatology is computed:
 clim <- climatology(CFS_Iberia_tas, by.member = TRUE)
@@ -163,6 +164,19 @@ spatialPlot(climatology(VALUE_Iberia_pr),
             backdrop.theme = "countries",
             color.theme = "BrBG",
             rev.colors = TRUE, cex = 2.5)
+            
+# Station data (hatching):
+data("VALUE_Iberia_pr")
+# Just as an example, stations with a precip climatology lower than 3mm/day
+ind <- which(climatology(VALUE_Iberia_pr)$Data < 3)
+spatialPlot(climatology(VALUE_Iberia_pr),
+            backdrop.theme = "countries",
+            colorkey = TRUE,
+            sp.layout = list(list("sp.points",
+                                  SpatialPoints(VALUE_Iberia_pr$xyCoords[ind,]), pch = 4, cex = 1.5,
+                                  first = FALSE, col = "black")))
+
+
 }
 }
 \references{
