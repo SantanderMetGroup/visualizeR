@@ -65,11 +65,13 @@ spatialPlot(climatology(CFS_Iberia_tas, by.member = FALSE), backdrop.theme = "co
 dat <- url("http://www.europeanwindstorms.org/repository/Jeanette/Jeanette_track.csv")
 custom.coords <- read.csv(dat, header = FALSE)[ ,5:4]
 storm <- map.lines(coords = custom.coords,
-                   lwd = 3,
-                   col = "red") 
+                   lwd = 2,
+                   col = "purple",
+                   lty = 3) 
 spatialPlot(climatology(CFS_Iberia_tas, by.member = FALSE), backdrop.theme = "coastline",
-                sp.layout = list(storm), # Add storm track
-                scales = list(draw = TRUE)) # Add coordinate axes
+            ylim = c(35, 56), xlim = c(-10, 12),
+            sp.layout = list(storm), # Add storm track
+            scales = list(draw = TRUE)) # Add coordinate axes
 }
 }
 \seealso{

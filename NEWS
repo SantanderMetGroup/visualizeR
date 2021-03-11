@@ -54,7 +54,7 @@
 * Load example datasets from the new climate4R.datasets package
 * Other documentation and example updates
 
-## v1.6.1 (in devel)
+## v1.6.1 (11 Mar 2021)
 * Minor bug fix and a few adjustments in map.hatching
 * Include WGS84 SpatialLines of world geographic lines (tropics, equator, polar circles) and coastlines in inst folder
 * Include resX and resY attributes in tas.ncep built-in dataset
