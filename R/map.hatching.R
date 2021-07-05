@@ -13,6 +13,7 @@
 #' The default uses the average value.
 #' @param angle Angle of the hatching lines w.r.t. the horizontal line, as character string. Possible values are \code{"-45"} (default) and \code{"45"}
 #'  degrees. 
+#' @param coverage.percent Coverage percent
 #' @param ... Graphical parameters affecting the appearance of the hatching lines. See details and examples.
 #' @return A graphical parameter list to be superposed onto the climatological map via \code{sp.layout}
 #' @note The function assumes that a valid CRS is in use, so no mismatches between the hatched area and
@@ -25,9 +26,10 @@
 #' 
 #' Several details on its application are illustrated in the examples below.
 #' 
-#' @examples 
+#' @examples \donttest{
 #' 
 #' library(visualizeR)
+#' require(transformeR)
 #' data(tas.ncep)
 #' 
 #' # The climatology of DJF 2m air temperature (NCEP reanalysis 1983-2010) is calculated
@@ -71,6 +73,7 @@
 #' l5 <- map.hatching(clim, threshold = 25.5, condition = "GT",
 #'                    density = 2, angle = "45", lwd = 1.5, col = "green", lty = 2)
 #' spatialPlot(clim, backdrop.theme = "coastline", rev.colors = TRUE, sp.layout = list(l5))
+#' }
 #' 
 #' @importFrom sp SpatialLines SpatialPolygonsDataFrame Lines Line
 #' @importFrom transformeR upscaleGrid grid2sp getGrid

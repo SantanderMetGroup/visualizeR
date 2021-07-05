@@ -12,6 +12,7 @@ map.hatching(
   density = 4,
   angle = "-45",
   upscaling.aggr.fun = list(FUN = "mean", na.rm = TRUE),
+  coverage.percent = 100,
   ...
 )
 }
@@ -36,6 +37,8 @@ degrees.}
 \item{upscaling.aggr.fun}{Function performing the spatial aggregation when upscaling according to parameter \code{density}. 
 The default uses the average value.}
 
+\item{coverage.percent}{Coverage percent}
+
 \item{...}{Graphical parameters affecting the appearance of the hatching lines. See details and examples.}
 }
 \value{
@@ -56,8 +59,10 @@ The function assumes that a valid CRS is in use, so no mismatches between the ha
  the base climatology happen. See \code{\link[geoprocessoR]{projectGrid}} for details
 }
 \examples{
+\donttest{
 
 library(visualizeR)
+require(transformeR)
 data(tas.ncep)
 
 # The climatology of DJF 2m air temperature (NCEP reanalysis 1983-2010) is calculated
@@ -101,6 +106,7 @@ spatialPlot(clim, backdrop.theme = "coastline", rev.colors = TRUE, sp.layout = l
 l5 <- map.hatching(clim, threshold = 25.5, condition = "GT",
                    density = 2, angle = "45", lwd = 1.5, col = "green", lty = 2)
 spatialPlot(clim, backdrop.theme = "coastline", rev.colors = TRUE, sp.layout = list(l5))
+}
 
 }
 \author{
