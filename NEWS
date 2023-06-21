@@ -60,5 +60,6 @@
 * Include resX and resY attributes in tas.ncep built-in dataset
 * Other minor documentation updates
 
-
+## v1.6.2 (21 Jun 2023)
+* Adapt to R version >=4
 
