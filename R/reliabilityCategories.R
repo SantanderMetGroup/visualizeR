@@ -146,7 +146,7 @@ reliabilityCategories <- function(hindcast,
     esquinas[5,] <- c(min(bbox$x), min(bbox$y))
     regs <- sp::SpatialPolygons(list(sp::Polygons(list(Polygon(list(esquinas))), ID = "region")))
   }
-  if (class(regs) == "SpatialPolygonsDataFrame") {
+  if ("SpatialPolygonsDataFrame" %in% class(regs)) {
     regs <-  SpatialPolygons(regs@polygons)
   }
   if (isRegular(obs)) {

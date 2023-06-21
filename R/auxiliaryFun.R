@@ -117,7 +117,7 @@ checkDim <- function(obj) {
 checkData <- function(mm.obj, obs) {
   vec <- c()
   if(isS4(mm.obj)==TRUE){
-    if (!class(mm.obj)[1]=="MrEnsemble") {
+    if (!"MrEnsemble" %in% class(mm.obj)[1]) {
        vec <- c(vec,FALSE)
        message("The input data for hindcast is not a multimember field ")
     }
@@ -127,7 +127,7 @@ checkData <- function(mm.obj, obs) {
     }
     if (!missing(obs)){
       if(isS4(obs)==TRUE){
-        if (class(obs)[1]=="MrEnsemble") {
+        if ("MrEnsemble" %in% class(obs)[1]) {
           vec <- c(vec,FALSE)
           message("The verifying observations can't be a multimember")
         }
@@ -244,7 +244,7 @@ rocss.fun <- function (obs, pred, conf.level = 0.95){
 #' @author M.D. Frias \email{mariadolores.frias@@unican.es} and J. Fernandez 
 #' @family VisualizeR
 convertIntoS4 <- function(obj) {   
-  if(class(obj)=="list"){
+  if(is.list(obj)){
     if(!is.null(obj$Variable) & !is.null(obj$Data) & !is.null(obj$xyCoords) & !is.null(obj$Dates)){  
       if(!is.null(obj$Members)){
         if(length(obj$Members)>1){
