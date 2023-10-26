@@ -73,10 +73,9 @@
 #' @examples \donttest{
 #' require(climate4R.datasets)
 #' require(transformeR)
-#' data("CFS_Iberia_pr")
-#' data("EOBS_Iberia_pr")
+#' data("CFS_Iberia_tas")
 #' data("EOBS_Iberia_tas")
-#' data("VALUE_Iberia_pr")
+#' data("VALUE_Iberia_tas")
 #' # Combine grids with members (CFS) and without members (EOBS)
 #' a <- subsetGrid(CFS_Iberia_tas, years = 1985:1992)
 #' b <- subsetGrid(EOBS_Iberia_tas, years = 1985:1992)

@@ -69,6 +69,7 @@ data(tas.ncep)
 # as example:
 
 clim <- climatology(tas.ncep)
+attr(clim$xyCoords, "projection") <- NA
 spatialPlot(clim, backdrop.theme = "coastline", rev.colors = TRUE)
 
 # Basic usage
